@@ -1,0 +1,70 @@
+{
+  "students": [
+    {
+      "id": 1,
+      "name": "ALICINO",
+      "firstName": "GIUSEPPE",
+      "serial": "123123",
+      "teamId": 1,
+      "courseId": 1
+    },
+    {
+      "id": 2,
+      "name": "MAGNANI",
+      "firstName": "SIMONE",
+      "courseId": 1,
+      "serial": "265171",
+      "teamId": 0
+    },
+    {
+      "id": 3,
+      "name": "MARCHI",
+      "firstName": "RICCARDO",
+      "courseId": 1,
+      "serial": "321321",
+      "teamId": 0
+    },
+    {
+      "id": 4,
+      "name": "PAVAN",
+      "firstName": "FRANCESCO",
+      "courseId": 2,
+      "serial": "414141",
+      "teamId": 0
+    },
+    {
+      "id": 5,
+      "name": "POSTOLOV",
+      "firstName": "ENRICO",
+      "courseId": 0,
+      "serial": "515151",
+      "teamId": 0
+    }
+  ],
+  "courses": [
+    {
+      "id": 1,
+      "name": "Internet Applications",
+      "path": "internet-applications"
+    },
+    {
+      "id": 2,
+      "name": "Cloud computing",
+      "path": "cloud-computing"
+    }
+  ],
+  "teams": [
+    {
+      "id": 1,
+      "name": "Calvary"
+    }
+  ],
+  "users": [
+    {
+      "email": "olivier@mail.com",
+      "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
+      "id": 1,
+      "role": "student"
+    }
+  ]
+}
