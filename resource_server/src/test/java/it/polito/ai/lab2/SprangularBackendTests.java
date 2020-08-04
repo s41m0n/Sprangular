@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.fail;
 /*If @Transaction => doesn't save to DB so tests fail! Don't know how to solve, so the DB must not have those entry, and it won't be clean */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class SpringExampleTests {
+class SprangularBackendTests {
 
     static final String studentID = "s100";
     static final String courseID = "ApplicazioniInternet";

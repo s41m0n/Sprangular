@@ -4,10 +4,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-public class SpringExample {
+public class SprangularBackend {
 
     @Bean
     ModelMapper modelMapper() {
@@ -15,7 +14,7 @@ public class SpringExample {
     };
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringExample.class, args);
+        SpringApplication.run(SprangularBackend.class, args);
     }
 
 }
