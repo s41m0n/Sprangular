@@ -56,7 +56,7 @@ There site is a Single Page Application, in which you can login and navigate thr
 
 There is one default user with `Professor` privileges who can authenticate into the system and it is listed in the same configuration file of before:
 
-* email: olivier@mail.com  
+* email: olivier@mail.com
 * password: bestPassw0rd
 
 When logged, the user can navigate though all the courses he belongs, but right now only the tab `students` shows something, while the other two will be implemented later in the final project.

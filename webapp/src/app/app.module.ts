@@ -19,6 +19,10 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { StudentsComponent } from './professor/students/students.component';
 import { StudentsContainer } from './professor/students/students.container';
+import { AssignmentsComponent} from './professor/assignments/assignments.component';
+import { AssignmentsContainer} from './professor/assignments/assignments.container';
+import { VmsContainer } from './professor/vms/vms.container';
+import { VmsComponent } from './professor/vms/vms.component';
 import { AppRoutingModule } from './app-routing-module';
 import { HttpClientModule, HTTP_INTERCEPTORS }    from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -37,6 +41,10 @@ import { PageNotFoundComponent } from './fallback/page-not-found.component';
     AppComponent,
     StudentsComponent,
     StudentsContainer,
+    AssignmentsComponent,
+    AssignmentsContainer,
+    VmsComponent,
+    VmsContainer,
     LoginDialogComponent,
     ProfessorComponent,
     HomeComponent,

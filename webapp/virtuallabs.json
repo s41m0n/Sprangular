@@ -41,6 +41,15 @@
       "teamId": 0
     }
   ],
+  "professors": [
+    {
+      "id": 1,
+      "name": "RISSO",
+      "firstName": "FULVIO",
+      "courseId": 1,
+      "serial": "111111"
+    }
+  ],
   "courses": [
     {
       "id": 1,
@@ -57,6 +66,31 @@
     {
       "id": 1,
       "name": "Calvary"
+    }
+  ],
+  "assignments": [
+    {
+      "id": 1,
+      "name": "Lab1",
+      "path": "lab1",
+      "professorId": 1,
+      "courseId": 1
+    },
+    {
+      "id": 2,
+      "name": "Lab2",
+      "path": "lab2",
+      "professorId": 1,
+      "courseId": 1
+    }
+  ],
+  "vms": [
+    {
+      "id": 1,
+      "name": "experiment",
+      "path": "experiment",
+      "courseId": 1,
+      "teamId": 1
     }
   ],
   "users": [

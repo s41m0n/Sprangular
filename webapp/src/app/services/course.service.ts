@@ -5,7 +5,9 @@ import { HttpClient } from '@angular/common/http';
 import { tap, catchError, map } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
+import { Assignment } from '../models/assignment.model';
 import { Student } from '../models/student.model';
+import { VM } from '../models/vm.model';
 
 /**
  * CourseService service
@@ -62,6 +64,22 @@ export class CourseService{
         tap(() => console.log(`fetched courses - getCourses()`)),
         catchError(this.handleError<Course[]>(`getCourses()`))
       )
+  }
+
+  getCourseAssignments(course : Course) : Observable<Assignment[]>{
+    return this.http.get<Assignment[]>(`${this.baseURL}/${course.id}/assignments?_expand=professor`)
+      .pipe(
+        tap(() => console.log(`fetched course ${course.name} assignments - getCourseAssignments()`)),
+        catchError(this.handleError<Assignment[]>(`getCourseAssignments(${course.name})`))
+      );
+  }
+
+  getCourseVMs(course : Course) : Observable<VM[]>{
+    return this.http.get<Assignment[]>(`${this.baseURL}/${course.id}/vms?_expand=team`)
+      .pipe(
+        tap(() => console.log(`fetched course ${course.name} vms - getCourseVMs()`)),
+        catchError(this.handleError<VM[]>(`getCourseVMs(${course.name})`))
+      );
   }
 
   /**
