@@ -3,6 +3,9 @@ package it.polito.ai.lab2.entities;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,41 +14,31 @@ import java.util.List;
 public class Course {
 
     @Id
+    @GeneratedValue
+    Long id;
+
     String name;
 
-    int min;
+    String acronym;
 
-    int max;
+    int teamMinSize;
+
+    int teamMaxSize;
 
     boolean enabled;
 
-    @ManyToOne
-    @JoinColumn(name = "professor_id")
-    Professor professor;
+    @ManyToMany(mappedBy = "courses")
+    List<Professor> professors = new ArrayList<>();
 
     @ManyToMany(mappedBy = "courses")
     List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "course")
-    List<Team> teams;
+    List<Team> teams = new ArrayList<>();
 
-    public void addStudent(Student student) {
-        students.add(student);
-        student.getCourses().add(this);
-    }
+    @OneToMany(mappedBy = "course")
+    List<VmModel> vmModels = new ArrayList<>();
 
-    public void removeStudent(Student student) {
-        students.remove(student);
-        student.getCourses().remove(this);
-    }
-
-    public void addTeam(Team team) {
-        teams.add(team);
-        team.setCourse(this);
-    }
-
-    public void removeTeam(Team team) {
-        teams.remove(team);
-        team.setCourse(null);
-    }
+    @OneToMany(mappedBy = "course")
+    List<Assignment> assignments = new ArrayList<>();
 }

@@ -23,4 +23,13 @@ public class TeamDTO  extends RepresentationModel<TeamDTO> {
 
     int status;
 
+    int maxVCpu;
+
+    int maxDiskStorage;
+
+    int maxRam;
+
+    int maxActiveInstances;
+
+    int maxTotalInstances;
 }

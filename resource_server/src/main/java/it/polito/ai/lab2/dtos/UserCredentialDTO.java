@@ -7,14 +7,16 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
 
 @Data
-public class UserDTO {
+public class UserCredentialDTO {
 
     @Id
     @NotNull
     @NotEmpty
-    String id;
+    String email;
 
     @NotNull
     @NotEmpty
-    String password;
+    String saltedPassword;
+
+    String salt;
 }
