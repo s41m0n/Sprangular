@@ -21,8 +21,6 @@ export class AuthService {
 
   //Current User Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
   private currentUserSubject: BehaviorSubject<User>;
-  //Current User Observable: allows other components to subscribe to the currentUser Observable but doesn't allow them to publish to the currentUserSubject
-  public currentUser: Observable<User>;                      
   httpOptions = {headers: new HttpHeaders({ 'Content-Type': 'application/json'})};
 
   constructor(private http: HttpClient,
@@ -36,7 +34,6 @@ export class AuthService {
       user = null;
     }
     this.currentUserSubject = new BehaviorSubject<User>(user);
-    this.currentUser = this.currentUserSubject.asObservable();
   }
   
   /**
@@ -45,6 +42,13 @@ export class AuthService {
    */
   public get currentUserValue(): User {
     return this.currentUserSubject.value;
+  }
+
+  /**
+   * Function to get current user subject as observable
+   */
+  public getUserObservable() : Observable<User> {
+    return this.currentUserSubject.asObservable();
   }
 
   /**
@@ -58,7 +62,7 @@ export class AuthService {
       map(authResult => {
         // store user details and basic auth credentials in local storage to keep user logged in between page refreshes
         // Assigning the Admin Role since json-server-auth is not able to assign it directly in the jwt token
-        const user = new User(email, authResult.accessToken, Role.Professor);
+        const user = new User(email, authResult.accessToken, email[0] == 'd'? Role.Professor : email[0] == 'a'? Role.Admin : Role.Student);
         localStorage.setItem('currentUser', JSON.stringify(user));
         this.currentUserSubject.next(user);
         return authResult;

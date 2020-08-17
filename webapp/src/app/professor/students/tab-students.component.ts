@@ -15,15 +15,14 @@ import { Student } from '../../models/student.model';
  * It represents the view for the Students tab
  */
 @Component({
-  selector: 'app-students',
-  templateUrl: './students.component.html',
-  styleUrls: ['./students.component.css']
+  selector: 'app-tab-students',
+  templateUrl: './tab-students.component.html'
 })
-export class StudentsComponent implements AfterViewInit, OnInit, OnDestroy{
+export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy{
 
   dataSource = new MatTableDataSource<Student>();                     //Table datasource dynamically modified
   selection = new SelectionModel<Student>(true, []);                  //Keeps track of the selected rows
-  colsToDisplay = ["select", "serial", "name", "firstName", "team"];  //Columns to be displayed in the table
+  colsToDisplay = ["select", "id", "surname", "name", "team"];        //Columns to be displayed in the table
   addStudentControl = new FormControl();                              //Form control to input the user to be enrolled
   private destroy$: Subject<boolean> = new Subject<boolean>();        //Private subject to perform the unsubscriptions when the component is destroyed
   @Output() addStudentsEvent = new EventEmitter<Student[]>();         //Event emitter for the enroll student
@@ -75,7 +74,7 @@ export class StudentsComponent implements AfterViewInit, OnInit, OnDestroy{
   /** Function to retrieve a checkbox label */
   checkboxLabel(row?: Student): string {
     if (!row) return `${this.isAllSelected() ? 'select' : 'deselect'} all`;
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.serial}`;
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id}`;
   }
 
   /** Function to emit the unenroll event for the selected rows */

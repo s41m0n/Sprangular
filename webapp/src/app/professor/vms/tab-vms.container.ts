@@ -1,35 +1,33 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Assignment } from 'src/app/models/assignment.model';
-import { Course } from 'src/app/models/course.model';
-import { CourseService } from 'src/app/services/course.service';
+import { VM } from '../../models/vm.model';
+import { Course } from '../../models/course.model';
+import { CourseService } from '../../services/course.service';
 import { first, takeUntil } from 'rxjs/operators';
-import { BroadcasterService } from 'src/app/services/broadcaster.service';
 import { Subject } from 'rxjs';
 
 /**
- * AssignmentsContainer
+ * VmsContainer
  * 
- * It displays the assignments view (WIP)
+ * It displays the Vms view (WIP)
  */
 @Component({
-  selector: 'app-vms-cont',
-  templateUrl: './assignments.container.html'
+  selector: 'app-tab-professor-vms-cont',
+  templateUrl: './tab-vms.container.html'
 })
-export class AssignmentsContainer implements OnInit, OnDestroy {
+export class TabProfessorVmsContainer implements OnInit, OnDestroy {
 
   private course : Course;                                      //The current selected course
-  assignments: Assignment[] = [];                             //The current assignments
+  vms: VM[] = [];                             //The current vms
   private destroy$: Subject<boolean> = new Subject<boolean>();  //Private subject to perform the unsubscriptions when the component is destroyed
 
-  constructor(private courseService: CourseService,
-    private broadcaster: BroadcasterService) { }
+  constructor(private courseService: CourseService) { }
 
   ngOnInit(): void {
     //Subscribe to the Broadcaster course selected, to update the current rendered course
-    this.broadcaster.subscribeCourse().pipe(takeUntil(this.destroy$)).subscribe(course => {
+    this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
       this.course = course;
       this.refreshAssignments();
-    })    
+    })
   }
 
   ngOnDestroy() {
@@ -38,14 +36,16 @@ export class AssignmentsContainer implements OnInit, OnDestroy {
     this.destroy$.unsubscribe();
   }
 
+
   /** Private function to refresh the list of enrolled students*/
   private refreshAssignments() {
     //Check if already received the current course
     if(!this.course) {
-      this.assignments = [];
+      this.vms = [];
       return;
     }
-    this.courseService.getCourseAssignments(this.course).pipe(first()).subscribe(assignments => this.assignments = assignments);
+    this.courseService.getCourseVMs(this.course).pipe(first()).subscribe(vms => this.vms = vms);
   }
 
 }
+

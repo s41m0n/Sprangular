@@ -17,16 +17,16 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete'; 
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { StudentsComponent } from './professor/students/students.component';
-import { StudentsContainer } from './professor/students/students.container';
-import { AssignmentsComponent} from './professor/assignments/assignments.component';
-import { AssignmentsContainer} from './professor/assignments/assignments.container';
-import { VmsContainer } from './professor/vms/vms.container';
-import { VmsComponent } from './professor/vms/vms.component';
+import { TabStudentsComponent } from './professor/students/tab-students.component';
+import { TabStudentsContainer } from './professor/students/tab-students.container';
+import { TabProfessorAssignmentsComponent} from './professor/assignments/tab-assignments.component';
+import { TabProfessorAssignmentsContainer} from './professor/assignments/tab-assignments.container';
+import { TabProfessorVmsContainer } from './professor/vms/tab-vms.container';
+import { TabProfessorVmsComponent } from './professor/vms/tab-vms.component';
 import { AppRoutingModule } from './app-routing-module';
 import { HttpClientModule, HTTP_INTERCEPTORS }    from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
-import { LoginDialogComponent } from './auth/login-dialog.component';
+import { LoginDialogComponent } from './login/login-dialog.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthInterceptor } from './helpers/auth.interceptor';
@@ -36,19 +36,43 @@ import { ProfessorComponent } from './professor/professor.component';
 import { HomeComponent } from './home/home.component';
 import { PageNotFoundComponent } from './fallback/page-not-found.component';
 
+import { StudentComponent } from './student/student.component';
+import { TabTeamComponent } from './student/team/tab-team.component';
+import { TabNoTeamComponent } from './student/team/tab-no-team.component';
+import { TabTeamContainer } from './student/team/tab-team.container';
+import { TabStudentVmsComponent } from './student/vms/tab-vms.component';
+import { TabStudentVmsContainer } from './student/vms/tab-vms.container';
+import { TabStudentAssignmentsComponent } from './student/assignments/tab-assignments.component';
+import { TabStudentAssignmentsContainer } from './student/assignments/tab-assignments.container';
+
+import { TabAdminProfessorsContainer } from './admin/professors/tab-professors.container';
+import { AdminComponent } from './admin/admin.component';
+import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
+
 @NgModule({
   declarations: [
     AppComponent,
-    StudentsComponent,
-    StudentsContainer,
-    AssignmentsComponent,
-    AssignmentsContainer,
-    VmsComponent,
-    VmsContainer,
     LoginDialogComponent,
-    ProfessorComponent,
     HomeComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    StudentComponent,
+    TabStudentVmsComponent,
+    TabStudentVmsContainer,
+    TabStudentAssignmentsComponent,
+    TabStudentAssignmentsContainer,
+    TabTeamComponent,
+    TabNoTeamComponent,
+    TabTeamContainer,
+    ProfessorComponent,
+    TabStudentsComponent,
+    TabStudentsContainer,
+    TabProfessorAssignmentsComponent,
+    TabProfessorAssignmentsContainer,
+    TabProfessorVmsComponent,
+    TabProfessorVmsContainer,
+    AdminComponent,
+    TabAdminProfessorsContainer,
+    TabAdminVmModelsContainer
   ],
   imports: [
     BrowserModule,

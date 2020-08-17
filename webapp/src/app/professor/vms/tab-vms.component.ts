@@ -2,7 +2,6 @@ import { Component, ViewChild, AfterViewInit, OnDestroy, Input } from '@angular/
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { Subject } from 'rxjs';
 
 import { VM } from '../../models/vm.model';
 
@@ -12,25 +11,17 @@ import { VM } from '../../models/vm.model';
  * It represents the view for the VMs tab
  */
 @Component({
-  selector: 'app-vms',
-  templateUrl: './vms.component.html',
-  styleUrls: ['./vms.component.css']
+  selector: 'app-tab-professor-vms',
+  templateUrl: './tab-vms.component.html'
 })
-export class VmsComponent implements AfterViewInit, OnDestroy{
+export class TabProfessorVmsComponent implements AfterViewInit{
 
   dataSource = new MatTableDataSource<VM>();                     //Table datasource dynamically modified
   colsToDisplay = ["id", "name", "team"];  //Columns to be displayed in the table
-  private destroy$: Subject<boolean> = new Subject<boolean>();        //Private subject to perform the unsubscriptions when the component is destroyed
   @ViewChild(MatSort, {static: true}) sort: MatSort;                  //Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator;                   //Mat paginator for the table
   @Input() set vms( vms: VM[] ) {              //VMs to be displayed in the table
     this.dataSource.data = vms;
-  }
-
-  ngOnDestroy() {
-    /** Destroying subscription */
-    this.destroy$.next(true);
-    this.destroy$.unsubscribe();
   }
 
   ngAfterViewInit() {
