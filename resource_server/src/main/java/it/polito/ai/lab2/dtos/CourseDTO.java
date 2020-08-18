@@ -15,15 +15,19 @@ import javax.validation.constraints.NotEmpty;
 public class CourseDTO extends RepresentationModel<CourseDTO> {
 
     @Id
+    Long id;
+
     @NotNull
     @NotEmpty
     String name;
 
-    @Min(0)
-    int min;
+    String acronym;
 
     @Min(0)
-    int max;
+    int teamMinSize;
+
+    @Min(0)
+    int teamMaxSize;
 
     boolean enabled;
 }
