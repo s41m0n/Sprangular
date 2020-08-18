@@ -34,7 +34,7 @@ public class Course {
     @OneToMany(mappedBy = "course")
     List<Team> teams = new ArrayList<>();
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne
     @JoinColumn(name = "vmModel_id")
     VmModel vmModel;
 

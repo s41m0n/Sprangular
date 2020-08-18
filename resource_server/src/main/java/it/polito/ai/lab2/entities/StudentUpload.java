@@ -23,7 +23,7 @@ public class StudentUpload {
     @JoinColumn(name = "assignmentSolution_id")
     AssignmentSolution assignmentSolution;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne
     @JoinColumn(name = "teacherUpload_id")
     ProfessorUpload teacherRevision;
 }
