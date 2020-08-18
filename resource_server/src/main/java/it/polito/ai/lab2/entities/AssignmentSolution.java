@@ -26,9 +26,8 @@ public class AssignmentSolution {
   @Enumerated(EnumType.STRING)
   AssignmentStatus status;
 
-  @OneToMany
-  @Column(name = "upload_id")
+  @OneToMany(mappedBy = "assignmentSolution")
   List<StudentUpload> studentUploads = new ArrayList<>();
 
-  int grade;
+  String grade;
 }

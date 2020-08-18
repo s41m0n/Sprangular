@@ -3,6 +3,8 @@ package it.polito.ai.lab2.entities;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -14,13 +16,11 @@ public class VmModel {
 
   String name;
 
-  @OneToOne
-  @JoinColumn(name = "team_id")
-  Team team;
-
-  @ManyToOne
-  @JoinColumn(name = "course_id")
+  @OneToOne(mappedBy = "vmModel")
   Course course;
+
+  @OneToMany(mappedBy = "vmModel")
+  List<Vm> vms = new ArrayList<>();
 
   String imagePath;
 }

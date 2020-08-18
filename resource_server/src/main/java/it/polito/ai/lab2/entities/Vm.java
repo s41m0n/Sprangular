@@ -10,24 +10,25 @@ import java.util.List;
 @Data
 public class Vm {
 
-  @Id
-  @GeneratedValue
-  Long id;
+    @Id
+    @GeneratedValue
+    Long id;
 
-  @ManyToOne
-  VmModel vmModel;
+    @ManyToOne
+    @JoinColumn(name = "vmModel_id")
+    VmModel vmModel;
 
-  int vCpu;
+    int vCpu;
 
-  int diskStorage;
+    int diskStorage;
 
-  int ram;
+    int ram;
 
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  @JoinTable(name = "vm_owner", joinColumns = @JoinColumn(name = "vm_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
-  List<Student> owners = new ArrayList<>();
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "vm_owner", joinColumns = @JoinColumn(name = "vm_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
+    List<Student> owners = new ArrayList<>();
 
-  boolean active;
+    boolean active;
 
-  String imagePath;
+    String imagePath;
 }

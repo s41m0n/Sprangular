@@ -2,26 +2,28 @@ package it.polito.ai.lab2.entities;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
 @Data
 public class StudentUpload {
 
-  @Id
-  @GeneratedValue
-  Long id;
+    @Id
+    @GeneratedValue
+    Long id;
 
-  String imagePath;
+    String imagePath;
 
-  Timestamp timestamp;
+    Timestamp timestamp;
 
-  String comment;
+    String comment;
 
-  @OneToOne
-  ProfessorUpload teacherRevision;
+    @ManyToOne
+    @JoinColumn(name = "assignmentSolution_id")
+    AssignmentSolution assignmentSolution;
+
+    @OneToOne
+    @JoinColumn(name = "teacherUpload_id")
+    ProfessorUpload teacherRevision;
 }

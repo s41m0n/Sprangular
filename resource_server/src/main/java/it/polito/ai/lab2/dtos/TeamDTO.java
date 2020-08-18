@@ -5,14 +5,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class TeamDTO  extends RepresentationModel<TeamDTO> {
+public class TeamDTO extends RepresentationModel<TeamDTO> {
 
-    @Id
     @NotNull
     @NotEmpty
     Long id;

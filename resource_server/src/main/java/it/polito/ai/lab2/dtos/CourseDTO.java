@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.Id;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
@@ -14,7 +12,6 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class CourseDTO extends RepresentationModel<CourseDTO> {
 
-    @Id
     Long id;
 
     @NotNull

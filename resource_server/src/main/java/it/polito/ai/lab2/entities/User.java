@@ -12,7 +12,7 @@ public class User {
     @Id
     String email;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne(mappedBy = "user")
     UserCredential userCredential;
 
     @Column(unique = true)
