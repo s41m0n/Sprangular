@@ -27,7 +27,7 @@ public class Assignment {
   @JoinColumn(name = "professor_id")
   Professor professor;
 
-  @OneToMany
+  @OneToMany(mappedBy = "assignment")
   List<AssignmentSolution> solutions = new ArrayList<>();
 
   Timestamp releaseDate;

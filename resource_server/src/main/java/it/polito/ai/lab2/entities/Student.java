@@ -12,8 +12,7 @@ import java.util.List;
 @Data
 public class Student extends User {
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "student_course", joinColumns = @JoinColumn(name = "student_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
+    @ManyToMany(mappedBy = "students")
     List<Course> courses = new ArrayList<>();
 
     @ManyToMany(mappedBy = "members")

@@ -14,8 +14,7 @@ public class VmModel {
 
   String name;
 
-  @OneToOne
-  @JoinColumn(name = "course_id")
+  @OneToOne(mappedBy = "vmModel")
   Course course;
 
   String imagePath;

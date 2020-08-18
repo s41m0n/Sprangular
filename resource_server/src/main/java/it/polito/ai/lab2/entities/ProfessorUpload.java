@@ -19,6 +19,6 @@ public class ProfessorUpload {
 
   String comment;
 
-  @OneToOne
+  @OneToOne(mappedBy = "teacherRevision")
   StudentUpload revisedSolution;
 }
