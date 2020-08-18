@@ -15,10 +15,6 @@ public class VmModel {
   String name;
 
   @OneToOne
-  @JoinColumn(name = "team_id")
-  Team team;
-
-  @ManyToOne
   @JoinColumn(name = "course_id")
   Course course;
 

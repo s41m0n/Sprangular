@@ -19,9 +19,6 @@ public class Team {
 
     int status;
 
-    @OneToOne
-    VmModel vmModel;
-
     @ManyToOne
     @JoinColumn(name = "course_id")
     Course course;

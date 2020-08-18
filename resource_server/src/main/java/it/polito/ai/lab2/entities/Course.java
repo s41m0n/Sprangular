@@ -3,9 +3,6 @@ package it.polito.ai.lab2.entities;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +33,8 @@ public class Course {
     @OneToMany(mappedBy = "course")
     List<Team> teams = new ArrayList<>();
 
-    @OneToMany(mappedBy = "course")
-    List<VmModel> vmModels = new ArrayList<>();
+    @OneToOne(mappedBy = "course")
+    VmModel vmModel;
 
     @OneToMany(mappedBy = "course")
     List<Assignment> assignments = new ArrayList<>();
