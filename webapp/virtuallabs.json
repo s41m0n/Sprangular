@@ -2,43 +2,52 @@
   "students": [
     {
       "id": 1,
-      "name": "ALICINO",
-      "firstName": "GIUSEPPE",
-      "serial": "123123",
+      "email": "s1@studenti.polito.it",
+      "surname": "ALICINO",
+      "name": "GIUSEPPE",
       "teamId": 1,
       "courseId": 1
     },
     {
       "id": 2,
-      "name": "MAGNANI",
-      "firstName": "SIMONE",
+      "email": "s2@studenti.polito.it",
+      "surname": "MAGNANI",
+      "name": "SIMONE",
       "courseId": 1,
-      "serial": "265171",
-      "teamId": 0
+      "teamId": 1
     },
     {
       "id": 3,
-      "name": "MARCHI",
-      "firstName": "RICCARDO",
+      "email": "s3@studenti.polito.it",
+      "surname": "MARCHI",
+      "name": "RICCARDO",
       "courseId": 1,
-      "serial": "321321",
       "teamId": 0
     },
     {
       "id": 4,
-      "name": "PAVAN",
-      "firstName": "FRANCESCO",
+      "email": "s4@studenti.polito.it",
+      "surname": "PAVAN",
+      "name": "FRANCESCO",
       "courseId": 2,
-      "serial": "414141",
       "teamId": 0
     },
     {
       "id": 5,
-      "name": "POSTOLOV",
-      "firstName": "ENRICO",
+      "email": "s5@studenti.polito.it",
+      "surname": "POSTOLOV",
+      "name": "ENRICO",
       "courseId": 0,
-      "serial": "515151",
       "teamId": 0
+    }
+  ],
+  "professors": [
+    {
+      "id": 1,
+      "email": "d1@polito.it",
+      "surname": "RISSO",
+      "name": "FULVIO",
+      "courseId": 1
     }
   ],
   "courses": [
@@ -56,15 +65,53 @@
   "teams": [
     {
       "id": 1,
+      "courseId": 1,
       "name": "Calvary"
+    }
+  ],
+  "assignments": [
+    {
+      "id": 1,
+      "name": "Lab1",
+      "path": "lab1",
+      "professorId": 1,
+      "courseId": 1
+    },
+    {
+      "id": 2,
+      "name": "Lab2",
+      "path": "lab2",
+      "professorId": 1,
+      "courseId": 1
+    }
+  ],
+  "vms": [
+    {
+      "id": 1,
+      "name": "experiment",
+      "path": "experiment",
+      "courseId": 1,
+      "teamId": 1
     }
   ],
   "users": [
     {
-      "email": "olivier@mail.com",
+      "email": "d1@polito.it",
       "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
       "id": 1,
+      "role": "professor"
+    },
+    {
+      "email": "s1@studenti.polito.it",
+      "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
+      "id": 2,
       "role": "student"
+    },
+    {
+      "email": "a1@polito.it",
+      "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
+      "id": 3,
+      "role": "admin"
     }
   ]
 }

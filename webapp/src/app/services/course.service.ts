@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 
-import { Observable, of } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { tap, catchError, map } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
+import { Assignment } from '../models/assignment.model';
 import { Student } from '../models/student.model';
+import { VM } from '../models/vm.model';
 
 /**
  * CourseService service
@@ -18,9 +20,13 @@ import { Student } from '../models/student.model';
 })
 export class CourseService{
   baseURL = 'api/courses';
+  //Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
+  public currentCourseSubject: BehaviorSubject<Course>;
 
   constructor(private http: HttpClient,
-    private toastrService: ToastrService) {}
+    private toastrService: ToastrService) {
+      this.currentCourseSubject = new BehaviorSubject<Course>(null);
+    }
   
   /**
    * Function to retrieve a Course resource given a path
@@ -62,6 +68,30 @@ export class CourseService{
         tap(() => console.log(`fetched courses - getCourses()`)),
         catchError(this.handleError<Course[]>(`getCourses()`))
       )
+  }
+
+  getCourseVMs(course : Course) : Observable<VM[]>{
+    return this.http.get<Assignment[]>(`${this.baseURL}/${course.id}/vms?_expand=team`)
+      .pipe(
+        tap(() => console.log(`fetched course ${course.name} vms - getCourseVMs()`)),
+        catchError(this.handleError<VM[]>(`getCourseVMs(${course.name})`))
+      );
+  }
+
+  getAvailableStudents(course : Course) : Observable<Student[]> {
+    return this.http.get<Student[]>(`${this.baseURL}/${course.id}/students?teamId_like=0`)
+      .pipe(
+        tap(() => console.log(`fetched available students in course ${course.name} - getAvailableStudents()`)),
+        catchError(this.handleError<Student[]>(`getAvailableStudents(${course.name})`))
+      );
+  }
+
+  getCourseAssignments(course: Course) : Observable<Assignment[]>{
+    return this.http.get<Assignment[]>(`/api/assignments?courseId=${course.id}&_expand=professor`)
+      .pipe(
+        tap(() => console.log(`fetched assignments in course ${course.name} - getCourseAssignments()`)),
+        catchError(this.handleError<Assignment[]>(`getCourseAssignments(${course.name})`))
+      );
   }
 
   /**

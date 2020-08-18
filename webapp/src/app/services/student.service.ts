@@ -86,7 +86,7 @@ export class StudentService {
     if (typeof name !== 'string' || !(name = name.trim()) || name.indexOf(' ') >= 0) {
       return of([]);
     }
-    return this.http.get<Student[]>(`${this.baseURL}?name_like=${name}`).pipe(
+    return this.http.get<Student[]>(`${this.baseURL}?surname_like=${name}`).pipe(
       //If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
       tap(x => console.log(`found ${x.length} results matching ${name} - searchStudents()`)),
       catchError(this.handleError<Student[]>(`searchStudents(${name})`, [], false))
@@ -111,7 +111,31 @@ export class StudentService {
     };
   }
 
-  /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ UNUSED @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+  public getStudentCourses(email: string) : Observable<Course[]> {
+    return this.http.get<Student[]>(`${this.baseURL}?email_like=${email}&_expand=course`)
+      .pipe(
+        map(students => [students.shift().course]),
+        tap(() => console.log(`fetched student ${email} courses - getUserCourses()`)),
+        catchError(this.handleError<Course[]>(`getUserCourses(${email})`))
+      );
+  }
+
+  public getStudentByEmail(email : String) : Observable<Student> {
+    return this.http.get<Student[]>(`${this.baseURL}?email_like=${email}&_expand=team`)
+      .pipe(
+        map(x => x.shift()),
+        tap(() => console.log(`fetched student with email ${email} - getStudentByEmail()`)),
+        catchError(this.handleError<Student>(`getStudentByEmail(${email})`))
+      );
+  }
+
+  public getStudentsInTeam(teamId: Number) : Observable<Student[]> {
+    return this.http.get<Student[]>(`${this.baseURL}?teamId=${teamId}`)
+      .pipe(
+        tap(() => console.log(`fetched student in team ${teamId} - getStudentInTeam()`)),
+        catchError(this.handleError<Student[]>(`getStudentInTeam(${teamId})`))
+      );
+  }
 
   /**
    * Function to retrieve all students (including their teams if any)

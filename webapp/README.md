@@ -54,10 +54,17 @@ This behaviour refers to the actual state of the project. There are 5 students i
 
 There site is a Single Page Application, in which you can login and navigate through all your courses.
 
-There is one default user with `Professor` privileges who can authenticate into the system and it is listed in the same configuration file of before:
+There are 3 default users with different roles:
 
-* email: olivier@mail.com  
-* password: bestPassw0rd
+* Professor
+    * email: d1@polito.it
+    * password: bestPassw0rd
+* Student
+    * email: s1@studenti.polito.it
+    * password: bestPassw0rd
+* Admin
+    * email: a1@polito.it  
+    * password: bestPassw0rd
 
 When logged, the user can navigate though all the courses he belongs, but right now only the tab `students` shows something, while the other two will be implemented later in the final project.
 

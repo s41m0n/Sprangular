@@ -4,9 +4,8 @@ import { Student } from '../../models/student.model';
 import { StudentService } from '../../services/student.service';
 import { first, switchMap, takeUntil, finalize } from 'rxjs/operators';
 import { Subject, Observable } from 'rxjs';
-import { Course } from 'src/app/models/course.model';
-import { CourseService } from 'src/app/services/course.service';
-import { BroadcasterService } from 'src/app/services/broadcaster.service';
+import { Course } from '../../models/course.model';
+import { CourseService } from '../../services/course.service';
 
 /**
  * StudentsContainer class
@@ -14,10 +13,10 @@ import { BroadcasterService } from 'src/app/services/broadcaster.service';
  * It contains the StudentComponent and all the application logic
  */
 @Component({
-  selector: 'app-students-cont',
-  templateUrl: './students.container.html',
+  selector: 'app-tab-students-cont',
+  templateUrl: './tab-students.container.html',
 })
-export class StudentsContainer implements OnInit, OnDestroy{
+export class TabStudentsContainer implements OnInit, OnDestroy{
 
   private course : Course;                                      //The current selected course
   enrolledStudents: Student[] = [];                             //The current enrolled list
@@ -26,12 +25,11 @@ export class StudentsContainer implements OnInit, OnDestroy{
   private destroy$: Subject<boolean> = new Subject<boolean>();  //Private subject to perform the unsubscriptions when the component is destroyed
 
   constructor(private studentService : StudentService,
-    private broadcaster: BroadcasterService,
     private courseService: CourseService) {}
 
   ngOnInit(): void {
     //Subscribe to the Broadcaster course selected, to update the current rendered course
-    this.broadcaster.subscribeCourse().pipe(takeUntil(this.destroy$)).subscribe(course => {
+    this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
       this.course = course;
       this.refreshEnrolled();
     })

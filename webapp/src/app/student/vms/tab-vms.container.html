@@ -1,0 +1,4 @@
+<app-tab-student-vms [vms]="vms" *ngIf="vms.length; else elseBlock"></app-tab-student-vms>
+<ng-template #elseBlock>
+    No Vms available
+</ng-template>
