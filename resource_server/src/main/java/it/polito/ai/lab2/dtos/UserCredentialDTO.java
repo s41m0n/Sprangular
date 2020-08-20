@@ -14,7 +14,6 @@ public class UserCredentialDTO {
 
     @NotNull
     @NotEmpty
-    String saltedPassword;
+    String password;
 
-    String salt;
 }

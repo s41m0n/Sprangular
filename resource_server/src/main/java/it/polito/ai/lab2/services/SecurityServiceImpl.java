@@ -1,5 +1,6 @@
 package it.polito.ai.lab2.services;
 
+import it.polito.ai.lab2.entities.Professor;
 import it.polito.ai.lab2.repositories.CourseRepository;
 import it.polito.ai.lab2.repositories.ProfessorRepository;
 import it.polito.ai.lab2.repositories.StudentRepository;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,9 +39,18 @@ public class SecurityServiceImpl implements SecurityService{
 
     @Override
     public boolean isProfessorCourseOwner(String course) {
-        return courseRepository.findById(course)
-                .map(c -> c.getProfessor() != null && c.getProfessor().getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
-                .orElse(false);
+
+        if(!courseRepository.existsById(course) || courseRepository.getOne(course).getProfessors().isEmpty()){ //the course does not exists or there are no professors
+            return false;
+        }
+
+        List<String> professorsIds = new ArrayList<>();
+
+        for(Professor p : courseRepository.getOne(course).getProfessors()){
+            professorsIds.add(p.getId());
+        }
+
+        return professorsIds.contains(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
     @Override
@@ -52,7 +63,7 @@ public class SecurityServiceImpl implements SecurityService{
     @Override
     public boolean isTeamOfProfessorCourse(Long id) {
         return professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
-                .map(professor -> professor.getProfessorCourses().stream()
+                .map(professor -> professor.getCourses().stream()
                     .anyMatch(course -> course.getTeams().stream()
                         .anyMatch(team -> team.getId().equals(id))))
                 .orElse(false);

@@ -11,37 +11,9 @@ import java.util.Optional;
 
 public interface TeamService {
 
-    boolean addCourse(CourseDTO course);
-
-    Optional<CourseDTO> getCourse(String name);
-
-    List<CourseDTO> getAllCourses();
-
-    boolean addStudent(StudentDTO student);
-
-    Optional<StudentDTO> getStudent(String studentId);
-
-    List<StudentDTO> getAllStudents();
-
-    List<StudentDTO> getEnrolledStudents(String courseName);
-
-    boolean addStudentToCourse(String studentId, String courseName);
-
-    void enableCourse(String courseName);
-
-    void disableCourse(String courseName);
-
-    List<Boolean> addAll(List<StudentDTO> students);
-
-    List<Boolean> enrollAll(List<String> studentIds, String courseName);
-
-    List<Boolean> addAndEnroll(Reader r, String courseName);
-
-    List<CourseDTO> getCourses(String studentId);
-
     List<TeamDTO> getTeamsForStudent(String studentId);
 
-    List<StudentDTO> getMembers(Long teamId);
+    List<StudentDTO> getTeamMembers(Long teamId);
 
     TeamDTO proposeTeam(String courseId, String name, List<String> memberIds);
 
@@ -58,12 +30,6 @@ public interface TeamService {
     List<ProfessorDTO> getProfessors();
 
     boolean addProfessor(ProfessorDTO professorDTO);
-
-    ProfessorDTO getCourseProfessor(String name);
-
-    boolean setProfessorForCourse(String professor, String name);
-
-    List<CourseDTO> getProfessorCourses(String id);
 
     List<TeamDTO> getTeams();
 
