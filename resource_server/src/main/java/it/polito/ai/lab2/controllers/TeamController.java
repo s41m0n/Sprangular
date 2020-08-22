@@ -46,7 +46,7 @@ public class TeamController {
     public List<StudentDTO> getMembers(@PathVariable Long id) {
         log.info("getMembers(" + id + ") called");
         try {
-            return teamService.getMembers(id).stream()
+            return teamService.getTeamMembers(id).stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
         }catch (TeamNotFoundException e) {

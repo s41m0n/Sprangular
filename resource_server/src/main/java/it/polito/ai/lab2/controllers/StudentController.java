@@ -5,6 +5,7 @@ import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.services.CustomUserDetailsService;
+import it.polito.ai.lab2.services.StudentService;
 import it.polito.ai.lab2.services.TeamService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
@@ -22,6 +23,9 @@ import java.util.stream.Collectors;
 public class StudentController {
 
     @Autowired
+    StudentService studentService;
+
+    @Autowired
     TeamService teamService;
 
     @Autowired
@@ -30,7 +34,7 @@ public class StudentController {
     @GetMapping({"", "/"})
     public List<StudentDTO> all() {
         log.info("all() called");
-        return teamService.getAllStudents().stream()
+        return studentService.getAllStudents().stream()
                 .map(ModelHelper::enrich)
                 .collect(Collectors.toList());
     }
@@ -38,7 +42,7 @@ public class StudentController {
     @GetMapping("/{id}")
     public StudentDTO getOne(@PathVariable String id) {
         log.info("getOne(" + id + ") called");
-        return teamService.getStudent(id)
+        return studentService.getStudent(id)
                 .map(ModelHelper::enrich)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student `" + id + "` does not exist"));
     }
@@ -47,7 +51,7 @@ public class StudentController {
     public List<CourseDTO> getCourses(@PathVariable String id) {
         log.info("getCourses(" + id + ") called");
         try {
-            return teamService.getCourses(id).stream()
+            return studentService.getStudentCourses(id).stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
         }catch (StudentNotFoundException e) {
@@ -70,7 +74,7 @@ public class StudentController {
     @PostMapping({"", "/"})
     public StudentDTO add(@RequestBody StudentDTO studentDTO) {
         log.info("add(" + studentDTO + ") called");
-        if(!teamService.addStudent(studentDTO)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Already present student `" + studentDTO.getId() + "`");
+        if(!studentService.addStudent(studentDTO)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Already present student `" + studentDTO.getId() + "`");
         return ModelHelper.enrich(studentDTO);
     }
 }

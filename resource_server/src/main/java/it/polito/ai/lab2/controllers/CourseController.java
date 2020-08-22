@@ -8,6 +8,8 @@ import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.CourseProfessorNotAssigned;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
+import it.polito.ai.lab2.services.CourseService;
+import it.polito.ai.lab2.services.StudentService;
 import it.polito.ai.lab2.services.TeamService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
@@ -30,10 +32,16 @@ public class CourseController {
     @Autowired
     TeamService teamService;
 
+    @Autowired
+    CourseService courseService;
+
+    @Autowired
+    StudentService studentService;
+
     @GetMapping({"", "/"})
     public List<CourseDTO> all() {
         log.info("all() called");
-        return teamService.getAllCourses()
+        return courseService.getAllCourses()
                 .stream()
                 .map(ModelHelper::enrich)
                 .collect(Collectors.toList());
@@ -42,7 +50,7 @@ public class CourseController {
     @GetMapping("/{name}")
     public CourseDTO getOne(@PathVariable String name) {
         log.info("getOne(" + name + ") called");
-        return teamService.getCourse(name)
+        return courseService.getCourse(name)
                 .map(ModelHelper::enrich)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course `" + name + "` does not exist"));
     }
@@ -51,28 +59,30 @@ public class CourseController {
     public List<StudentDTO> enrolledStudents(@PathVariable String name) {
         log.info("enrolledStudents(" + name + ") called");
         try {
-            return teamService.getEnrolledStudents(name)
+            return courseService.getEnrolledStudents(name)
                     .stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
-        }catch (CourseNotFoundException e) {
+        } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
-    @GetMapping("/{name}/professor")
-    public ProfessorDTO getProfessor(@PathVariable String name) {
+    @GetMapping("/{name}/professors")
+    public List<ProfessorDTO> getProfessor(@PathVariable String name) {
         log.info("getProfessor(" + name + ") called");
         try {
-            ProfessorDTO p = teamService.getCourseProfessor(name);
-            return p == null ? null : ModelHelper.enrich(p);
+            return courseService.getCourseProfessors(name)
+                    .stream()
+                    .map(ModelHelper::enrich)
+                    .collect(Collectors.toList());
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @GetMapping("/{name}/teams")
-    public List<TeamDTO> getTeams(@PathVariable String name){
+    public List<TeamDTO> getTeams(@PathVariable String name) {
         log.info("getTeams(" + name + ") called");
         try {
             return teamService.getTeamForCourse(name).stream()
@@ -110,7 +120,7 @@ public class CourseController {
     @GetMapping("/{name}/enabled")
     public boolean getEnabled(@PathVariable String name) {
         log.info("getEnabled(" + name + ") called");
-        return teamService.getCourse(name)
+        return courseService.getCourse(name)
                 .map(CourseDTO::isEnabled)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, name));
     }
@@ -118,18 +128,19 @@ public class CourseController {
     @PostMapping({"", "/"})
     public CourseDTO add(@RequestBody CourseDTO courseDTO) {
         log.info("add(" + courseDTO + ") called");
-        if (!teamService.addCourse(courseDTO)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Course `" + courseDTO.getName() + "` already exists");
+        if (!courseService.addCourse(courseDTO))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Course `" + courseDTO.getName() + "` already exists");
         return ModelHelper.enrich(courseDTO);
     }
 
     @PutMapping("/{name}/enabled")
     public void enableDisable(@PathVariable String name, @RequestBody Map<String, Boolean> reqBody) {
-        log.info("enableDisable(" + name + ", " + reqBody +") called");
+        log.info("enableDisable(" + name + ", " + reqBody + ") called");
         Boolean enable = reqBody.get("enabled");
-        if(enable == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "enabled {true,false} required");
+        if (enable == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "enabled {true,false} required");
         try {
-            if(enable) teamService.enableCourse(name);
-            else teamService.disableCourse(name);
+            if (enable) courseService.enableCourse(name);
+            else courseService.disableCourse(name);
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (CourseProfessorNotAssigned e) {
@@ -138,12 +149,12 @@ public class CourseController {
     }
 
     @PutMapping("/{name}/professor")
-    public boolean setProfessor(@PathVariable String name, @RequestBody Map<String,String> reqBody) {
-        log.info("setProfessor(" + name + ", " + reqBody +") called");
+    public boolean setProfessor(@PathVariable String name, @RequestBody Map<String, String> reqBody) {
+        log.info("setProfessor(" + name + ", " + reqBody + ") called");
         String professor = reqBody.get("id");
-        if(professor == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
+        if (professor == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
         try {
-            return teamService.setProfessorForCourse(professor, name);
+            return courseService.addProfessorToCourse(professor, name);
         } catch (CourseNotFoundException | ProfessorNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -151,23 +162,23 @@ public class CourseController {
 
     @PutMapping("{name}/enrollOne")
     public boolean enrollStudent(@RequestBody Map<String, String> reqBody, @PathVariable String name) {
-        log.info("enrollStudent(" + name + ", " + reqBody +") called");
+        log.info("enrollStudent(" + name + ", " + reqBody + ") called");
         String studentId = reqBody.get("id");
-        if(studentId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
+        if (studentId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
         try {
-            return teamService.addStudentToCourse(studentId, name);
-        }catch (CourseNotFoundException | StudentNotFoundException e) {
+            return studentService.addStudentToCourse(studentId, name);
+        } catch (CourseNotFoundException | StudentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @PostMapping(value = "{name}/enrollMany")
     public List<Boolean> enrollStudents(@PathVariable String name, @RequestParam("file") MultipartFile multipartFile) {
-        log.info("enrollStudents(" + name + ", " + multipartFile +") called");
-        if(multipartFile.getContentType() == null || !multipartFile.getContentType().equals("text/csv"))
+        log.info("enrollStudents(" + name + ", " + multipartFile + ") called");
+        if (multipartFile.getContentType() == null || !multipartFile.getContentType().equals("text/csv"))
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
-            return teamService.addAndEnroll(new InputStreamReader(multipartFile.getInputStream()), name);
+            return studentService.addAndEnroll(new InputStreamReader(multipartFile.getInputStream()), name);
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
@@ -177,14 +188,15 @@ public class CourseController {
 
     @PostMapping("/{name}/teams")
     public TeamDTO proposeTeam(@PathVariable String name, @RequestBody Map<String, Object> reqBody) {
-        log.info("proposeTeam(" + name + ", " + reqBody +") called");
+        log.info("proposeTeam(" + name + ", " + reqBody + ") called");
         String teamName = (String) reqBody.get("name");
         List<String> memberIds = (List<String>) reqBody.get("memberIds");
-        if(teamName == null || memberIds == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamName and memberIds are required");
+        if (teamName == null || memberIds == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamName and memberIds are required");
 
         try {
             return teamService.proposeTeam(name, teamName, memberIds);
-        }catch (CourseNotFoundException | StudentNotFoundException e) {
+        } catch (CourseNotFoundException | StudentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

@@ -3,7 +3,7 @@ package it.polito.ai.lab2.controllers;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
-import it.polito.ai.lab2.services.TeamService;
+import it.polito.ai.lab2.services.ProfessorService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 public class ProfessorController {
 
     @Autowired
-    TeamService teamService;
+    ProfessorService professorService;
 
     @GetMapping({"", "/"})
     public List<ProfessorDTO> all() {
         log.info("all() called");
-        return teamService.getProfessors().stream()
+        return professorService.getProfessors().stream()
                 .map(ModelHelper::enrich)
                 .collect(Collectors.toList());
     }
@@ -33,7 +33,7 @@ public class ProfessorController {
     @GetMapping("/{id}")
     public ProfessorDTO getOne(@PathVariable String id) {
         log.info("getOne(" + id + ") called");
-        return teamService.getProfessor(id)
+        return professorService.getProfessor(id)
                 .map(ModelHelper::enrich)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor `" + id + "` does not exist"));
     }
@@ -42,7 +42,7 @@ public class ProfessorController {
     public List<CourseDTO> getProfessorCourses(@PathVariable String id) {
         log.info("getProfessorCourses(" + id + ") called");
         try {
-            return teamService.getProfessorCourses(id).stream()
+            return professorService.getProfessorCourses(id).stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
         } catch (ProfessorNotFoundException e) {
@@ -53,7 +53,7 @@ public class ProfessorController {
     @PostMapping({"", "/"})
     public ProfessorDTO add(@RequestBody ProfessorDTO professorDTO) {
         log.info("add(" + professorDTO + ") called");
-        if(!teamService.addProfessor(professorDTO)) throw new ResponseStatusException(HttpStatus.CONFLICT, professorDTO.getId());
+        if(!professorService.addProfessor(professorDTO)) throw new ResponseStatusException(HttpStatus.CONFLICT, professorDTO.getId());
         return ModelHelper.enrich(professorDTO);
     }
 
