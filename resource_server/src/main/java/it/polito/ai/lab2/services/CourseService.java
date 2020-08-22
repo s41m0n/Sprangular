@@ -26,6 +26,4 @@ public interface CourseService {
     boolean addProfessorToCourse(String professor, String name);
 
     boolean removeProfessorFromCourse(String professor, String name);
-
-    List<CourseDTO> getProfessorCourses(String id);
 }

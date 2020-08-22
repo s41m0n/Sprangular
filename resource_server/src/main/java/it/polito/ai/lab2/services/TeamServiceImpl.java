@@ -1,13 +1,11 @@
 package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.CourseDTO;
-import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.repositories.*;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,9 +32,6 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     TeamRepository teamRepository;
-
-    @Autowired
-    ProfessorRepository professorRepository;
 
     @Autowired
     RoleRepository roleRepository;
@@ -150,33 +145,6 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<ProfessorDTO> getProfessors() {
-        return professorRepository.findAll().stream()
-                .map(professor -> modelMapper.map(professor, ProfessorDTO.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public boolean addProfessor(ProfessorDTO professorDTO) {
-        if (userRepository.findById(professorDTO.getId()).isPresent()) return false;
-
-        Role role = roleRepository.findByName("ROLE_PROFESSOR").orElseGet(() -> {
-            Role r = new Role();
-            r.setName("ROLE_PROFESSOR");
-            return r;
-        });
-
-        Professor p = modelMapper.map(professorDTO, Professor.class);
-        String pwd = RandomStringUtils.random(10, true, true);
-        p.setPassword(passwordEncoder.encode(pwd));
-        p.addRole(role);
-        userRepository.save(p);
-        notificationService.sendMessage("p" + professorDTO.getId() + "@polito.it", "Account Creation", getPredefinedRegisterMessage(professorDTO.getId(), pwd));
-        return true;
-    }
-
-    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<TeamDTO> getTeams() {
         return teamRepository.findAll().stream()
@@ -192,24 +160,10 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Optional<ProfessorDTO> getProfessor(String id) {
-        return professorRepository.findById(id)
-                .map(professor -> modelMapper.map(professor, ProfessorDTO.class));
-    }
-
-    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#id)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#id))")
     public CourseDTO getCourseForTeam(Long id) {
         return teamRepository.findById(id)
                 .map(team -> modelMapper.map(team.getCourse(), CourseDTO.class))
                 .orElseThrow(() -> new TeamNotFoundException("Team `" + id + "` does not exist"));
-    }
-
-    private String getPredefinedRegisterMessage(String id, String pwd) {
-        return "Welcome to SpringExample app!\n\n" +
-                "Your access credentials are:\n" +
-                "-Username: " + id +
-                "\n-Password: " + pwd + "" +
-                "\n\nAuthenticate through http://localhost:8080/API/authenticate and enjoy!";
     }
 }

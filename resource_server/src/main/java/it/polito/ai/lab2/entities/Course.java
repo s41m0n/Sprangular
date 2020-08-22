@@ -14,6 +14,7 @@ public class Course {
     @GeneratedValue
     Long id;
 
+    @Column(unique = true)
     String name;
 
     String acronym;

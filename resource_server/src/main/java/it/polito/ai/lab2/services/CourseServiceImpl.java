@@ -9,11 +9,15 @@ import it.polito.ai.lab2.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
+@Transactional
 public class CourseServiceImpl implements CourseService {
 
     @Autowired
@@ -102,14 +106,5 @@ public class CourseServiceImpl implements CourseService {
         Professor p = professor.isEmpty() ? null : professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
         if (p != null) p.removeCourse(c);
         return true;
-    }
-
-    @Override
-    public List<CourseDTO> getProfessorCourses(String id) {
-        return professorRepository.findById(id)
-                .map(p -> p.getCourses().stream()
-                        .map(course -> modelMapper.map(course, CourseDTO.class))
-                        .collect(Collectors.toList()))
-                .orElseThrow(() -> new ProfessorNotFoundException("Professor `" + id + "` does not exist"));
     }
 }

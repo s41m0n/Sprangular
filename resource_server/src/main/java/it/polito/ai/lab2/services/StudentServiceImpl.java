@@ -15,12 +15,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.Reader;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
+@Transactional
 public class StudentServiceImpl implements StudentService {
 
     @Autowired
@@ -58,7 +62,7 @@ public class StudentServiceImpl implements StudentService {
         Student s = modelMapper.map(student, Student.class);
         String pwd = RandomStringUtils.random(10, true, true);
         s.setPassword(passwordEncoder.encode(pwd));
-        s.addRole(role);
+        s.getRoles().add(role);
         userRepository.save(s);
         notificationService.sendMessage("s" + student.getId() + "@studenti.polito.it", "Account Creation", getPredefinedRegisterMessage(student.getId(), pwd));
         return true;

@@ -17,5 +17,5 @@ public class Role {
     String name;
 
     @ManyToMany(mappedBy = "roles")
-    List<UserCredential> users = new ArrayList<>();
+    List<User> users = new ArrayList<>();
 }

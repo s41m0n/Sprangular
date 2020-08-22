@@ -20,4 +20,9 @@ public class Student extends User {
 
     @ManyToMany(mappedBy = "owners")
     List<Vm> ownedVms = new ArrayList<>();
+
+    public void addCourse(Course course) {
+        courses.add(course);
+        course.getStudents().add(this);
+    }
 }
