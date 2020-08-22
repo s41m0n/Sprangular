@@ -13,8 +13,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete'; 
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { TabStudentsComponent } from './professor/students/tab-students.component';
@@ -24,10 +24,11 @@ import { TabProfessorAssignmentsContainer} from './professor/assignments/tab-ass
 import { TabProfessorVmsContainer } from './professor/vms/tab-vms.container';
 import { TabProfessorVmsComponent } from './professor/vms/tab-vms.component';
 import { AppRoutingModule } from './app-routing-module';
-import { HttpClientModule, HTTP_INTERCEPTORS }    from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { LoginDialogComponent } from './login/login-dialog.component';
 import { MatCardModule } from '@angular/material/card';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthInterceptor } from './helpers/auth.interceptor';
 import { ErrorInterceptor } from './helpers/error.interceptor';
@@ -48,6 +49,9 @@ import { TabStudentAssignmentsContainer } from './student/assignments/tab-assign
 import { TabAdminProfessorsContainer } from './admin/professors/tab-professors.container';
 import { AdminComponent } from './admin/admin.component';
 import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
+import {MatMenuModule} from "@angular/material/menu";
+import { VmOptionsModalComponent } from './modals/vm-options-modal/vm-options-modal.component';
+import {MatSliderModule} from "@angular/material/slider";
 
 @NgModule({
   declarations: [
@@ -72,7 +76,8 @@ import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
     TabProfessorVmsContainer,
     AdminComponent,
     TabAdminProfessorsContainer,
-    TabAdminVmModelsContainer
+    TabAdminVmModelsContainer,
+    VmOptionsModalComponent
   ],
   imports: [
     BrowserModule,
@@ -92,6 +97,7 @@ import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
     MatPaginatorModule,
     MatDialogModule,
     MatCardModule,
+    FlexLayoutModule,
     AppRoutingModule,
     HttpClientModule,
     MatProgressSpinnerModule,
@@ -99,7 +105,10 @@ import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
       progressBar: true,
       timeOut: 3000,
       preventDuplicates: true
-    })
+    }),
+    MatMenuModule,
+    FormsModule,
+    MatSliderModule,
   ],
   entryComponents: [
     LoginDialogComponent

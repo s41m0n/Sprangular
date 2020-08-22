@@ -90,6 +90,19 @@
       "id": 1,
       "name": "experiment",
       "path": "experiment",
+      "vCpu": "2",
+      "ram": "3",
+      "disk": "4",
+      "courseId": 1,
+      "teamId": 1
+    },
+    {
+      "id": 2,
+      "name": "test",
+      "path": "test/prova",
+      "vCpu": "1",
+      "ram": "4",
+      "disk": "2",
       "courseId": 1,
       "teamId": 1
     }

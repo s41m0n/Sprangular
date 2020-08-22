@@ -16,3 +16,5 @@ mat-form-field {width: 30%;}
 .mat-column-id {width: 10%;}
 
 table {width: 100%;}
+
+mat-card-content { padding: 16px; }
