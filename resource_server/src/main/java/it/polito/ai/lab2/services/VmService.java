@@ -26,4 +26,6 @@ public interface VmService {
     List<VmDTO> getVmsOfGroup(Long groupId);
 
     List<VmDTO> getVmsOfStudent(String studentId);
+
+    List<VmDTO> getVmsOfStudentOfCourse(String studentId, Long courseId);
 }
