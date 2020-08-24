@@ -9,7 +9,7 @@ public interface VmService {
 
     boolean createVmModel(VmModelDTO vmModelDTO, String courseName);
 
-    boolean createVm(Long vmModelId, VmDTO vmDTO);
+    boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId);
 
     boolean deleteVm(Long vmId);
 

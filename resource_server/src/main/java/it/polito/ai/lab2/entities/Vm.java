@@ -24,6 +24,10 @@ public class Vm {
 
     int ram;
 
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    Team team;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "vm_owner", joinColumns = @JoinColumn(name = "vm_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
     List<Student> owners = new ArrayList<>();
