@@ -13,7 +13,7 @@ public interface VmService {
 
     boolean deleteVm(Long vmId);
 
-    boolean updateVm(VmDTO vmDTO);
+    boolean updateVmResourceLimits(Long vmId, int vCpu, int diskStorage, int ram);
 
     boolean turnOnVm(Long vmId);
 

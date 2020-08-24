@@ -21,6 +21,8 @@ public class Proposal {
 
     Long teamId;
 
+    Long courseId;
+
     Timestamp expiryDate;
 
     ProposalStatus status;

@@ -2,7 +2,7 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.Proposal;
-import it.polito.ai.lab2.repositories.TokenRepository;
+import it.polito.ai.lab2.repositories.ProposalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,7 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
     JavaMailSender emailSender;
 
     @Autowired
-    TokenRepository tokenRepository;
+    ProposalRepository proposalRepository;
 
     @Autowired
     TeamService teamService;
@@ -42,13 +42,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public boolean confirm(String token) {
-        Proposal t = tokenRepository.findById(token).orElse(null);
+        Proposal t = proposalRepository.findById(token).orElse(null);
 
         if (t == null || t.getExpiryDate().before(new Timestamp(System.currentTimeMillis()))) return false;
 
-        tokenRepository.delete(t);
+        proposalRepository.delete(t);
 
-        if (!tokenRepository.findAllByTeamId(t.getTeamId()).isEmpty()) return false;
+        if (!proposalRepository.findAllByTeamId(t.getTeamId()).isEmpty()) return false;
 
         teamService.activeTeam(t.getTeamId());
         return true;
@@ -56,11 +56,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public boolean reject(String token) {
-        Proposal t = tokenRepository.findById(token).orElse(null);
+        Proposal t = proposalRepository.findById(token).orElse(null);
         if (t == null || t.getExpiryDate().before(new Timestamp(System.currentTimeMillis())))
             return false;
 
-        tokenRepository.deleteAll(tokenRepository.findAllByTeamId(t.getTeamId()));
+        proposalRepository.deleteAll(proposalRepository.findAllByTeamId(t.getTeamId()));
         teamService.evictTeam(t.getTeamId());
         return true;
     }
@@ -78,7 +78,7 @@ public class NotificationServiceImpl implements NotificationService {
             proposal.setId((UUID.randomUUID().toString()));
             proposal.setTeamId(dto.getId());
 
-            tokenRepository.save(proposal);
+            proposalRepository.save(proposal);
 
             String email = "s" +  memberId + "@studenti.polito.it";
             String confirm = "http://localhost:8080/API/notification/confirm/" + proposal.getId();
@@ -96,9 +96,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     public void fixedTokenClear() {
         Set<Long> teamIds = new HashSet<>();
-        tokenRepository.findAllByExpiryDateAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
+        proposalRepository.findAllByExpiryDateAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
             teamIds.add(proposal.getTeamId());
-            tokenRepository.delete(proposal);
+            proposalRepository.delete(proposal);
         });
         teamIds.forEach(team -> teamService.evictTeam(team));
     }

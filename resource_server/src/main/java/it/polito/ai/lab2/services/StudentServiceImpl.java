@@ -9,6 +9,7 @@ import it.polito.ai.lab2.entities.Role;
 import it.polito.ai.lab2.entities.Student;
 import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
+import it.polito.ai.lab2.exceptions.StudentNotInCourseException;
 import it.polito.ai.lab2.repositories.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
@@ -133,6 +134,20 @@ public class StudentServiceImpl implements StudentService {
                         .map(course -> modelMapper.map(course, CourseDTO.class))
                         .collect(Collectors.toList()))
                 .orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+    }
+
+    @Override
+    public boolean removeStudentFromCourse(String studentId, String courseName) {
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+        Course course = courseRepository.findById(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+
+        if(!course.getStudents().contains(student)){
+            throw new StudentNotInCourseException("Some student is not enrolled in course " + courseName);
+        }
+
+        student.removeCourse(course); //symmetric method, it updates also the course
+        return true;
     }
 
     private String getPredefinedRegisterMessage(String id, String pwd) {

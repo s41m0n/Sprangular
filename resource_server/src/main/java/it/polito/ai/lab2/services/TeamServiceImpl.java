@@ -6,6 +6,8 @@ import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.repositories.*;
+import it.polito.ai.lab2.utility.ProposalStatus;
+import it.polito.ai.lab2.utility.TeamProposalDetails;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,8 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +36,9 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    ProposalRepository proposalRepository;
 
     @Autowired
     ModelMapper modelMapper;
@@ -165,5 +169,37 @@ public class TeamServiceImpl implements TeamService {
         return teamRepository.findById(id)
                 .map(team -> modelMapper.map(team.getCourse(), CourseDTO.class))
                 .orElseThrow(() -> new TeamNotFoundException("Team `" + id + "` does not exist"));
+    }
+
+    @Override
+    public List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseName) {
+        studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+        Course course = courseRepository.findById(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+
+        List<Proposal> proposals = proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, course.getId());
+
+        if(proposals.isEmpty()){
+            return null;
+        }
+
+        List<TeamProposalDetails> proposalsDetails = new ArrayList<>();
+
+        for(Proposal p : proposals) {
+            TeamProposalDetails tpd = new TeamProposalDetails();
+            tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
+            tpd.setProposalCreator(studentRepository.getOne(p.getProposalCreatorId()));
+
+            Map<Student, ProposalStatus> teamApprovalDetails = new HashMap<>();
+
+            for(Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())){
+                teamApprovalDetails.put(studentRepository.getOne(pr.getInvitedUserId()), pr.getStatus());
+            }
+
+            tpd.setMembersAndStatus(teamApprovalDetails);
+
+            proposalsDetails.add(tpd);
+        }
+
+        return proposalsDetails;
     }
 }

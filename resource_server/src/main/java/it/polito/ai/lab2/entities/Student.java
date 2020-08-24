@@ -25,4 +25,9 @@ public class Student extends User {
         courses.add(course);
         course.getStudents().add(this);
     }
+
+    public void removeCourse(Course course) {
+        course.getStudents().remove(this);
+        this.getCourses().remove(course);
+    }
 }

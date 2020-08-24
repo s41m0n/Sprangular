@@ -101,10 +101,38 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public boolean removeProfessorFromCourse(String professor, String name) {
-        Course c = courseRepository.findById(name).orElseThrow(() -> new CourseNotFoundException("Course `" + name + "` does not exist"));
+    public boolean removeProfessorFromCourse(String professor, String courseName) {
+        Course c = courseRepository.findById(courseName).orElseThrow(() -> new CourseNotFoundException("Course `" + courseName + "` does not exist"));
         Professor p = professor.isEmpty() ? null : professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
         if (p != null) p.removeCourse(c);
+        return true;
+    }
+
+    @Override
+    public boolean removeCourse(String courseName) {
+        Course c = courseRepository.findById(courseName).orElseThrow(() -> new CourseNotFoundException("Course `" + courseName + "` does not exist"));
+        if(c.getStudents().isEmpty()){ //TODO: permettiamo di eliminare un corso con studenti iscritti? Secondo me no
+            throw new CourseNotEmptyException("Course " + courseName + " has one or more students enrolled, you cannot delete it");
+        }
+        courseRepository.delete(c);
+        return true;
+    }
+
+    /*TODO: decidere come gestire questo update: se il frontend ci invia tutti i dati possiamo sovrascrivere anche se sono uguali, altrimenti o creiamo metodi singoli
+     *per i vari campi oppure dobbiamo mettere dei controlli per evitare di cancellare informazioni
+     */
+    @Override
+    public boolean updateCourse(CourseDTO courseDTO) {
+        if (courseDTO.getTeamMaxSize() < courseDTO.getTeamMinSize()) {
+            return false;
+        }
+        Course c = courseRepository.findById(courseDTO.getName()).orElseThrow(() -> new CourseNotFoundException("Course `" + courseDTO.getName() + "` does not exist"));
+        c.setName(courseDTO.getName());
+        c.setAcronym(courseDTO.getAcronym());
+        c.setTeamMaxSize(courseDTO.getTeamMaxSize());
+        c.setTeamMinSize(courseDTO.getTeamMinSize());
+        c.setEnabled(courseDTO.isEnabled());
+        courseRepository.save(c);
         return true;
     }
 }

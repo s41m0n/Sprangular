@@ -34,10 +34,7 @@ public interface TeamService {
 
     CourseDTO getCourseForTeam(Long id);
 
-    boolean updateVmResourceLimits(TeamDTO teamDTO);
-    //TODO: meglio mettere tutti i campi singoli o il DTO che ha 2 campi in più?
-
-    TeamProposalDetails getProposalsForStudentOfCourse(String studentId, String courseName);
-    //TODO: classe di appoggio con tutti i dettagli da mandare che sono un casino
+    List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseName);
+    //TeamProposalDetails contains all the details needed by the frontend
 
 }
