@@ -12,7 +12,7 @@ public interface ProfessorService {
 
     boolean addProfessor(ProfessorDTO professorDTO);
 
-    Optional<ProfessorDTO> getProfessor(String id);
+    Optional<ProfessorDTO> getProfessor(String professorId);
 
-    List<CourseDTO> getProfessorCourses(String id);
+    List<CourseDTO> getProfessorCourses(String professorId);
 }

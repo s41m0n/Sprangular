@@ -1,7 +1,7 @@
 package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.TeamDTO;
-import it.polito.ai.lab2.entities.Token;
+import it.polito.ai.lab2.entities.Proposal;
 import it.polito.ai.lab2.repositories.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -42,7 +42,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public boolean confirm(String token) {
-        Token t = tokenRepository.findById(token).orElse(null);
+        Proposal t = tokenRepository.findById(token).orElse(null);
 
         if (t == null || t.getExpiryDate().before(new Timestamp(System.currentTimeMillis()))) return false;
 
@@ -56,7 +56,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public boolean reject(String token) {
-        Token t = tokenRepository.findById(token).orElse(null);
+        Proposal t = tokenRepository.findById(token).orElse(null);
         if (t == null || t.getExpiryDate().before(new Timestamp(System.currentTimeMillis())))
             return false;
 
@@ -73,16 +73,16 @@ public class NotificationServiceImpl implements NotificationService {
 
         memberIds.remove(SecurityContextHolder.getContext().getAuthentication().getName());
         memberIds.forEach(memberId -> {
-            Token token = new Token();
-            token.setExpiryDate(expiryDate);
-            token.setId((UUID.randomUUID().toString()));
-            token.setTeamId(dto.getId());
+            Proposal proposal = new Proposal();
+            proposal.setExpiryDate(expiryDate);
+            proposal.setId((UUID.randomUUID().toString()));
+            proposal.setTeamId(dto.getId());
 
-            tokenRepository.save(token);
+            tokenRepository.save(proposal);
 
             String email = "s" +  memberId + "@studenti.polito.it";
-            String confirm = "http://localhost:8080/API/notification/confirm/" + token.getId();
-            String reject = "http://localhost:8080/API/notification/reject/" + token.getId();
+            String confirm = "http://localhost:8080/API/notification/confirm/" + proposal.getId();
+            String reject = "http://localhost:8080/API/notification/reject/" + proposal.getId();
             sendMessage(email, "[SpringExample] Someone wants to create a team with you",
                     "Dear " + email + ",\n\n" +
                             "You have been requested to create the team `" + dto.getName() +"`.\n" +
@@ -96,9 +96,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     public void fixedTokenClear() {
         Set<Long> teamIds = new HashSet<>();
-        tokenRepository.findAllByExpiryDateAfter(new Timestamp(System.currentTimeMillis())).forEach(token -> {
-            teamIds.add(token.getTeamId());
-            tokenRepository.delete(token);
+        tokenRepository.findAllByExpiryDateAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
+            teamIds.add(proposal.getTeamId());
+            tokenRepository.delete(proposal);
         });
         teamIds.forEach(team -> teamService.evictTeam(team));
     }

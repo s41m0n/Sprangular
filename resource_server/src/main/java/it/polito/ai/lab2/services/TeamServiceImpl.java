@@ -68,7 +68,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
-    public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds) {
+    public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, int hoursTimeout) {
         if (memberIds.stream().distinct().count() != memberIds.size())
             throw new DuplicateStudentInTeam("Some student is already in the group " + name);
 
@@ -109,7 +109,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseName)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseName))")
-    public List<TeamDTO> getTeamForCourse(String courseName) {
+    public List<TeamDTO> getTeamsForCourse(String courseName) {
         return courseRepository.findById(courseName)
                 .map(course -> course.getTeams().stream()
                         .map(team -> modelMapper.map(team, TeamDTO.class))

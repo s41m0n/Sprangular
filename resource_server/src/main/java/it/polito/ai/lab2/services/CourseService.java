@@ -11,7 +11,11 @@ public interface CourseService {
 
     boolean addCourse(CourseDTO course);
 
-    Optional<CourseDTO> getCourse(String name);
+    boolean removeCourse(String courseName);
+
+    boolean updateCourse(CourseDTO courseDTO);
+
+    Optional<CourseDTO> getCourse(String courseName);
 
     List<CourseDTO> getAllCourses();
 
@@ -21,9 +25,9 @@ public interface CourseService {
 
     void disableCourse(String courseName);
 
-    List<ProfessorDTO> getCourseProfessors(String name);
+    List<ProfessorDTO> getCourseProfessors(String courseName);
 
-    boolean addProfessorToCourse(String professor, String name);
+    boolean addProfessorToCourse(String professorId, String courseName);
 
-    boolean removeProfessorFromCourse(String professor, String name);
+    boolean removeProfessorFromCourse(String professorId, String courseName);
 }

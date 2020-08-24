@@ -85,7 +85,7 @@ public class CourseController {
     public List<TeamDTO> getTeams(@PathVariable String name) {
         log.info("getTeams(" + name + ") called");
         try {
-            return teamService.getTeamForCourse(name).stream()
+            return teamService.getTeamsForCourse(name).stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
         } catch (CourseNotFoundException e) {

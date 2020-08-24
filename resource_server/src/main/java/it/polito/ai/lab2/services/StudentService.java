@@ -24,4 +24,6 @@ public interface StudentService {
     List<Boolean> addAndEnroll(Reader r, String courseName);
 
     List<CourseDTO> getStudentCourses(String studentId);
+
+    boolean removeStudentFromCourse(String studentId, String courseName);
 }

@@ -16,4 +16,6 @@ public class UserDTO {
     String surname;
 
     String photoPath;
+
+    boolean verified;
 }

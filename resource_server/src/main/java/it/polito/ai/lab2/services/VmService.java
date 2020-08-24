@@ -7,11 +7,13 @@ import java.util.List;
 
 public interface VmService {
 
-    boolean createVmModel(VmModelDTO vmModelDTO, Long courseId);
+    boolean createVmModel(VmModelDTO vmModelDTO, String courseName);
 
     boolean createVm(Long vmModelId, VmDTO vmDTO);
 
     boolean deleteVm(Long vmId);
+
+    boolean updateVm(VmDTO vmDTO);
 
     boolean turnOnVm(Long vmId);
 
@@ -27,5 +29,7 @@ public interface VmService {
 
     List<VmDTO> getVmsOfStudent(String studentId);
 
-    List<VmDTO> getVmsOfStudentOfCourse(String studentId, Long courseId);
+    List<VmDTO> getVmsOfCourse(String courseName);
+
+    List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseName);
 }
