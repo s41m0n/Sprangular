@@ -52,6 +52,8 @@ import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
 import {MatMenuModule} from "@angular/material/menu";
 import { VmOptionsModalComponent } from './modals/vm-options-modal/vm-options-modal.component';
 import {MatSliderModule} from "@angular/material/slider";
+import { NewVmComponent } from './modals/new-vm/new-vm.component';
+import {MatSelectModule} from "@angular/material/select";
 
 @NgModule({
   declarations: [
@@ -77,7 +79,8 @@ import {MatSliderModule} from "@angular/material/slider";
     AdminComponent,
     TabAdminProfessorsContainer,
     TabAdminVmModelsContainer,
-    VmOptionsModalComponent
+    VmOptionsModalComponent,
+    NewVmComponent
   ],
   imports: [
     BrowserModule,
@@ -109,6 +112,7 @@ import {MatSliderModule} from "@angular/material/slider";
     MatMenuModule,
     FormsModule,
     MatSliderModule,
+    MatSelectModule,
   ],
   entryComponents: [
     LoginDialogComponent

@@ -4,6 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { VM } from '../../models/vm.model';
 import {VmOptionsModalComponent} from '../../modals/vm-options-modal/vm-options-modal.component';
 import {MatDialog} from '@angular/material/dialog';
+import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
 
 /**
  * VmsComponent
@@ -38,10 +39,11 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('The dialog was closed', result);
-        selectedVm.vCpu = result.vCpu;
-        selectedVm.ram = result.ram;
-        selectedVm.disk = result.disk;
+        selectedVm.vCpu = Number(result.vCpu);
+        selectedVm.ram = Number(result.ram);
+        selectedVm.disk = Number(result.disk);
         this.dataSource.data[index] = selectedVm;
+        // TODO - da pushare la modifica
       }
     });
   }
@@ -52,5 +54,31 @@ export class TabProfessorVmsComponent implements AfterViewInit {
 
   connectToVm(id: number) {
     console.log('Method to implement');
+  }
+
+  newVm() {
+    const newVmDialog = this.dialog.open(NewVmComponent, {
+      width: '300px',
+      data: { teams: ['aggiungere', 'dati'], courses: ['aggiungere', 'dati'] }
+    });
+
+    newVmDialog.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('The dialog was closed', result);
+        const vm = new VM(
+            // TODO - l'id dove lo prendiamo?
+            100,
+            result.vmName,
+            result.vmPath,
+            new Date().toDateString(),
+            Number(result.vmVCpu),
+            Number(result.vmRam),
+            Number(result.vmDisk)
+        );
+        vm.team = result.vmTeam;
+        this.dataSource.data.push(vm);
+      }
+      // TODO - pushare la nuova vm sul db
+    });
   }
 }

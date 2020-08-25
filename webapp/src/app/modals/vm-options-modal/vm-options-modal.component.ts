@@ -20,4 +20,5 @@ export class VmOptionsModalComponent implements OnInit {
   }
 
   getSliderTickInterval(): number | 'auto' { return 'auto'; }
+
 }

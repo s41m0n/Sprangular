@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 
 /**
  * VmsContainer
- * 
+ *
  * It displays the Vms view (WIP)
  */
 @Component({
@@ -16,18 +16,18 @@ import { Subject } from 'rxjs';
 })
 export class TabProfessorVmsContainer implements OnInit, OnDestroy {
 
-  private course : Course;                                      //The current selected course
-  vms: VM[] = [];                             //The current vms
-  private destroy$: Subject<boolean> = new Subject<boolean>();  //Private subject to perform the unsubscriptions when the component is destroyed
+  private course: Course;                                      // The current selected course
+  vms: VM[] = [];                             // The current vms
+  private destroy$: Subject<boolean> = new Subject<boolean>();  // Private subject to perform the unsubscriptions when the component is destroyed
 
   constructor(private courseService: CourseService) { }
 
   ngOnInit(): void {
-    //Subscribe to the Broadcaster course selected, to update the current rendered course
+    // Subscribe to the Broadcaster course selected, to update the current rendered course
     this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
       this.course = course;
       this.refreshAssignments();
-    })
+    });
   }
 
   ngOnDestroy() {
@@ -39,8 +39,8 @@ export class TabProfessorVmsContainer implements OnInit, OnDestroy {
 
   /** Private function to refresh the list of enrolled students*/
   private refreshAssignments() {
-    //Check if already received the current course
-    if(!this.course) {
+    // Check if already received the current course
+    if (!this.course) {
       this.vms = [];
       return;
     }

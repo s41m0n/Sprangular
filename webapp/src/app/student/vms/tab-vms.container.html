@@ -1,4 +1,5 @@
 <app-tab-student-vms [vms]="vms" *ngIf="vms.length; else elseBlock"></app-tab-student-vms>
 <ng-template #elseBlock>
+    <button mat-raised-button color="primary" (click)="newVm()">New VM</button>
     No Vms available
 </ng-template>
