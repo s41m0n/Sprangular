@@ -9,12 +9,14 @@ import it.polito.ai.lab2.entities.VmModel;
 import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.exceptions.VmModelNotFoundException;
+import it.polito.ai.lab2.exceptions.VmNotFoundException;
 import it.polito.ai.lab2.repositories.CourseRepository;
 import it.polito.ai.lab2.repositories.StudentRepository;
 import it.polito.ai.lab2.repositories.VmModelRepository;
 import it.polito.ai.lab2.repositories.VmRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,6 +54,9 @@ public class VmServiceImpl implements VmService{
     public boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId) {
         VmModel vmModel = vmModelRepository.findById(vmModelId).orElseThrow(() -> new VmModelNotFoundException("VmModel " + vmModelId + " does not exist"));
         Student owner = studentRepository.findById(ownerId).orElseThrow(() -> new StudentNotFoundException("Student " + ownerId + " does not exist"));
+
+        //TODO: manca tutto il controllo delle risorse!
+
         Vm vm = new Vm();
         vm.setVmModel(vmModel);
         vm.setActive(vmDTO.isActive());
@@ -61,12 +66,20 @@ public class VmServiceImpl implements VmService{
         vm.setImagePath(vmDTO.getImagePath());
         vm.getOwners().add(owner);
         vmRepository.save(vm);
+        vmModel.getVms().add(vm);
         return true;
     }
 
     @Override
     public boolean deleteVm(Long vmId) {
-        return false;
+        Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
+
+        if(vm.getOwners().contains(studentRepository.getOne(SecurityContextHolder.getContext().getAuthentication().getName()))){
+            vmRepository.delete(vm);
+            return true;
+            //TODO: facciamo che si può eliminare anche una macchina virtuale accesa?
+        }
+        return false; //TODO: facciamo un'eccezione o lasciamo che torni falso e gli mandiamo giù un messaggio?
     }
 
     @Override
