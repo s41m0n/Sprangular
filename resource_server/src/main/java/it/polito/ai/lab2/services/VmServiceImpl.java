@@ -77,7 +77,7 @@ public class VmServiceImpl implements VmService{
         if(vm.getOwners().contains(studentRepository.getOne(SecurityContextHolder.getContext().getAuthentication().getName()))){
             vmRepository.delete(vm);
             return true;
-            //TODO: facciamo che si può eliminare anche una macchina virtuale accesa?
+            //TODO: implementare check accesa/spenta
         }
         return false; //TODO: facciamo un'eccezione o lasciamo che torni falso e gli mandiamo giù un messaggio?
     }

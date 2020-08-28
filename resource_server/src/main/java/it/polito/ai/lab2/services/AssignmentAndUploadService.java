@@ -20,7 +20,6 @@ public interface AssignmentAndUploadService {
     List<StudentUpload> getStudentsUploadForAssignmentSolution(Long assignmentId, String studentId);
 
     boolean createAssignment(AssignmentDTO assignmentDTO, String courseName);
-    //TODO: il prof lo recuperiamo dall'identità nel jwt?
     //TODO: quando creo un assignment devo anche creare un solution per ogni studente del corso con stato NULL.
 
     boolean uploadStudentUpload(UploadDTO uploadDTO, Long assignmentSolutionId);

@@ -111,16 +111,14 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public boolean removeCourse(String courseName) {
         Course c = courseRepository.findById(courseName).orElseThrow(() -> new CourseNotFoundException("Course `" + courseName + "` does not exist"));
-        if(c.getStudents().isEmpty()){ //TODO: permettiamo di eliminare un corso con studenti iscritti? Secondo me no
+        if(c.getStudents().isEmpty()){
             throw new CourseNotEmptyException("Course " + courseName + " has one or more students enrolled, you cannot delete it");
         }
         courseRepository.delete(c);
         return true;
     }
 
-    /*TODO: decidere come gestire questo update: se il frontend ci invia tutti i dati possiamo sovrascrivere anche se sono uguali, altrimenti o creiamo metodi singoli
-     *per i vari campi oppure dobbiamo mettere dei controlli per evitare di cancellare informazioni
-     */
+    //TODO: check che il DTO sia pieno
     @Override
     public boolean updateCourse(CourseDTO courseDTO) {
         if (courseDTO.getTeamMaxSize() < courseDTO.getTeamMinSize()) {
