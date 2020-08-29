@@ -9,11 +9,13 @@ public interface VmService {
 
     boolean createVmModel(VmModelDTO vmModelDTO, String courseName);
 
-    boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId);
+    boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId, String courseName);
 
     boolean deleteVm(Long vmId);
 
-    boolean updateVmResourceLimits(Long vmId, int vCpu, int diskStorage, int ram);
+    boolean updateVmResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances);
+
+    boolean updateVmResources(Long vmId, int vCpu, int diskStorage, int ram);
 
     boolean turnOnVm(Long vmId);
 
