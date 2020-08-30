@@ -1,6 +1,5 @@
 package it.polito.ai.lab2.services;
 
-import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
 import it.polito.ai.lab2.entities.*;
@@ -11,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class VmServiceImpl implements VmService{
+public class VmServiceImpl implements VmService {
 
     @Autowired
     ModelMapper modelMapper;
@@ -53,31 +53,31 @@ public class VmServiceImpl implements VmService{
         Student owner = studentRepository.findById(ownerId).orElseThrow(() -> new StudentNotFoundException("Student " + ownerId + " does not exist"));
         Course course = courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
 
-        if(!owner.getCourses().contains(course)){ //student not enrolled in course
+        if (!owner.getCourses().contains(course)) { //student not enrolled in course
             throw new StudentNotInCourseException("Student " + ownerId + " is not enrolled in course " + courseName);
         }
 
-        if(!course.isEnabled()){ //course not enabled
+        if (!course.isEnabled()) { //course not enabled
             throw new CourseNotEnabledException("Course " + courseName + " is not enabled");
         }
 
-        if(owner.getTeams().isEmpty()){ //student in no teams
+        if (owner.getTeams().isEmpty()) { //student in no teams
             throw new StudentNotInTeamException("Student " + ownerId + " does not belong to any team");
         }
 
         Team team = null;
-        for(Team t : owner.getTeams()){ //find the student's team of the selected course
-            if(t.getCourse().getName().equals(courseName)){
+        for (Team t : owner.getTeams()) { //find the student's team of the selected course
+            if (t.getCourse().getName().equals(courseName)) {
                 team = t;
                 break;
             }
         }
 
-        if(team == null){
+        if (team == null) {
             throw new StudentNotInTeamOfCourseException("Student " + ownerId + "does not belong to a team of course " + courseName);
         }
 
-        if(team.getVms().size() + 1 > team.getMaxTotalInstances()){
+        if (team.getVms().size() + 1 > team.getMaxTotalInstances()) {
             throw new TooManyVmInstancesException("Cannot create the new VM, too many instances");
         }
 
@@ -86,20 +86,20 @@ public class VmServiceImpl implements VmService{
         int actualDiskStorage = 0;
         int numOfActiveVms = 0;
 
-        for(Vm vm : team.getVms()){
+        for (Vm vm : team.getVms()) {
             actualVCpu += vm.getVCpu();
             actualRam += vm.getRam();
             actualDiskStorage += vm.getDiskStorage();
-            if(vm.isActive()){
+            if (vm.isActive()) {
                 numOfActiveVms += 1;
             }
         }
 
-        if(actualVCpu + vmDTO.getVCpu() > team.getMaxVCpu() || actualRam + vmDTO.getRam() > team.getMaxRam() || actualDiskStorage + vmDTO.getDiskStorage() > team.getMaxDiskStorage()){
+        if (actualVCpu + vmDTO.getVCpu() > team.getMaxVCpu() || actualRam + vmDTO.getRam() > team.getMaxRam() || actualDiskStorage + vmDTO.getDiskStorage() > team.getMaxDiskStorage()) {
             throw new MaxVmResourcesException("Cannot create the VM, no more resources available");
         }
 
-        if(vmDTO.isActive() && numOfActiveVms + 1 > team.getMaxActiveInstances()){
+        if (vmDTO.isActive() && numOfActiveVms + 1 > team.getMaxActiveInstances()) {
             throw new MaxVmResourcesException("Cannot create the VM, no more resources available");
         }
 
@@ -131,7 +131,7 @@ public class VmServiceImpl implements VmService{
     public boolean updateVmResources(Long vmId, int vCpu, int diskStorage, int ram) { //only owners
         Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
 
-        if(vm.isActive()){
+        if (vm.isActive()) {
             throw new VmIsActiveException("Vm " + vmId + " is active and cannot be updated. Please turn it off");
         }
 
@@ -141,13 +141,13 @@ public class VmServiceImpl implements VmService{
         int actualRam = 0;
         int actualDiskStorage = 0;
 
-        for(Vm v : team.getVms()){
+        for (Vm v : team.getVms()) {
             actualVCpu += v.getVCpu();
             actualRam += v.getRam();
             actualDiskStorage += v.getDiskStorage();
         }
 
-        if(actualVCpu - vm.getVCpu() + vCpu > team.getMaxVCpu() || actualRam - vm.getRam() + ram > team.getMaxRam() || actualDiskStorage - vm.getDiskStorage() + diskStorage > team.getMaxDiskStorage()){
+        if (actualVCpu - vm.getVCpu() + vCpu > team.getMaxVCpu() || actualRam - vm.getRam() + ram > team.getMaxRam() || actualDiskStorage - vm.getDiskStorage() + diskStorage > team.getMaxDiskStorage()) {
             throw new MaxVmResourcesException("Cannot create the VM, no more resources available");
         }
 
@@ -177,7 +177,7 @@ public class VmServiceImpl implements VmService{
         Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
         Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
-        if(!vm.getOwners().contains(student)){
+        if (!vm.getOwners().contains(student)) {
             vm.addOwner(student);
             return true;
         }
@@ -201,16 +201,47 @@ public class VmServiceImpl implements VmService{
 
     @Override
     public List<VmDTO> getVmsOfCourse(String courseName) { //only professor
-        return null;
+        Course course = courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+        List<VmDTO> returnedList = new ArrayList<>();
+
+        for (Team t : course.getTeams()) {
+            returnedList.addAll(t.getVms().stream()
+                    .map(vm -> modelMapper.map(vm, VmDTO.class))
+                    .collect(Collectors.toList()));
+        }
+        return returnedList;
     }
 
     @Override
-    public List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseName) {
-        return null;
+    public List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseName) { //tutte le vm collegate al suo team
+        courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+        Team team = null;
+        for (Team t : student.getTeams()) { //find the student's team of the selected course
+            if (t.getCourse().getName().equals(courseName)) {
+                team = t;
+                break;
+            }
+        }
+
+        if (team == null) {
+            throw new StudentNotInTeamOfCourseException("Student " + studentId + "does not belong to a team of course " + courseName);
+        }
+
+        return team.getVms().stream()
+                .map(vm -> modelMapper.map(vm, VmDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseName) {
-        return null;
+    public List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseName) { //solo quelle che possiede
+        courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+        return student.getOwnedVms().stream()
+                .filter(vm -> vm.getTeam().getCourse().getName().equals(courseName))
+                .map(vm -> modelMapper.map(vm, VmDTO.class))
+                .collect(Collectors.toList());
     }
 }
