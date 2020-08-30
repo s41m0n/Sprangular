@@ -35,4 +35,19 @@ public class Vm {
     boolean active;
 
     String imagePath;
+
+    public void setVmModel(VmModel vmModel){
+        this.vmModel = vmModel;
+        vmModel.getVms().add(this);
+    }
+
+    public void setTeam(Team team){
+        this.team = team;
+        team.getVms().add(this);
+    }
+
+    public void setOwner(Student student){
+        this.getOwners().add(student);
+        student.getOwnedVms().add(this);
+    }
 }

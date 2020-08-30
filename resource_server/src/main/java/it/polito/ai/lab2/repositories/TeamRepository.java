@@ -13,4 +13,5 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
 
     @Query("SELECT s FROM Student s INNER JOIN s.teams t WHERE t.id=:id")
     List<Student> getTeamMembers(Long id);
+
 }
