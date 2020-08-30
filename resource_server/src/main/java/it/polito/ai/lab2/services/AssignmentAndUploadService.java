@@ -1,35 +1,33 @@
 package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.AssignmentDTO;
+import it.polito.ai.lab2.dtos.AssignmentSolutionDTO;
 import it.polito.ai.lab2.dtos.UploadDTO;
-import it.polito.ai.lab2.entities.Assignment;
-import it.polito.ai.lab2.entities.AssignmentSolution;
-import it.polito.ai.lab2.entities.StudentUpload;
 import it.polito.ai.lab2.utility.AssignmentStatus;
+import org.springframework.core.io.Resource;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 public interface AssignmentAndUploadService {
 
-    List<Assignment> getAssignmentsForCourse(String courseName);
+    List<AssignmentDTO> getAssignmentsForCourse(String courseName);
 
-    List<AssignmentSolution> getAssignmentSolutionsForAssignment(Long assignmentId);
+    List<AssignmentSolutionDTO> getAssignmentSolutionsForAssignment(Long assignmentId);
 
-    List<AssignmentSolution> filterAssignmentSolutionsForStatus(Long assignmentId, AssignmentStatus status);
+    List<AssignmentDTO> getStudentAssignments(String studentId);
 
-    List<StudentUpload> getStudentsUploadForAssignmentSolution(Long assignmentId, String studentId);
+    List<AssignmentSolutionDTO> filterAssignmentSolutionsForStatus(Long assignmentId, AssignmentStatus status);
 
-    boolean createAssignment(AssignmentDTO assignmentDTO, String courseName);
-    //TODO: quando creo un assignment devo anche creare un solution per ogni studente del corso con stato NULL.
+    List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId);
 
-    boolean uploadStudentUpload(UploadDTO uploadDTO, Long assignmentSolutionId);
+    AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseName, String professorId);
 
-    boolean updateAssignmentSolutionStatus(Long assignmentSolutionId, AssignmentStatus status);
+    UploadDTO uploadStudentUpload(UploadDTO uploadDTO, Long assignmentSolutionId);
 
-    boolean uploadProfessorUpload(UploadDTO uploadDTO, Long studentUploadId, AssignmentStatus newStatus);
+    Resource getAssignmentForStudent(Long assignmentId, String studentId) throws FileNotFoundException;
 
-    void automaticDeliveryAfterDueDate();
-    //TODO: metodo schedulato che modifica lo stato passata la data di scadenza.
+    UploadDTO uploadProfessorUpload(UploadDTO uploadDTO, Long studentUploadId, boolean reUploadable);
 
     void assignGrade(Long assignmentSolutionId, String grade);
 }
