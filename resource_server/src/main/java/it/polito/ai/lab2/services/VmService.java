@@ -4,6 +4,7 @@ import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VmService {
 
@@ -13,8 +14,6 @@ public interface VmService {
 
     boolean deleteVm(Long vmId);
 
-    boolean updateVmResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances);
-
     boolean updateVmResources(Long vmId, int vCpu, int diskStorage, int ram);
 
     boolean turnOnVm(Long vmId);
@@ -23,15 +22,13 @@ public interface VmService {
 
     boolean addVmOwner(Long vmId, String studentId);
 
-    List<VmDTO> getAllVms();
+    Optional<VmDTO> getVm(Long vmId);
 
-    VmDTO getVm(Long vmId);
-
-    List<VmDTO> getVmsOfGroup(Long groupId);
-
-    List<VmDTO> getVmsOfStudent(String studentId);
+    List<VmDTO> getVmsOfTeam(Long teamId);
 
     List<VmDTO> getVmsOfCourse(String courseName);
 
     List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseName);
+
+    List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseName);
 }

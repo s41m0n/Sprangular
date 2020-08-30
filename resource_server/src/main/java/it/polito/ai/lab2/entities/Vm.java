@@ -46,7 +46,7 @@ public class Vm {
         team.getVms().add(this);
     }
 
-    public void setOwner(Student student){
+    public void addOwner(Student student){
         this.getOwners().add(student);
         student.getOwnedVms().add(this);
     }

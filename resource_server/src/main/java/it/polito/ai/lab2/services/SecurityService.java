@@ -10,4 +10,5 @@ public interface SecurityService {
     boolean isStudentEnrolled(String courseName);
     boolean isTeamOfProfessorCourse(Long id);
     boolean isStudentInTeamRequest(List<String> memberIds);
+    boolean isStudentOwnerOfVm(Long vmId, String studentId);
 }

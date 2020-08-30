@@ -1,5 +1,6 @@
 package it.polito.ai.lab2.services;
 
+import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
 import it.polito.ai.lab2.entities.*;
@@ -11,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VmServiceImpl implements VmService{
@@ -108,7 +111,7 @@ public class VmServiceImpl implements VmService{
         vm.setDiskStorage(vmDTO.getDiskStorage());
         vm.setImagePath(vmDTO.getImagePath());
         vm.setTeam(team);
-        vm.setOwner(owner);
+        vm.addOwner(owner);
         vmRepository.save(vm);
         return true;
     }
@@ -125,57 +128,89 @@ public class VmServiceImpl implements VmService{
     }
 
     @Override
-    public boolean updateVmResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances) { //TODO:only professor
-        return false;
-    }
-
-    @Override
     public boolean updateVmResources(Long vmId, int vCpu, int diskStorage, int ram) { //only owners
+        Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
+
+        if(vm.isActive()){
+            throw new VmIsActiveException("Vm " + vmId + " is active and cannot be updated. Please turn it off");
+        }
+
+        Team team = vm.getTeam();
+
+        int actualVCpu = 0;
+        int actualRam = 0;
+        int actualDiskStorage = 0;
+
+        for(Vm v : team.getVms()){
+            actualVCpu += v.getVCpu();
+            actualRam += v.getRam();
+            actualDiskStorage += v.getDiskStorage();
+        }
+
+        if(actualVCpu - vm.getVCpu() + vCpu > team.getMaxVCpu() || actualRam - vm.getRam() + ram > team.getMaxRam() || actualDiskStorage - vm.getDiskStorage() + diskStorage > team.getMaxDiskStorage()){
+            throw new MaxVmResourcesException("Cannot create the VM, no more resources available");
+        }
+
+        vm.setVCpu(vCpu);
+        vm.setRam(ram);
+        vm.setDiskStorage(diskStorage);
+        vmRepository.save(vm);
+        return true;
+    }
+
+    @Override
+    public boolean turnOnVm(Long vmId) { //only owners
+        Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
+        vm.setActive(true);
+        return true;
+    }
+
+    @Override
+    public boolean turnOffVm(Long vmId) { //only owners
+        Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
+        vm.setActive(false);
+        return true;
+    }
+
+    @Override
+    public boolean addVmOwner(Long vmId, String studentId) { //only owners
+        Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+        if(!vm.getOwners().contains(student)){
+            vm.addOwner(student);
+            return true;
+        }
         return false;
     }
 
     @Override
-    public boolean turnOnVm(Long vmId) {
-        return false;
+    public Optional<VmDTO> getVm(Long vmId) {
+        return vmRepository.findById(vmId)
+                .map(vm -> modelMapper.map(vm, VmDTO.class));
     }
 
     @Override
-    public boolean turnOffVm(Long vmId) {
-        return false;
+    public List<VmDTO> getVmsOfTeam(Long teamId) {
+        return teamRepository.findById(teamId)
+                .map(team -> team.getVms().stream()
+                        .map(vm -> modelMapper.map(vm, VmDTO.class))
+                        .collect(Collectors.toList()))
+                .orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
     }
 
     @Override
-    public boolean addVmOwner(Long vmId, String studentId) {
-        return false;
-    }
-
-    @Override
-    public List<VmDTO> getAllVms() {
-        return null;
-    }
-
-    @Override
-    public VmDTO getVm(Long vmId) {
-        return null;
-    }
-
-    @Override
-    public List<VmDTO> getVmsOfGroup(Long groupId) {
-        return null;
-    }
-
-    @Override
-    public List<VmDTO> getVmsOfStudent(String studentId) {
-        return null;
-    }
-
-    @Override
-    public List<VmDTO> getVmsOfCourse(String courseName) {
+    public List<VmDTO> getVmsOfCourse(String courseName) { //only professor
         return null;
     }
 
     @Override
     public List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseName) {
+        return null;
+    }
+
+    @Override
+    public List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseName) {
         return null;
     }
 }

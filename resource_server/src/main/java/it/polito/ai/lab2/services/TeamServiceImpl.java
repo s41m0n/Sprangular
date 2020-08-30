@@ -202,4 +202,35 @@ public class TeamServiceImpl implements TeamService {
 
         return proposalsDetails;
     }
+
+    @Override
+    public boolean setVmsResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances) { //only professor
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
+
+        int actualVCpu = 0;
+        int actualRam = 0;
+        int actualDiskStorage = 0;
+        int numOfActiveVms = 0;
+
+        for(Vm vm : team.getVms()){
+            actualVCpu += vm.getVCpu();
+            actualRam += vm.getRam();
+            actualDiskStorage += vm.getDiskStorage();
+            if(vm.isActive()){
+                numOfActiveVms += 1;
+            }
+        }
+
+        if(actualVCpu > vCpu || actualRam > ram || actualDiskStorage > diskStorage || numOfActiveVms > maxActiveInstances || team.getVms().size() > maxTotalInstances){
+            throw new TooManyActualResourcesException("Cannot set VMs resource limits, actual used resources are higher than the new limits");
+        }
+
+        team.setMaxVCpu(vCpu);
+        team.setMaxRam(ram);
+        team.setMaxDiskStorage(diskStorage);
+        team.setMaxActiveInstances(maxActiveInstances);
+        team.setMaxTotalInstances(maxTotalInstances);
+        teamRepository.save(team);
+        return true;
+    }
 }

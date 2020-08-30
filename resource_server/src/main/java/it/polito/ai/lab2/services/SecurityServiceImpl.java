@@ -1,9 +1,12 @@
 package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.entities.Professor;
+import it.polito.ai.lab2.entities.Student;
+import it.polito.ai.lab2.entities.Vm;
 import it.polito.ai.lab2.repositories.CourseRepository;
 import it.polito.ai.lab2.repositories.ProfessorRepository;
 import it.polito.ai.lab2.repositories.StudentRepository;
+import it.polito.ai.lab2.repositories.VmRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,9 @@ public class SecurityServiceImpl implements SecurityService{
 
     @Autowired
     CourseRepository courseRepository;
+
+    @Autowired
+    VmRepository vmRepository;
 
     @Override
     public boolean isStudentSelf(String id) {
@@ -72,5 +78,17 @@ public class SecurityServiceImpl implements SecurityService{
     @Override
     public boolean isStudentInTeamRequest(List<String> memberIds) {
         return memberIds.contains(SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
+    @Override
+    public boolean isStudentOwnerOfVm(Long vmId, String studentId) {
+        Vm vm = vmRepository.findById(vmId).orElse(null);
+        Student student = studentRepository.findById(studentId).orElse(null);
+
+        if(vm == null || student == null){
+            return false;
+        }
+
+        return vm.getOwners().contains(student);
     }
 }
