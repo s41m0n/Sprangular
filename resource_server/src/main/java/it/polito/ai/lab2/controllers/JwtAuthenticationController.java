@@ -12,10 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.AbstractMap;
@@ -23,6 +20,7 @@ import java.util.AbstractMap;
 @RestController
 @Log(topic = "JwtAuthenticationController")
 @CrossOrigin
+@RequestMapping("/API/authentication")
 public class JwtAuthenticationController {
 
     @Autowired
@@ -34,7 +32,7 @@ public class JwtAuthenticationController {
     @Autowired
     CustomUserDetailsService customUserDetailsService;
 
-    @PostMapping("/API/authenticate")
+    @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody UserDTO authenticationRequest) {
         log.info("createAuthenticationToken(" + authenticationRequest + ")");
         try {
@@ -51,5 +49,11 @@ public class JwtAuthenticationController {
         final String token = jwtTokenUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AbstractMap.SimpleEntry<>("id_token", token));
+    }
+
+    //TODO
+    @PostMapping("/register")
+    public ResponseEntity<?> registerToServer() {
+        return null;
     }
 }
