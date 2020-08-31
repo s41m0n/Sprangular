@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { first, switchMap, takeUntil, finalize } from 'rxjs/operators';
+import { first, switchMap, takeUntil } from 'rxjs/operators';
 import { Subject, Observable } from 'rxjs';
 
 import { Student } from '../../models/student.model';
@@ -9,6 +9,7 @@ import { StudentService } from '../../services/student.service';
 import { CourseService } from '../../services/course.service';
 import { Team } from 'src/app/models/team.model';
 import { TeamService } from 'src/app/services/team.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 /**
  * TabTeamContainer class
@@ -30,7 +31,8 @@ export class TabTeamContainer implements OnInit, OnDestroy{
 
   constructor(private studentService : StudentService,
     private courseService: CourseService,
-    private teamService : TeamService) {}
+    private teamService : TeamService,
+    private authService: AuthService) {}
 
   ngOnInit(): void {
     //Subscribe to current course
@@ -70,6 +72,6 @@ export class TabTeamContainer implements OnInit, OnDestroy{
       this.availableStudents = [];
       return;
     }
-    this.courseService.getAvailableStudents(this.course).pipe(first()).subscribe(students => this.availableStudents = students);
+    this.courseService.getAvailableStudents(this.course, this.authService.currentUserValue.email).pipe(first()).subscribe(students => this.availableStudents = students);
   }
 }

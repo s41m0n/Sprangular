@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { tap, map, catchError } from 'rxjs/operators';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 import { Role } from '../models/role.model';
 import { ToastrService } from 'ngx-toastr';
 import * as moment from 'moment';
+import { environment } from 'src/environments/environment';
 
 /**
  * AuthService service
@@ -21,7 +22,6 @@ export class AuthService {
 
   //Current User Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
   private currentUserSubject: BehaviorSubject<User>;
-  httpOptions = {headers: new HttpHeaders({ 'Content-Type': 'application/json'})};
 
   constructor(private http: HttpClient,
     private toastrService: ToastrService) {
@@ -58,7 +58,7 @@ export class AuthService {
    * @param(password) the login password  
    */
   login(email: string, password: string) {
-    return this.http.post<any>('api/login', {'email': email, 'password': password}, this.httpOptions).pipe(
+    return this.http.post<any>(environment.login_url, {'email': email, 'password': password}, environment.base_http_headers).pipe(
       map(authResult => {
         // store user details and basic auth credentials in local storage to keep user logged in between page refreshes
         // Assigning the Admin Role since json-server-auth is not able to assign it directly in the jwt token

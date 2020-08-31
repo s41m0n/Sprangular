@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
 
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, of, BehaviorSubject, from } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { tap, catchError, map } from 'rxjs/operators';
+import { tap, catchError, map, toArray, mergeMap, first } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { Assignment } from '../models/assignment.model';
 import { Student } from '../models/student.model';
 import { VM } from '../models/vm.model';
+import { Professor } from '../models/professor.model';
+import { ProfessorService } from './professor.service';
+import { environment } from 'src/environments/environment';
+import { VmModel } from '../models/vm-model.model';
 
 /**
  * CourseService service
@@ -19,12 +23,12 @@ import { VM } from '../models/vm.model';
   providedIn: 'root'
 })
 export class CourseService{
-  baseURL = 'api/courses';
-  // Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
+  //Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
   public currentCourseSubject: BehaviorSubject<Course>;
 
   constructor(private http: HttpClient,
-              private toastrService: ToastrService) {
+    private toastrService: ToastrService,
+    private professorService: ProfessorService) {
       this.currentCourseSubject = new BehaviorSubject<Course>(null);
     }
 
@@ -33,8 +37,8 @@ export class CourseService{
    *
    * @param(path) the requested path
    */
-  getCourseByPath(path: string): Observable<Course> {
-    return this.http.get<Course[]>(`${this.baseURL}?path_like=${path}&_limit=1`)
+  getCourseByPath(path: string) : Observable<Course> {
+    return this.http.get<Course[]>(`${environment.base_courses_url}?path_like=${path}&_limit=1`)
       .pipe(
         // If I don't know a priori which data the server sends me --> map(res => Object.assign(new Course(), res)),
         // Take the first one (json-server does not support direct search, but we have to use _like query)
@@ -49,8 +53,8 @@ export class CourseService{
    *
    * @param(course) the objective course
    */
-  getEnrolledStudents(course: Course): Observable<Student[]>{
-    return this.http.get<Student[]>(`${this.baseURL}/${course.id}/students?_expand=team`)
+  getEnrolledStudents(course : Course) : Observable<Student[]>{
+    return this.http.get<Student[]>(`${environment.base_courses_url}/${course.id}/students?_expand=team`)
       .pipe(
         // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
         tap(() => console.log(`fetched enrolled ${course.name} students - getEnrolledStudents()`)),
@@ -61,8 +65,8 @@ export class CourseService{
   /**
    * Function to retrieve the list of Courses available
    */
-  getCourses(): Observable<Course[]>{
-    return this.http.get<Course[]>(this.baseURL)
+  getCourses() : Observable<Course[]>{
+    return this.http.get<Course[]>(environment.base_courses_url)
       .pipe(
         // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Course(), r))),
         tap(() => console.log(`fetched courses - getCourses()`)),
@@ -70,27 +74,82 @@ export class CourseService{
       );
   }
 
-  getCourseVMs(course: Course): Observable<VM[]>{
-    return this.http.get<VM[]>(`${this.baseURL}/${course.id}/vms?_expand=team`)
+  getCourseVMs(course : Course) : Observable<VM[]>{
+    return this.http.get<VM[]>(`${environment.base_courses_url}/${course.id}/vms?_expand=team`)
       .pipe(
         tap(() => console.log(`fetched course ${course.name} vms - getCourseVMs()`)),
         catchError(this.handleError<VM[]>(`getCourseVMs(${course.name})`))
       );
   }
 
-  getAvailableStudents(course: Course): Observable<Student[]> {
-    return this.http.get<Student[]>(`${this.baseURL}/${course.id}/students?teamId_like=0`)
+  getAvailableStudents(course : Course, currentUser: string) : Observable<Student[]> {
+    return this.http.get<Student[]>(`${environment.base_courses_url}/${course.id}/students?teamId_like=0&email_ne=${currentUser}`)
       .pipe(
         tap(() => console.log(`fetched available students in course ${course.name} - getAvailableStudents()`)),
         catchError(this.handleError<Student[]>(`getAvailableStudents(${course.name})`))
       );
   }
 
-  getCourseAssignments(course: Course): Observable<Assignment[]>{
-    return this.http.get<Assignment[]>(`/api/assignments?courseId=${course.id}&_expand=professor`)
+  getCourseAssignments(course: Course) : Observable<Assignment[]>{
+    return this.http.get<Assignment[]>(`${environment.base_assignments_url}?courseId=${course.id}&_expand=professor`)
       .pipe(
         tap(() => console.log(`fetched assignments in course ${course.name} - getCourseAssignments()`)),
         catchError(this.handleError<Assignment[]>(`getCourseAssignments(${course.name})`))
+      );
+  }
+
+  getCourseProfessors(course: Course): Observable<Professor[]> {
+    return this.http.get<Course>(`${environment.base_courses_url}/${course.id}?_expand=professor`)
+      .pipe(
+        map(course => course.professor? [course.professor] : []),
+        tap(() => console.log(`fetched professors in course ${course.name} - getCourseProfessors()`)),
+        catchError(this.handleError<Professor[]>(`getCourseProfessors(${course.name})`))
+      );
+  }
+
+  assignProfessorsToCourse(professors: Professor[], course : Course): Observable<Professor[]> {
+    return from(professors).pipe(
+      mergeMap((professor : Professor) => {
+        //Checking if ADD has been pressed without selecting a professor (or modifying the selected one)
+        if(typeof professor === 'string') {
+          this.toastrService.error(`${professor} is not a valid Professor, please select one from the options`, 'Error 😅');
+          return of(null);
+        }
+        // Faking enroll
+        //professor.courseId = course.id;
+        // Faking change professor
+        course.professorId = professor.id;
+        /** this.professorService.updateProfessor(professor)*/
+        return this.updateCourse(course);
+      }),
+      toArray()
+    );
+  };
+
+  removeProfessorsFromCourse(professors: Professor[], course : Course): Observable<Professor[]> {
+    return from(professors).pipe(
+      mergeMap((professor : Professor) => {
+        //Checking if ADD has been pressed without selecting a professor (or modifying the selected one)
+        if(typeof professor === 'string') {
+          this.toastrService.error(`${professor} is not a valid Professor, please select one from the options`, 'Error 😅');
+          return of(null);
+        }
+        // Faking unenroll
+        //professor.courseId = course.id;
+        // Faking change professor
+        course.professorId = 0;
+        /** this.professorService.updateProfessor(professor)*/
+        return this.updateCourse(course);
+      }),
+      toArray()
+    );
+  };
+
+  private updateCourse(course: Course): Observable<Course> {
+    return this.http.put<Course>(`${environment.base_courses_url}/${course.id}`, course, environment.base_http_headers)
+      .pipe(
+        tap(() => console.log(`updated course ${course.name} - updateCourse()`)),
+        catchError(this.handleError<Course>(`updateCourse(${course.name})`))
       );
   }
 

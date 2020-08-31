@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Team } from '../models/team.model';
 import { VM } from '../models/vm.model';
 import { tap, catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 /** Team service
  * 
@@ -15,7 +16,6 @@ import { tap, catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class TeamService {
-  baseURL : string = 'api/teams';
   //Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
   public currentTeamSubject: BehaviorSubject<Team>;
 
@@ -25,7 +25,7 @@ export class TeamService {
     }
 
   public getTeamVms(team: Team) : Observable<VM[]>{
-    return this.http.get<VM[]>(`api/vms/?teamId_like=${team.id}`)
+    return this.http.get<VM[]>(`${environment.base_teams_url}/?teamId_like=${team.id}`)
       .pipe(
         tap(() => console.log(`fetched team ${team.id} vms - getTeamVms()`)),
         catchError(this.handleError<VM[]>(`getTeamVms(${team.id}`))

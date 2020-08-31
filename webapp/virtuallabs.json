@@ -37,7 +37,7 @@
       "email": "s5@studenti.polito.it",
       "surname": "POSTOLOV",
       "name": "ENRICO",
-      "courseId": 0,
+      "courseId": 1,
       "teamId": 0
     }
   ],
@@ -54,12 +54,16 @@
     {
       "id": 1,
       "name": "Internet Applications",
-      "path": "internet-applications"
+      "path": "internet-applications",
+      "professorId": 1,
+      "acronym": "ia"
     },
     {
       "id": 2,
       "name": "Cloud computing",
-      "path": "cloud-computing"
+      "path": "cloud-computing",
+      "professorId": 1,
+      "acronym": "cc"
     }
   ],
   "teams": [
@@ -107,6 +111,14 @@
       "teamId": 1
     }
   ],
+  "vmmodels": [
+    {
+      "id": 1,
+      "name": "base",
+      "path": "base",
+      "courseId": 2
+    }
+  ],
   "users": [
     {
       "email": "d1@polito.it",
@@ -118,6 +130,12 @@
       "email": "s1@studenti.polito.it",
       "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
       "id": 2,
+      "role": "student"
+    },
+    {
+      "email": "s3@studenti.polito.it",
+      "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
+      "id": 3,
       "role": "student"
     },
     {

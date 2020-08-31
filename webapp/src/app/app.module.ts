@@ -46,14 +46,16 @@ import { TabStudentVmsContainer } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsComponent } from './student/assignments/tab-assignments.component';
 import { TabStudentAssignmentsContainer } from './student/assignments/tab-assignments.container';
 
-import { TabAdminProfessorsContainer } from './admin/professors/tab-professors.container';
 import { AdminComponent } from './admin/admin.component';
-import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
 import {MatMenuModule} from "@angular/material/menu";
 import { VmOptionsModalComponent } from './modals/vm-options-modal/vm-options-modal.component';
 import {MatSliderModule} from "@angular/material/slider";
 import { NewVmComponent } from './modals/new-vm/new-vm.component';
 import {MatSelectModule} from "@angular/material/select";
+import { TabAdminProfessorsContainer } from './admin/professors/tab-professors.container';
+import { TabAdminProfessorsComponent} from './admin/professors/tab-professors.component';
+import { TabAdminVmModelContainer } from './admin/vmmodels/tab-model.container';
+import { TabAdminVmModelComponent } from './admin/vmmodels/tab-model.component';
 
 @NgModule({
   declarations: [
@@ -78,9 +80,11 @@ import {MatSelectModule} from "@angular/material/select";
     TabProfessorVmsContainer,
     AdminComponent,
     TabAdminProfessorsContainer,
-    TabAdminVmModelsContainer,
     VmOptionsModalComponent,
-    NewVmComponent
+    NewVmComponent,
+    TabAdminProfessorsComponent,
+    TabAdminVmModelContainer,
+    TabAdminVmModelComponent
   ],
   imports: [
     BrowserModule,
