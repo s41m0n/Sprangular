@@ -11,23 +11,23 @@ public interface CourseService {
 
     boolean addCourse(CourseDTO course);
 
-    boolean removeCourse(String courseName);
+    boolean removeCourse(String courseId);
 
     boolean updateCourse(CourseDTO courseDTO);
 
-    Optional<CourseDTO> getCourse(String courseName);
+    Optional<CourseDTO> getCourse(String courseId);
 
     List<CourseDTO> getAllCourses();
 
-    List<StudentDTO> getEnrolledStudents(String courseName);
+    List<StudentDTO> getEnrolledStudents(String courseId);
 
-    void enableCourse(String courseName);
+    void enableCourse(String courseId);
 
-    void disableCourse(String courseName);
+    void disableCourse(String courseId);
 
-    List<ProfessorDTO> getCourseProfessors(String courseName);
+    List<ProfessorDTO> getCourseProfessors(String courseId);
 
-    boolean addProfessorToCourse(String professorId, String courseName);
+    boolean addProfessorToCourse(String professorId, String courseId);
 
-    boolean removeProfessorFromCourse(String professorId, String courseName);
+    boolean removeProfessorFromCourse(String professorId, String courseId);
 }

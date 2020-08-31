@@ -17,13 +17,13 @@ public interface StudentService {
 
     List<Boolean> addAll(List<StudentDTO> students);
 
-    boolean addStudentToCourse(String studentId, String courseName);
+    boolean addStudentToCourse(String studentId, String courseId);
 
-    List<Boolean> enrollAll(List<String> studentIds, String courseName);
+    List<Boolean> enrollAll(List<String> studentIds, String courseID);
 
-    List<Boolean> addAndEnroll(Reader r, String courseName);
+    List<Boolean> addAndEnroll(Reader r, String courseId);
 
     List<CourseDTO> getStudentCourses(String studentId);
 
-    boolean removeStudentFromCourse(String studentId, String courseName);
+    boolean removeStudentFromCourse(String studentId, String courseId);
 }

@@ -44,15 +44,15 @@ public class SecurityServiceImpl implements SecurityService{
     }
 
     @Override
-    public boolean isProfessorCourseOwner(String course) {
+    public boolean isProfessorCourseOwner(String courseId) {
 
-        if(!courseRepository.existsById(course) || courseRepository.getOne(course).getProfessors().isEmpty()){ //the course does not exists or there are no professors
+        if(!courseRepository.existsById(courseId) || courseRepository.getOne(courseId).getProfessors().isEmpty()){ //the course does not exists or there are no professors
             return false;
         }
 
         List<String> professorsIds = new ArrayList<>();
 
-        for(Professor p : courseRepository.getOne(course).getProfessors()){
+        for(Professor p : courseRepository.getOne(courseId).getProfessors()){
             professorsIds.add(p.getId());
         }
 
@@ -60,9 +60,9 @@ public class SecurityServiceImpl implements SecurityService{
     }
 
     @Override
-    public boolean isStudentEnrolled(String course) {
+    public boolean isStudentEnrolled(String courseId) {
         return studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
-                .map(student -> student.getCourses().stream().anyMatch(c -> c.getName().equals(course)))
+                .map(student -> student.getCourses().stream().anyMatch(c -> c.getAcronym().equals(courseId)))
                 .orElse(false);
     }
 

@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface AssignmentAndUploadService {
 
-    List<AssignmentDTO> getAssignmentsForCourse(String courseName);
+    List<AssignmentDTO> getAssignmentsForCourse(String courseId);
 
     List<AssignmentSolutionDTO> getAssignmentSolutionsForAssignment(Long assignmentId);
 
@@ -21,7 +21,7 @@ public interface AssignmentAndUploadService {
 
     List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId);
 
-    AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseName, String professorId);
+    AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseId, String professorId);
 
     UploadDTO uploadStudentUpload(UploadDTO uploadDTO, Long assignmentSolutionId);
 

@@ -57,9 +57,9 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   //TODO: add more integrity checks
 
   @Override
-  public List<AssignmentDTO> getAssignmentsForCourse(String courseName) {
-    Course course = courseRepository.findByName(courseName)
-        .orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+  public List<AssignmentDTO> getAssignmentsForCourse(String courseId) {
+    Course course = courseRepository.findByName(courseId)
+        .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     return course.getAssignments().stream()
         .map(assignment -> modelMapper.map(assignment, AssignmentDTO.class))
         .collect(Collectors.toList());
@@ -78,7 +78,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   public List<AssignmentDTO> getStudentAssignments(String studentId) {
     if (!studentRepository.existsById(studentId))
         throw new StudentNotFoundException("Student " + studentId + " does not exist");
-    return assignmentSolutionRepository.findByStudent_Id(studentId).stream()
+    return assignmentSolutionRepository.findByStudentId(studentId).stream()
         .map(solution -> modelMapper.map(solution.getAssignment(), AssignmentDTO.class))
         .collect(Collectors.toList());
   }
@@ -87,14 +87,14 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   public List<AssignmentSolutionDTO> filterAssignmentSolutionsForStatus(Long assignmentId, AssignmentStatus status) {
     if (!assignmentRepository.existsById(assignmentId))
       throw new AssignmentNotFoundException("Assignment " + assignmentId + " does not exist");
-    return assignmentSolutionRepository.findByAssignment_IdAndStatus(assignmentId, status).stream()
+    return assignmentSolutionRepository.findByAssignmentIdAndStatus(assignmentId, status).stream()
         .map(solution -> modelMapper.map(solution, AssignmentSolutionDTO.class))
         .collect(Collectors.toList());
   }
 
   @Override
   public List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId) {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignment_IdAndStudent_Id(
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
         assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
             "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     return assignmentSolution.getStudentUploads().stream()
@@ -103,9 +103,9 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  public AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseName, String professorId) {
-    Course course = courseRepository.findByName(courseName)
-        .orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+  public AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseId, String professorId) {
+    Course course = courseRepository.findByName(courseId)
+        .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     Professor professor = professorRepository.findById(professorId)
         .orElseThrow(() -> new ProfessorNotFoundException("Professor " + professorId + " does not exist"));
     Assignment assignment = modelMapper.map(assignmentDTO, Assignment.class);
@@ -150,7 +150,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   public Resource getAssignmentForStudent(Long assignmentId, String studentId) throws FileNotFoundException {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignment_IdAndStudent_Id(
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
         assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
             "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     Resource file = null;

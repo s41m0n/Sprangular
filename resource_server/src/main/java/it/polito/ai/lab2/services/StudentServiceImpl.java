@@ -83,13 +83,13 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseName))")
-    public boolean addStudentToCourse(String studentId, String courseName) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+    public boolean addStudentToCourse(String studentId, String courseId) {
         Student student = studentRepository.findById(studentId).orElse(null);
         if (student == null) throw new StudentNotFoundException("Student " + studentId + " does not exist");
 
-        Course course = courseRepository.findById(courseName).orElse(null);
-        if (course == null) throw new CourseNotFoundException("Course " + courseName + " does not exist");
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) throw new CourseNotFoundException("Course " + courseId + " does not exist");
 
         if (student.getCourses().contains(course) || !course.isEnabled()) return false;
         student.addCourse(course);
@@ -105,16 +105,16 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseName))")
-    public List<Boolean> enrollAll(List<String> studentIds, String courseName) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+    public List<Boolean> enrollAll(List<String> studentIds, String courseId) {
         return studentIds.stream()
-                .map(studentId -> addStudentToCourse(studentId, courseName))
+                .map(studentId -> addStudentToCourse(studentId, courseId))
                 .collect(Collectors.toList());
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseName))")
-    public List<Boolean> addAndEnroll(Reader r, String courseName) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+    public List<Boolean> addAndEnroll(Reader r, String courseId) {
         CsvToBean<StudentDTO> csvToBean = new CsvToBeanBuilder(r)
                 .withType(StudentDTO.class)
                 .withIgnoreLeadingWhiteSpace(true)
@@ -124,7 +124,7 @@ public class StudentServiceImpl implements StudentService {
 
         this.addAll(students);
 
-        return enrollAll(students.stream().map(StudentDTO::getId).collect(Collectors.toList()), courseName);
+        return enrollAll(students.stream().map(StudentDTO::getId).collect(Collectors.toList()), courseId);
     }
 
     @Override
@@ -137,13 +137,13 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public boolean removeStudentFromCourse(String studentId, String courseName) {
+    public boolean removeStudentFromCourse(String studentId, String courseId) {
         Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
-        Course course = courseRepository.findById(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
         if(!course.getStudents().contains(student)){
-            throw new StudentNotInCourseException("Some student is not enrolled in course " + courseName);
+            throw new StudentNotInCourseException("Some student is not enrolled in course " + courseId);
         }
 
         student.removeCourse(course); //symmetric method, it updates also the course

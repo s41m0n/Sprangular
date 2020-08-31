@@ -23,7 +23,7 @@ public class Proposal {
 
     Long teamId;
 
-    Long courseId;
+    String courseId;
 
     Timestamp expiryDate;
 

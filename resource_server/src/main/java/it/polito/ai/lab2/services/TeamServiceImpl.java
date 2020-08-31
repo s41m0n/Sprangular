@@ -97,7 +97,7 @@ public class TeamServiceImpl implements TeamService {
 
         if (members.stream()
                 .anyMatch(student -> student.getTeams().stream()
-                        .anyMatch(team -> team.getCourse().getName().equals(courseId))))
+                        .anyMatch(team -> team.getCourse().getAcronym().equals(courseId))))
             throw new StudentAlreadyInTeam("Some student is already in a team for the course " + courseId);
 
         boolean isAlone = memberIds.size() == 1;
@@ -112,27 +112,27 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseName)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseName))")
-    public List<TeamDTO> getTeamsForCourse(String courseName) {
-        return courseRepository.findById(courseName)
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
+    public List<TeamDTO> getTeamsForCourse(String courseId) {
+        return courseRepository.findById(courseId)
                 .map(course -> course.getTeams().stream()
                         .map(team -> modelMapper.map(team, TeamDTO.class))
                         .collect(Collectors.toList()))
-                .orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+                .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseName)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseName))")
-    public List<StudentDTO> getStudentsInTeams(String courseName) {
-        return courseRepository.getStudentsInTeams(courseName).stream()
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
+    public List<StudentDTO> getStudentsInTeams(String courseId) {
+        return courseRepository.getStudentsInTeams(courseId).stream()
                 .map(student -> modelMapper.map(student, StudentDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseName)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseName))")
-    public List<StudentDTO> getAvailableStudents(String courseName) {
-        return courseRepository.getStudentsNotInTeams(courseName).stream()
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
+    public List<StudentDTO> getAvailableStudents(String courseId) {
+        return courseRepository.getStudentsNotInTeams(courseId).stream()
                 .map(student -> modelMapper.map(student, StudentDTO.class))
                 .collect(Collectors.toList());
     }
@@ -172,11 +172,11 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseName) {
+    public List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId) {
         studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
-        Course course = courseRepository.findById(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
-        List<Proposal> proposals = proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, course.getId());
+        List<Proposal> proposals = proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, course.getAcronym());
 
         if(proposals.isEmpty()){
             return null;

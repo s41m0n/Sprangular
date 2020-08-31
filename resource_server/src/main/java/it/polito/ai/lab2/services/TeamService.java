@@ -17,11 +17,11 @@ public interface TeamService {
     TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, int hoursTimeout);
     //TODO: dobbiamo implementare la cosa del timeout variabile, una volta il token aveva durata fissa.
 
-    List<TeamDTO> getTeamsForCourse(String courseName);
+    List<TeamDTO> getTeamsForCourse(String courseId);
 
-    List<StudentDTO> getStudentsInTeams(String courseName);
+    List<StudentDTO> getStudentsInTeams(String courseId);
 
-    List<StudentDTO> getAvailableStudents(String courseName);
+    List<StudentDTO> getAvailableStudents(String courseId);
 
     void activeTeam(Long id);
 
@@ -33,7 +33,7 @@ public interface TeamService {
 
     CourseDTO getCourseForTeam(Long id);
 
-    List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseName);
+    List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId);
     //TeamProposalDetails contains all the details needed by the frontend
 
     boolean setVmsResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances);

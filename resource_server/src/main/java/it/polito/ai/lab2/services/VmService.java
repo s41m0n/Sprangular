@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface VmService {
 
-    boolean createVmModel(VmModelDTO vmModelDTO, String courseName);
+    boolean createVmModel(VmModelDTO vmModelDTO, String courseId);
 
-    boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId, String courseName);
+    boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId, String courseId);
 
     boolean deleteVm(Long vmId);
 
@@ -26,9 +26,9 @@ public interface VmService {
 
     List<VmDTO> getVmsOfTeam(Long teamId);
 
-    List<VmDTO> getVmsOfCourse(String courseName);
+    List<VmDTO> getVmsOfCourse(String courseId);
 
-    List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseName);
+    List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseId);
 
-    List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseName);
+    List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseId);
 }

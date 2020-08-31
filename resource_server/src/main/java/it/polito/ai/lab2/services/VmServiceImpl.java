@@ -37,8 +37,8 @@ public class VmServiceImpl implements VmService {
     TeamRepository teamRepository;
 
     @Override
-    public boolean createVmModel(VmModelDTO vmModelDTO, String courseName) {
-        Course course = courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+    public boolean createVmModel(VmModelDTO vmModelDTO, String courseId) {
+        Course course = courseRepository.findByName(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
         VmModel v = new VmModel();
         v.setName(vmModelDTO.getName());
         v.setImagePath(vmModelDTO.getImagePath());
@@ -48,17 +48,17 @@ public class VmServiceImpl implements VmService {
     }
 
     @Override
-    public boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId, String courseName) {
+    public boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId, String courseId) {
         VmModel vmModel = vmModelRepository.findById(vmModelId).orElseThrow(() -> new VmModelNotFoundException("VmModel " + vmModelId + " does not exist"));
         Student owner = studentRepository.findById(ownerId).orElseThrow(() -> new StudentNotFoundException("Student " + ownerId + " does not exist"));
-        Course course = courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+        Course course = courseRepository.findByName(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
         if (!owner.getCourses().contains(course)) { //student not enrolled in course
-            throw new StudentNotInCourseException("Student " + ownerId + " is not enrolled in course " + courseName);
+            throw new StudentNotInCourseException("Student " + ownerId + " is not enrolled in course " + courseId);
         }
 
         if (!course.isEnabled()) { //course not enabled
-            throw new CourseNotEnabledException("Course " + courseName + " is not enabled");
+            throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
         }
 
         if (owner.getTeams().isEmpty()) { //student in no teams
@@ -67,14 +67,14 @@ public class VmServiceImpl implements VmService {
 
         Team team = null;
         for (Team t : owner.getTeams()) { //find the student's team of the selected course
-            if (t.getCourse().getName().equals(courseName)) {
+            if (t.getCourse().getName().equals(courseId)) {
                 team = t;
                 break;
             }
         }
 
         if (team == null) {
-            throw new StudentNotInTeamOfCourseException("Student " + ownerId + "does not belong to a team of course " + courseName);
+            throw new StudentNotInTeamOfCourseException("Student " + ownerId + "does not belong to a team of course " + courseId);
         }
 
         if (team.getVms().size() + 1 > team.getMaxTotalInstances()) {
@@ -200,8 +200,8 @@ public class VmServiceImpl implements VmService {
     }
 
     @Override
-    public List<VmDTO> getVmsOfCourse(String courseName) { //only professor
-        Course course = courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+    public List<VmDTO> getVmsOfCourse(String courseId) { //only professor
+        Course course = courseRepository.findByName(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
         List<VmDTO> returnedList = new ArrayList<>();
 
         for (Team t : course.getTeams()) {
@@ -213,20 +213,20 @@ public class VmServiceImpl implements VmService {
     }
 
     @Override
-    public List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseName) { //tutte le vm collegate al suo team
-        courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+    public List<VmDTO> getVmsOfStudentOfCourse(String studentId, String courseId) { //tutte le vm collegate al suo team
+        courseRepository.findByName(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
         Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
         Team team = null;
         for (Team t : student.getTeams()) { //find the student's team of the selected course
-            if (t.getCourse().getName().equals(courseName)) {
+            if (t.getCourse().getName().equals(courseId)) {
                 team = t;
                 break;
             }
         }
 
         if (team == null) {
-            throw new StudentNotInTeamOfCourseException("Student " + studentId + "does not belong to a team of course " + courseName);
+            throw new StudentNotInTeamOfCourseException("Student " + studentId + "does not belong to a team of course " + courseId);
         }
 
         return team.getVms().stream()
@@ -235,12 +235,12 @@ public class VmServiceImpl implements VmService {
     }
 
     @Override
-    public List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseName) { //solo quelle che possiede
-        courseRepository.findByName(courseName).orElseThrow(() -> new CourseNotFoundException("Course " + courseName + " does not exist"));
+    public List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseId) { //solo quelle che possiede
+        courseRepository.findByName(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
         Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
         return student.getOwnedVms().stream()
-                .filter(vm -> vm.getTeam().getCourse().getName().equals(courseName))
+                .filter(vm -> vm.getTeam().getCourse().getName().equals(courseId))
                 .map(vm -> modelMapper.map(vm, VmDTO.class))
                 .collect(Collectors.toList());
     }

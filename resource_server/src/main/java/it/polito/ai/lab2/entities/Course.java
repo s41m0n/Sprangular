@@ -11,13 +11,10 @@ import java.util.List;
 public class Course {
 
     @Id
-    @GeneratedValue
-    Long id;
+    String acronym;
 
     @Column(unique = true)
     String name;
-
-    String acronym;
 
     int teamMinSize;
 

@@ -14,6 +14,6 @@ public interface ProposalRepository extends JpaRepository<Proposal, String> {
 
     List<Proposal> findAllByTeamId(Long teamId);
 
-    List<Proposal> findAllByInvitedUserIdAndCourseId(String userId, Long courseId);
+    List<Proposal> findAllByInvitedUserIdAndCourseId(String userId, String courseId);
 
 }

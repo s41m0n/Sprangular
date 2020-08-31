@@ -20,7 +20,7 @@ public class ModelHelper {
         courseDTO.add(Arrays.asList(
                 linkTo(methodOn(CourseController.class).enrolledStudents(courseDTO.getName())).withRel("enrolled"),
                 linkTo(CourseController.class).slash(courseDTO.getName()).withSelfRel(),
-                linkTo(methodOn(CourseController.class).getProfessor(courseDTO.getName())).withRel("professor"),
+                linkTo(methodOn(CourseController.class).getProfessors(courseDTO.getName())).withRel("professors"),
                 linkTo(methodOn(CourseController.class).getTeams(courseDTO.getName())).withRel("teams"),
                 linkTo(methodOn(CourseController.class).getAvailableStudents(courseDTO.getName())).withRel("availableStudents"),
                 linkTo(methodOn(CourseController.class).getUnavailableStudents(courseDTO.getName())).withRel("unavailableStudents")
