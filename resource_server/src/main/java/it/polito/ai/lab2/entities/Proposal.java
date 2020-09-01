@@ -25,7 +25,7 @@ public class Proposal {
 
     String courseId;
 
-    Timestamp expiryDate;
+    Timestamp deadline;
 
     @Enumerated(EnumType.STRING)
     ProposalStatus status;

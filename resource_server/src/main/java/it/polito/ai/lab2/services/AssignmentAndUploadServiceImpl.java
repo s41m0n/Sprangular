@@ -7,6 +7,7 @@ import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.AssignmentStatus;
+import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -124,15 +125,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           assignmentSolution -> assignmentSolution.setStatus(AssignmentStatus.DELIVERED)
       );
     };
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(assignment.getDueDate().getTime());
-    String formattedDate = calendar.get(Calendar.MINUTE)
-        + " " + calendar.get(Calendar.HOUR)
-        + " " + calendar.get(Calendar.DAY_OF_MONTH)
-        + " " + (calendar.get(Calendar.MONTH) + 1)
-        + " *"
-        + " " + calendar.get(Calendar.YEAR);
-    scheduler.schedule(automaticDelivery, new CronTrigger(formattedDate));
+    scheduler.schedule(automaticDelivery, new CronTrigger(Utility.timestampToCronTrigger(assignment.getDueDate())));
     return modelMapper.map(assignmentRepository.save(assignment), AssignmentDTO.class);
   }
 

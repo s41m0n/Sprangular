@@ -44,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     public boolean confirm(String token) {
         Proposal t = proposalRepository.findById(token).orElse(null);
 
-        if (t == null || t.getExpiryDate().before(new Timestamp(System.currentTimeMillis()))) return false;
+        if (t == null || t.getDeadline().before(new Timestamp(System.currentTimeMillis()))) return false;
 
         proposalRepository.delete(t);
 
@@ -57,7 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public boolean reject(String token) {
         Proposal t = proposalRepository.findById(token).orElse(null);
-        if (t == null || t.getExpiryDate().before(new Timestamp(System.currentTimeMillis())))
+        if (t == null || t.getDeadline().before(new Timestamp(System.currentTimeMillis())))
             return false;
 
         proposalRepository.deleteAll(proposalRepository.findAllByTeamId(t.getTeamId()));
@@ -74,7 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
         memberIds.remove(SecurityContextHolder.getContext().getAuthentication().getName());
         memberIds.forEach(memberId -> {
             Proposal proposal = new Proposal();
-            proposal.setExpiryDate(expiryDate);
+            proposal.setDeadline(expiryDate);
             proposal.setId((UUID.randomUUID().toString()));
             proposal.setTeamId(dto.getId());
 

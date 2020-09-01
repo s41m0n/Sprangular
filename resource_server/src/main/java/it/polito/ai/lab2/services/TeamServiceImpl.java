@@ -7,19 +7,26 @@ import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import it.polito.ai.lab2.utility.TeamProposalDetails;
+import it.polito.ai.lab2.pojos.TeamProposalDetails;
+import it.polito.ai.lab2.utility.Utility;
+import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Log
 public class TeamServiceImpl implements TeamService {
 
     @Autowired
@@ -49,6 +56,9 @@ public class TeamServiceImpl implements TeamService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    TaskScheduler scheduler;
+
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
@@ -72,7 +82,10 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
-    public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, int hoursTimeout) {
+    public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Timestamp deadline) {
+        if (System.currentTimeMillis() >= deadline.getTime())
+            throw new InvalidTimestampException("Timestamp before current date");
+
         if (memberIds.stream().distinct().count() != memberIds.size())
             throw new DuplicateStudentInTeam("Some student is already in the group " + name);
 
@@ -100,6 +113,10 @@ public class TeamServiceImpl implements TeamService {
                         .anyMatch(team -> team.getCourse().getAcronym().equals(courseId))))
             throw new StudentAlreadyInTeam("Some student is already in a team for the course " + courseId);
 
+        Student creator = members.stream()
+            .filter(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
+            .findFirst().orElseThrow(() -> new StudentNotFoundException("Creator not in members"));
+
         boolean isAlone = memberIds.size() == 1;
         Team team = new Team();
         team.setMembers(members);
@@ -107,7 +124,33 @@ public class TeamServiceImpl implements TeamService {
         team.setName(name);
         team.setStatus(isAlone ? 1 : 0);
         TeamDTO t = modelMapper.map(teamRepository.save(team), TeamDTO.class);
-        if (!isAlone) notificationService.notifyTeam(t, memberIds);
+        if (!isAlone) {
+            members.forEach(
+                member -> {
+                    Proposal proposal = new Proposal();
+                    proposal.setProposalCreatorId(creator.getId());
+                    proposal.setInvitedUserId(member.getId());
+                    proposal.setTeamId(t.getId());
+                    proposal.setCourseId(courseId);
+                    proposal.setDeadline(deadline);
+                    proposal.setStatus(ProposalStatus.PENDING);
+                    proposalRepository.save(proposal);
+                }
+            );
+            Runnable proposalDeadline = () -> {
+                log.info("Deadline for proposal ");
+                List<Proposal> proposals = proposalRepository.findAllByTeamId(t.getId());
+                boolean toDelete = proposals.stream()
+                    .anyMatch(p -> p.getStatus().equals(ProposalStatus.REJECTED)
+                        || p.getStatus().equals(ProposalStatus.PENDING));
+                if (toDelete) {
+                    proposals.forEach(proposal -> proposal.setStatus(ProposalStatus.REJECTED));
+                    teamRepository.deleteById(t.getId());
+                }
+            };
+            scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
+            notificationService.notifyTeam(t, memberIds);
+        }
         return t;
     }
 

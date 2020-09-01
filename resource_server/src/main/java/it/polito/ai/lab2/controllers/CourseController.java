@@ -8,6 +8,7 @@ import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.CourseProfessorNotAssigned;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
+import it.polito.ai.lab2.pojos.TeamProposalRequest;
 import it.polito.ai.lab2.services.CourseService;
 import it.polito.ai.lab2.services.StudentService;
 import it.polito.ai.lab2.services.TeamService;
@@ -187,15 +188,15 @@ public class CourseController {
     }
 
     @PostMapping("/{courseId}/teams")
-    public TeamDTO proposeTeam(@PathVariable String courseId, @RequestBody Map<String, Object> reqBody) {
-        log.info("proposeTeam(" + courseId + ", " + reqBody + ") called");
-        String teamName = (String) reqBody.get("name");
-        List<String> memberIds = (List<String>) reqBody.get("memberIds");
-        if (teamName == null || memberIds == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamName and memberIds are required");
+    public TeamDTO proposeTeam(@PathVariable String courseId, @RequestBody TeamProposalRequest proposal) {
+        log.info("proposeTeam(" + courseId + ", " + proposal.getTeamName() + ") called");
+        if (proposal.getTeamName() == null
+            || proposal.getDeadline() == null
+            || proposal.getStudentIds() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamName, memberIds and deadline are required");
 
         try {
-            return teamService.proposeTeam(courseId, teamName, memberIds);
+            return teamService.proposeTeam(courseId, proposal.getTeamName(), proposal.getStudentIds(), proposal.getDeadline());
         } catch (CourseNotFoundException | StudentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
