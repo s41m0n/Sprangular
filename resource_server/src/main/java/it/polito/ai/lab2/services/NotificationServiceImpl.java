@@ -96,7 +96,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     public void fixedTokenClear() {
         Set<Long> teamIds = new HashSet<>();
-        proposalRepository.findAllByExpiryDateAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
+        proposalRepository.findAllByDeadlineAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
             teamIds.add(proposal.getTeamId());
             proposalRepository.delete(proposal);
         });
