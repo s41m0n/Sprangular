@@ -9,7 +9,7 @@ import { Team } from 'src/app/models/team.model';
 
 /**
  * VmsContainer
- * 
+ *
  * It displays the Vms view (WIP)
  */
 @Component({
@@ -18,23 +18,23 @@ import { Team } from 'src/app/models/team.model';
 })
 export class TabStudentVmsContainer implements OnInit, OnDestroy {
 
-  private course : Course;                                      //The current selected course
+  private course: Course;                                      // The current selected course
   private team: Team;
-  vms: VM[] = [];                             //The current vms
-  private destroy$: Subject<boolean> = new Subject<boolean>();  //Private subject to perform the unsubscriptions when the component is destroyed
+  vms: VM[] = [];                             // The current vms
+  private destroy$: Subject<boolean> = new Subject<boolean>();  // Private subject to perform the unsubscriptions when the component is destroyed
 
   constructor(private teamService: TeamService,
-    private courseService: CourseService) { }
+              private courseService: CourseService) { }
 
   ngOnInit(): void {
-    //Subscribe to the Broadcaster course selected, to update the current rendered course
+    // Subscribe to the Broadcaster course selected, to update the current rendered course
     this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
       this.course = course;
     });
     this.teamService.currentTeamSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(team => {
       this.team = team;
       this.refreshVMs();
-    })
+    });
   }
 
   ngOnDestroy() {
@@ -46,13 +46,16 @@ export class TabStudentVmsContainer implements OnInit, OnDestroy {
 
   /** Private function to refresh the list of enrolled students*/
   private refreshVMs() {
-    //Check if already received the current course
-    if(!this.course || !this.team) {
+    // Check if already received the current course
+    if (!this.course || !this.team) {
       this.vms = [];
       return;
     }
     this.teamService.getTeamVms(this.team).pipe(first()).subscribe(vms => this.vms = vms);
   }
 
+    newVm() {
+        console.log('method to implement');
+    }
 }
 

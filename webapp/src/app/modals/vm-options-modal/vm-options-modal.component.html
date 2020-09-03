@@ -1,0 +1,43 @@
+<h1 mat-dialog-title>VM Options</h1>
+
+<div mat-dialog-content>
+
+    <label>Number of vCPUs: {{data.vCpu}}</label><br/>
+    <mat-slider
+            class="example-margin"
+            [max]="4"
+            [min]="1"
+            [step]="1"
+            [thumbLabel]="true"
+            [tickInterval]="getSliderTickInterval()"
+            [(ngModel)]="data.vCpu">
+    </mat-slider>
+
+    <label>RAM size: {{data.ram}}GB</label><br/>
+    <mat-slider
+            class="example-margin"
+            [max]="8"
+            [min]="0.5"
+            [step]="0.5"
+            [thumbLabel]="true"
+            [tickInterval]="getSliderTickInterval()"
+            [(ngModel)]="data.ram">
+    </mat-slider>
+
+    <label>Disk space: {{data.disk}}GB</label><br/>
+    <mat-slider
+            class="example-margin"
+            [max]="10"
+            [min]="2"
+            [step]="0.5"
+            [thumbLabel]="true"
+            [tickInterval]="getSliderTickInterval()"
+            [(ngModel)]="data.disk">
+    </mat-slider>
+
+</div>
+
+<div mat-dialog-actions align="end">
+    <button mat-button color="primary" (click)="onNoClick()">Set options</button>
+    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+</div>
