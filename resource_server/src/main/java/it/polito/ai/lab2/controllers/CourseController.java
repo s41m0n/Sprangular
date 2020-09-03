@@ -205,7 +205,7 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/{courseId}/vmModel")
+    @PostMapping("/{courseId}/createVmModel")
     public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO){
         try {
             if(vmService.createVmModel(vmModelDTO, courseId)){
