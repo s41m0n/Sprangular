@@ -62,6 +62,7 @@ public class ProfessorServiceImpl implements ProfessorService{
         String pwd = RandomStringUtils.random(10, true, true);
         p.setPassword(passwordEncoder.encode(pwd));
         p.addRole(role);
+        p.setVerified(false);
         userRepository.save(p);
         notificationService.sendMessage("p" + professorDTO.getId() + "@polito.it", "Account Creation", getPredefinedRegisterMessage(professorDTO.getId(), pwd));
         return true;

@@ -64,6 +64,7 @@ public class StudentServiceImpl implements StudentService {
         String pwd = RandomStringUtils.random(10, true, true);
         s.setPassword(passwordEncoder.encode(pwd));
         s.getRoles().add(role);
+        s.setVerified(false);
         userRepository.save(s);
         notificationService.sendMessage("s" + student.getId() + "@studenti.polito.it", "Account Creation", getPredefinedRegisterMessage(student.getId(), pwd));
         return true;

@@ -1,9 +1,6 @@
 package it.polito.ai.lab2.controllers;
 
-import it.polito.ai.lab2.dtos.CourseDTO;
-import it.polito.ai.lab2.dtos.ProfessorDTO;
-import it.polito.ai.lab2.dtos.StudentDTO;
-import it.polito.ai.lab2.dtos.TeamDTO;
+import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.CourseProfessorNotAssigned;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
@@ -12,6 +9,7 @@ import it.polito.ai.lab2.pojos.TeamProposalRequest;
 import it.polito.ai.lab2.services.CourseService;
 import it.polito.ai.lab2.services.StudentService;
 import it.polito.ai.lab2.services.TeamService;
+import it.polito.ai.lab2.services.VmService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +36,9 @@ public class CourseController {
 
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    VmService vmService;
 
     @GetMapping({"", "/"})
     public List<CourseDTO> all() {
@@ -201,6 +202,19 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{courseId}/vmModel")
+    public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO){
+        try {
+            if(vmService.createVmModel(vmModelDTO, courseId)){
+                return vmModelDTO;
+            } else {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Course " + courseId + " already has a VM model");
+            }
+        } catch (CourseNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 }

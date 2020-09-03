@@ -3,16 +3,15 @@ package it.polito.ai.lab2.controllers;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
-import it.polito.ai.lab2.exceptions.TeamNotFoundException;
+import it.polito.ai.lab2.dtos.VmDTO;
+import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.services.TeamService;
+import it.polito.ai.lab2.services.VmService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -25,6 +24,9 @@ public class TeamController {
 
     @Autowired
     TeamService teamService;
+
+    @Autowired
+    VmService vmService;
 
     @GetMapping({"", "/"})
     public List<TeamDTO> all() {
@@ -63,5 +65,16 @@ public class TeamController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
-
+/*
+    @PostMapping("/{id}/createVm")
+    public VmDTO createVm(@PathVariable Long id, @RequestBody VmDTO vmDTO){
+        try{
+            vmService.createVm()
+        } catch (VmModelNotFoundException | StudentNotFoundException | CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+*/
 }

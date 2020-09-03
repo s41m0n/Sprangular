@@ -1,6 +1,5 @@
 package it.polito.ai.lab2.entities;
 
-
 import lombok.Data;
 
 import javax.persistence.*;

@@ -39,6 +39,9 @@ public class VmServiceImpl implements VmService {
     @Override
     public boolean createVmModel(VmModelDTO vmModelDTO, String courseId) {
         Course course = courseRepository.findByName(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+        if(course.getVmModel() != null){
+            return false;
+        }
         VmModel v = new VmModel();
         v.setName(vmModelDTO.getName());
         v.setImagePath(vmModelDTO.getImagePath());
@@ -48,13 +51,13 @@ public class VmServiceImpl implements VmService {
     }
 
     @Override
-    public boolean createVm(Long vmModelId, VmDTO vmDTO, String ownerId, String courseId) {
+    public boolean createVm(Long vmModelId, VmDTO vmDTO, String courseId) {
         VmModel vmModel = vmModelRepository.findById(vmModelId).orElseThrow(() -> new VmModelNotFoundException("VmModel " + vmModelId + " does not exist"));
-        Student owner = studentRepository.findById(ownerId).orElseThrow(() -> new StudentNotFoundException("Student " + ownerId + " does not exist"));
+        Student owner = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(() -> new StudentNotFoundException("Student " + SecurityContextHolder.getContext().getAuthentication().getName() + " does not exist"));
         Course course = courseRepository.findByName(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
         if (!owner.getCourses().contains(course)) { //student not enrolled in course
-            throw new StudentNotInCourseException("Student " + ownerId + " is not enrolled in course " + courseId);
+            throw new StudentNotInCourseException("Student " + owner.getId() + " is not enrolled in course " + courseId);
         }
 
         if (!course.isEnabled()) { //course not enabled
@@ -62,7 +65,7 @@ public class VmServiceImpl implements VmService {
         }
 
         if (owner.getTeams().isEmpty()) { //student in no teams
-            throw new StudentNotInTeamException("Student " + ownerId + " does not belong to any team");
+            throw new StudentNotInTeamException("Student " + owner.getId() + " does not belong to any team");
         }
 
         Team team = null;
@@ -74,7 +77,7 @@ public class VmServiceImpl implements VmService {
         }
 
         if (team == null) {
-            throw new StudentNotInTeamOfCourseException("Student " + ownerId + "does not belong to a team of course " + courseId);
+            throw new StudentNotInTeamOfCourseException("Student " + owner.getId() + "does not belong to a team of course " + courseId);
         }
 
         if (team.getVms().size() + 1 > team.getMaxTotalInstances()) {
