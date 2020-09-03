@@ -11,12 +11,12 @@ import java.util.List;
 public class User {
 
     @Id
-    String email;
+    String id;
 
     String password;
 
     @Column(unique = true)
-    String id;
+    String email;
 
     String name;
 

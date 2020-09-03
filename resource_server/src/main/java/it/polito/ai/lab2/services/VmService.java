@@ -10,19 +10,19 @@ public interface VmService {
 
     boolean createVmModel(VmModelDTO vmModelDTO, String courseId);
 
-    boolean createVm(Long vmModelId, VmDTO vmDTO, String courseId);
+    VmDTO createVm(Long teamId, VmDTO vmDTO);
 
-    boolean deleteVm(Long vmId);
+    VmDTO deleteVm(Long vmId, Long teamId);
 
-    boolean updateVmResources(Long vmId, int vCpu, int diskStorage, int ram);
+    VmDTO updateVmResources(Long vmId, Long teamId, int vCpu, int diskStorage, int ram);
 
-    boolean turnOnVm(Long vmId);
+    VmDTO turnOnVm(Long vmId, Long teamId);
 
-    boolean turnOffVm(Long vmId);
+    VmDTO turnOffVm(Long vmId, Long teamId);
 
-    boolean addVmOwner(Long vmId, String studentId);
+    void addVmOwner(Long vmId, Long teamId, String studentId);
 
-    Optional<VmDTO> getVm(Long vmId);
+    VmDTO getVm(Long vmId, Long teamId);
 
     List<VmDTO> getVmsOfTeam(Long teamId);
 
