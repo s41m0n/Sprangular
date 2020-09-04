@@ -192,8 +192,8 @@ public class CourseController {
     public TeamDTO proposeTeam(@PathVariable String courseId, @RequestBody TeamProposalRequest proposal) {
         log.info("proposeTeam(" + courseId + ", " + proposal.getTeamName() + ") called");
         if (proposal.getTeamName() == null
-            || proposal.getDeadline() == null
-            || proposal.getStudentIds() == null)
+                || proposal.getDeadline() == null
+                || proposal.getStudentIds() == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamName, memberIds and deadline are required");
 
         try {
@@ -206,14 +206,23 @@ public class CourseController {
     }
 
     @PostMapping("/{courseId}/createVmModel")
-    public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO){
+    public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO) {
         try {
-            if(vmService.createVmModel(vmModelDTO, courseId)){
+            if (vmService.createVmModel(vmModelDTO, courseId)) {
                 return vmModelDTO;
             } else {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Course " + courseId + " already has a VM model");
             }
-        } catch (CourseNotFoundException e){
+        } catch (CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseId}/vms")
+    public List<VmDTO> getVmsOfCourse(@PathVariable String courseId) {
+        try {
+            return vmService.getVmsOfCourse(courseId);
+        } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }

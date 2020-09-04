@@ -4,7 +4,6 @@ import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface VmService {
 

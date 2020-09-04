@@ -23,7 +23,8 @@ public class ModelHelper {
                 linkTo(methodOn(CourseController.class).getProfessors(courseDTO.getName())).withRel("professors"),
                 linkTo(methodOn(CourseController.class).getTeams(courseDTO.getName())).withRel("teams"),
                 linkTo(methodOn(CourseController.class).getAvailableStudents(courseDTO.getName())).withRel("availableStudents"),
-                linkTo(methodOn(CourseController.class).getUnavailableStudents(courseDTO.getName())).withRel("unavailableStudents")
+                linkTo(methodOn(CourseController.class).getUnavailableStudents(courseDTO.getName())).withRel("unavailableStudents"),
+                linkTo(methodOn(CourseController.class).getVmsOfCourse(courseDTO.getName())).withRel("vms")
         ));
         return courseDTO;
     }
