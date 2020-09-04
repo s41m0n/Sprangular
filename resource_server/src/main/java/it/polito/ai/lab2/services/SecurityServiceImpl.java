@@ -2,11 +2,9 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.entities.Professor;
 import it.polito.ai.lab2.entities.Student;
+import it.polito.ai.lab2.entities.Team;
 import it.polito.ai.lab2.entities.Vm;
-import it.polito.ai.lab2.repositories.CourseRepository;
-import it.polito.ai.lab2.repositories.ProfessorRepository;
-import it.polito.ai.lab2.repositories.StudentRepository;
-import it.polito.ai.lab2.repositories.VmRepository;
+import it.polito.ai.lab2.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class SecurityServiceImpl implements SecurityService{
+public class SecurityServiceImpl implements SecurityService {
 
     @Autowired
     StudentRepository studentRepository;
@@ -28,6 +26,9 @@ public class SecurityServiceImpl implements SecurityService{
 
     @Autowired
     VmRepository vmRepository;
+
+    @Autowired
+    TeamRepository teamRepository;
 
     @Override
     public boolean isStudentSelf(String id) {
@@ -46,13 +47,13 @@ public class SecurityServiceImpl implements SecurityService{
     @Override
     public boolean isProfessorCourseOwner(String courseId) {
 
-        if(!courseRepository.existsById(courseId) || courseRepository.getOne(courseId).getProfessors().isEmpty()){ //the course does not exists or there are no professors
+        if (!courseRepository.existsById(courseId) || courseRepository.getOne(courseId).getProfessors().isEmpty()) { //the course does not exists or there are no professors
             return false;
         }
 
         List<String> professorsIds = new ArrayList<>();
 
-        for(Professor p : courseRepository.getOne(courseId).getProfessors()){
+        for (Professor p : courseRepository.getOne(courseId).getProfessors()) {
             professorsIds.add(p.getId());
         }
 
@@ -70,8 +71,8 @@ public class SecurityServiceImpl implements SecurityService{
     public boolean isTeamOfProfessorCourse(Long id) {
         return professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
                 .map(professor -> professor.getCourses().stream()
-                    .anyMatch(course -> course.getTeams().stream()
-                        .anyMatch(team -> team.getId().equals(id))))
+                        .anyMatch(course -> course.getTeams().stream()
+                                .anyMatch(team -> team.getId().equals(id))))
                 .orElse(false);
     }
 
@@ -81,14 +82,38 @@ public class SecurityServiceImpl implements SecurityService{
     }
 
     @Override
-    public boolean isStudentOwnerOfVm(Long vmId, String studentId) {
+    public boolean isStudentOwnerOfVm(Long vmId) {
         Vm vm = vmRepository.findById(vmId).orElse(null);
-        Student student = studentRepository.findById(studentId).orElse(null);
+        Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
 
-        if(vm == null || student == null){
+        if (vm == null || student == null) {
             return false;
         }
 
         return vm.getOwners().contains(student);
+    }
+
+    @Override
+    public boolean isVmOfStudentTeam(Long vmId) {
+        Vm vm = vmRepository.findById(vmId).orElse(null);
+        Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+
+        if (vm == null || student == null) {
+            return false;
+        }
+
+        return vm.getTeam().getMembers().contains(student);
+    }
+
+    @Override
+    public boolean isStudentInTeam(Long teamId) {
+        Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+        Team team = teamRepository.findById(teamId).orElse(null);
+
+        if (student == null || team == null) {
+            return false;
+        }
+
+        return team.getMembers().contains(student);
     }
 }
