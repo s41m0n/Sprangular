@@ -109,6 +109,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public boolean removeCourse(String courseId) {
         Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
         if(c.getStudents().isEmpty()){
@@ -120,11 +121,12 @@ public class CourseServiceImpl implements CourseService {
 
     //TODO: check che il DTO sia pieno
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public boolean updateCourse(CourseDTO courseDTO) {
         if (courseDTO.getTeamMaxSize() < courseDTO.getTeamMinSize()) {
             return false;
         }
-        Course c = courseRepository.findById(courseDTO.getAcronym()).orElseThrow(() -> new CourseNotFoundException("Course `" + courseDTO.getAcronym() + "` does not exist"));
+        Course c = courseRepository.findById(courseDTO.getAcronym()).orElseThrow(() -> new CourseNotFoundException("Course " + courseDTO.getAcronym() + " does not exist"));
         c.setName(courseDTO.getName());
         c.setAcronym(courseDTO.getAcronym());
         c.setTeamMaxSize(courseDTO.getTeamMaxSize());

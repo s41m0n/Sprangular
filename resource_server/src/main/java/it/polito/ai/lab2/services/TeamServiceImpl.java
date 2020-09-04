@@ -114,8 +114,8 @@ public class TeamServiceImpl implements TeamService {
             throw new StudentAlreadyInTeam("Some student is already in a team for the course " + courseId);
 
         Student creator = members.stream()
-            .filter(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
-            .findFirst().orElseThrow(() -> new StudentNotFoundException("Creator not in members"));
+                .filter(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
+                .findFirst().orElseThrow(() -> new StudentNotFoundException("Creator not in members"));
 
         boolean isAlone = memberIds.size() == 1;
         Team team = new Team();
@@ -126,23 +126,23 @@ public class TeamServiceImpl implements TeamService {
         TeamDTO t = modelMapper.map(teamRepository.save(team), TeamDTO.class);
         if (!isAlone) {
             members.forEach(
-                member -> {
-                    Proposal proposal = new Proposal();
-                    proposal.setProposalCreatorId(creator.getId());
-                    proposal.setInvitedUserId(member.getId());
-                    proposal.setTeamId(t.getId());
-                    proposal.setCourseId(courseId);
-                    proposal.setDeadline(deadline);
-                    proposal.setStatus(ProposalStatus.PENDING);
-                    proposalRepository.save(proposal);
-                }
+                    member -> {
+                        Proposal proposal = new Proposal();
+                        proposal.setProposalCreatorId(creator.getId());
+                        proposal.setInvitedUserId(member.getId());
+                        proposal.setTeamId(t.getId());
+                        proposal.setCourseId(courseId);
+                        proposal.setDeadline(deadline);
+                        proposal.setStatus(ProposalStatus.PENDING);
+                        proposalRepository.save(proposal);
+                    }
             );
             Runnable proposalDeadline = () -> {
                 log.info("Deadline for proposal ");
                 List<Proposal> proposals = proposalRepository.findAllByTeamId(t.getId());
                 boolean toDelete = proposals.stream()
-                    .anyMatch(p -> p.getStatus().equals(ProposalStatus.REJECTED)
-                        || p.getStatus().equals(ProposalStatus.PENDING));
+                        .anyMatch(p -> p.getStatus().equals(ProposalStatus.REJECTED)
+                                || p.getStatus().equals(ProposalStatus.PENDING));
                 if (toDelete) {
                     proposals.forEach(proposal -> proposal.setStatus(ProposalStatus.REJECTED));
                     teamRepository.deleteById(t.getId());
@@ -215,26 +215,27 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.isStudentEnrolled(#courseId)")
     public List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId) {
         studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
         List<Proposal> proposals = proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, course.getAcronym());
 
-        if(proposals.isEmpty()){
+        if (proposals.isEmpty()) {
             return null;
         }
 
         List<TeamProposalDetails> proposalsDetails = new ArrayList<>();
 
-        for(Proposal p : proposals) {
+        for (Proposal p : proposals) {
             TeamProposalDetails tpd = new TeamProposalDetails();
             tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
             tpd.setProposalCreator(studentRepository.getOne(p.getProposalCreatorId()));
 
             Map<Student, ProposalStatus> teamApprovalDetails = new HashMap<>();
 
-            for(Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())){
+            for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
                 teamApprovalDetails.put(studentRepository.getOne(pr.getInvitedUserId()), pr.getStatus());
             }
 
@@ -247,7 +248,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public boolean setVmsResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances) { //only professor
+    @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)")
+    public boolean setVmsResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances) {
         Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
 
         int actualVCpu = 0;
@@ -255,16 +257,16 @@ public class TeamServiceImpl implements TeamService {
         int actualDiskStorage = 0;
         int numOfActiveVms = 0;
 
-        for(Vm vm : team.getVms()){
+        for (Vm vm : team.getVms()) {
             actualVCpu += vm.getVCpu();
             actualRam += vm.getRam();
             actualDiskStorage += vm.getDiskStorage();
-            if(vm.isActive()){
+            if (vm.isActive()) {
                 numOfActiveVms += 1;
             }
         }
 
-        if(actualVCpu > vCpu || actualRam > ram || actualDiskStorage > diskStorage || numOfActiveVms > maxActiveInstances || team.getVms().size() > maxTotalInstances){
+        if (actualVCpu > vCpu || actualRam > ram || actualDiskStorage > diskStorage || numOfActiveVms > maxActiveInstances || team.getVms().size() > maxTotalInstances) {
             throw new TooManyActualResourcesException("Cannot set VMs resource limits, actual used resources are higher than the new limits");
         }
 
