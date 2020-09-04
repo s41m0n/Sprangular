@@ -7,6 +7,7 @@ import { Team } from '../models/team.model';
 import { VM } from '../models/vm.model';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { Course } from '../models/course.model';
 
 /** Team service
  * 
@@ -24,11 +25,10 @@ export class TeamService {
       this.currentTeamSubject = new BehaviorSubject<Team>(null);
     }
 
-  public getTeamVms(team: Team) : Observable<VM[]>{
-    return this.http.get<VM[]>(`${environment.base_teams_url}/?teamId_like=${team.id}`)
-      .pipe(
-        tap(() => console.log(`fetched team ${team.id} vms - getTeamVms()`)),
-        catchError(this.handleError<VM[]>(`getTeamVms(${team.id}`))
+  public createTeam(name: string, course: Course) : Observable<Team> {
+    return this.http.post<Team>(environment.base_teams_url, {'name': name, 'courseId': course.id}, environment.base_http_headers).pipe(
+      tap(() => console.log(`created team ${name} - createTeam()`)),
+      catchError(this.handleError<Team>(`createTeam(${name}`))
     );
   }
 

@@ -78,6 +78,16 @@ export class AuthService {
     );
   }
 
+  register(email: string, name: string, surname: string, id: string, password: string, pic: Object ) {
+    return this.http.post(environment.register_url, {'email': email, 'password': password, 'name': name, 'surname': surname}, environment.base_http_headers).pipe(
+      tap(_ => this.toastrService.success(`Successfully registered! Check your email`, 'Awesome 😃')),
+      catchError(err => {
+        this.toastrService.error('Registration failed', 'Error 😅');
+        return throwError(err);
+      })
+    );
+  }
+
   /**
    * Function to perform logout
    * 

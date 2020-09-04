@@ -1,0 +1,14 @@
+.part1 {
+  width: 70%;
+  float:left;
+}
+
+.part2 {
+  width: 28%;
+  margin-left: 2%;
+  float:right;
+}
+
+.submitter{
+  float: right;
+}

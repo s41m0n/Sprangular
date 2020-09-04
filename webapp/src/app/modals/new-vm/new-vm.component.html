@@ -1,65 +1,33 @@
 <h1 mat-dialog-title>Create a new VM</h1>
 
 <div mat-dialog-content>
-    <mat-form-field hintLabel="Max 40 characters" appearance="fill">
-        <mat-label>VM name</mat-label>
-        <input matInput [(ngModel)]="vmName" maxlength="40" placeholder="Ex. VM1">
-    </mat-form-field>
-    <br>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-error *ngIf="vmInvalid">Error while creating VM</mat-error>
+            
+        <mat-form-field class="full-width-input" hintLabel="Max 40 characters">
+          <input matInput placeholder="Name" type="text" formControlName="name" required>
+          <mat-error>Please provide a valid name</mat-error>
+        </mat-form-field>
 
-    <mat-form-field appearance="fill">
-        <mat-label>Choose team</mat-label>
-        <mat-select [(value)]="team">
-            <mat-option *ngFor="let t of data.teams" [value]="t">
-                {{ t }}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-    <br>
+        <mat-form-field class="full-width-input" hintLabel="Only letters and numbers, no spaces or special characters">
+            <input matInput placeholder="Path" type="text" formControlName="path" required>
+            <mat-error>Please provide a valid path</mat-error>
+        </mat-form-field>
+        
+        <label>CPUs:</label>
+        <mat-slider formControlName="cpu" [thumbLabel]="true" min="1" max="6" step="1"></mat-slider>
+        
+        <label>RAM (GB):</label>
+        <mat-slider formControlName="ram" [thumbLabel]="true" min="1" max="6" step="0.5"></mat-slider>
 
-    <mat-form-field appearance="fill">
-        <mat-label>VM path</mat-label>
-        <input matInput [(ngModel)]="vmPath" placeholder="examples/vms">
-    </mat-form-field>
-    <br>
-
-
-    <label>Number of vCPUs: {{vCpu}}</label><br/>
-    <mat-slider
-            class="example-margin"
-            [max]="4"
-            [min]="1"
-            [step]="1"
-            [thumbLabel]="true"
-            [tickInterval]="getSliderTickInterval()"
-            [(ngModel)]="vCpu">
-    </mat-slider>
-
-    <label>RAM size: {{ram}}GB</label><br/>
-    <mat-slider
-            class="example-margin"
-            [max]="8"
-            [min]="0.5"
-            [step]="0.5"
-            [thumbLabel]="true"
-            [tickInterval]="getSliderTickInterval()"
-            [(ngModel)]="ram">
-    </mat-slider>
-
-    <label>Disk space: {{disk}}GB</label><br/>
-    <mat-slider
-            class="example-margin"
-            [max]="10"
-            [min]="2"
-            [step]="0.5"
-            [thumbLabel]="true"
-            [tickInterval]="getSliderTickInterval()"
-            [(ngModel)]="disk">
-    </mat-slider>
+        <label>Disk (GB):</label>
+        <mat-slider formControlName="disk" [thumbLabel]="true" min="1" max="15" step="1"></mat-slider>
+        
+    </form>
 </div>
 
 <div mat-dialog-actions align="end">
     <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
-    <button mat-button color="primary" [disabled]="!enabled()" (click)="onNoClick()">Create VM</button>
+    <button mat-button color="primary" (click)="onSubmit()">Create</button>
 </div>
 

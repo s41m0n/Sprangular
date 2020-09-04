@@ -13,6 +13,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { MaterialFileInputModule } from 'ngx-material-file-input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSortModule } from '@angular/material/sort';
@@ -26,7 +27,7 @@ import { TabProfessorVmsComponent } from './professor/vms/tab-vms.component';
 import { AppRoutingModule } from './app-routing-module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
-import { LoginDialogComponent } from './login/login-dialog.component';
+import { LoginDialogComponent } from './modals/login/login-dialog.component';
 import { MatCardModule } from '@angular/material/card';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -57,6 +58,8 @@ import { TabAdminProfessorsComponent} from './admin/professors/tab-professors.co
 import { TabAdminVmModelContainer } from './admin/vmmodels/tab-model.container';
 import { TabAdminVmModelComponent } from './admin/vmmodels/tab-model.component';
 
+import { RegisterDialogComponent } from './modals/register/register-dialog.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -84,7 +87,8 @@ import { TabAdminVmModelComponent } from './admin/vmmodels/tab-model.component';
     NewVmComponent,
     TabAdminProfessorsComponent,
     TabAdminVmModelContainer,
-    TabAdminVmModelComponent
+    TabAdminVmModelComponent,
+    RegisterDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -98,6 +102,7 @@ import { TabAdminVmModelComponent } from './admin/vmmodels/tab-model.component';
     MatCheckboxModule,
     MatButtonModule,
     MatInputModule,
+    MaterialFileInputModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
     MatSortModule,
@@ -119,7 +124,8 @@ import { TabAdminVmModelComponent } from './admin/vmmodels/tab-model.component';
     MatSelectModule,
   ],
   entryComponents: [
-    LoginDialogComponent
+    LoginDialogComponent,
+    RegisterDialogComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

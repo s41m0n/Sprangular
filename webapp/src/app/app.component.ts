@@ -1,6 +1,6 @@
 import { Component} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { LoginDialogComponent } from './login/login-dialog.component';
+import { LoginDialogComponent } from './modals/login/login-dialog.component';
 import { AuthService } from './services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from './models/user.model';
@@ -11,6 +11,7 @@ import { Observable, of } from 'rxjs';
 import { Role } from './models/role.model';
 import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
+import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -67,6 +68,16 @@ export class AppComponent{
    */
   openLogin() {
     const dialogRef = this.dialog.open(LoginDialogComponent);
+    dialogRef.afterClosed()
+      .pipe(first())
+      .subscribe(result => {
+        if(result) this.router.navigate([this.route.snapshot.queryParams['returnUrl'] || '/']);
+        else this.router.navigate(['/']);
+    });
+  }
+
+  openRegister() {
+    const dialogRef = this.dialog.open(RegisterDialogComponent);
     dialogRef.afterClosed()
       .pipe(first())
       .subscribe(result => {

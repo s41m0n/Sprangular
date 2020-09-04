@@ -22,7 +22,7 @@
       "surname": "MARCHI",
       "name": "RICCARDO",
       "courseId": 1,
-      "teamId": 0
+      "teamId": 3
     },
     {
       "id": 4,
@@ -38,7 +38,7 @@
       "surname": "POSTOLOV",
       "name": "ENRICO",
       "courseId": 1,
-      "teamId": 0
+      "teamId": 3
     }
   ],
   "professors": [
@@ -71,6 +71,16 @@
       "id": 1,
       "courseId": 1,
       "name": "Calvary"
+    },
+    {
+      "name": null,
+      "courseId": 1,
+      "id": 2
+    },
+    {
+      "name": "Hi",
+      "courseId": 1,
+      "id": 3
     }
   ],
   "assignments": [
@@ -94,19 +104,6 @@
       "id": 1,
       "name": "experiment",
       "path": "experiment",
-      "vCpu": "2",
-      "ram": "3",
-      "disk": "4",
-      "courseId": 1,
-      "teamId": 1
-    },
-    {
-      "id": 2,
-      "name": "test",
-      "path": "test/prova",
-      "vCpu": "1",
-      "ram": "4",
-      "disk": "2",
       "courseId": 1,
       "teamId": 1
     }
@@ -143,6 +140,13 @@
       "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
       "id": 3,
       "role": "admin"
+    },
+    {
+      "email": "s7@studenti.polito.it",
+      "password": "$2a$10$Ip6vauaxM8PIbsZusqNtxOLvEHSdXnozwHPAWyTiBMjARUq0U.Y2u",
+      "name": "dio",
+      "surname": "madonna",
+      "id": 4
     }
   ]
 }

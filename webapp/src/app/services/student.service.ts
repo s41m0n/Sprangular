@@ -90,12 +90,12 @@ export class StudentService {
     );
   }
 
-  searchStudentsInCourse(name: string, course: Course): Observable<Student[]> {
+  searchStudentsInCourseAvailable(name: string, course: Course, all: boolean = false): Observable<Student[]> {
     //Checking if it is actually a string and does not have whitespaces in the middle (if it has them at beginning or end, trim)
-    if (typeof name !== 'string' || !(name = name.trim()) || name.indexOf(' ') >= 0 || course == undefined) {
+    if (course == undefined || !all && (typeof name !== 'string' || !(name = name.trim()) || name.indexOf(' ') >= 0)) {
       return of([]);
     }
-    return this.http.get<Student[]>(`${environment.base_students_url}?surname_like=${name}&courseId=${course.id}`).pipe(
+    return this.http.get<Student[]>(`${environment.base_students_url}?surname_like=${name}&courseId=${course.id}&teamId=0`).pipe(
       //If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
       tap(x => console.log(`found ${x.length} results matching ${name} - searchStudents()`)),
       catchError(this.handleError<Student[]>(`searchStudents(${name})`, [], false))
@@ -126,6 +126,14 @@ export class StudentService {
         tap(() => console.log(`fetched student in team ${teamId} - getStudentInTeam()`)),
         catchError(this.handleError<Student[]>(`getStudentInTeam(${teamId})`))
       );
+  }
+
+  public setStudentTeam(teamId : number, student: Student) : Observable<Student> {
+    student.teamId = teamId;
+    return this.http.put<Student>(`${environment.base_students_url}/${student.id}`, student, environment.base_http_headers).pipe(
+      tap(() => console.log(`updated student ${student.id} in team ${teamId} - setStudentTeam()`)),
+      catchError(this.handleError<Student>(`setStudentTeam(${teamId}, ${student.id})`))
+    );
   }
 
   /**

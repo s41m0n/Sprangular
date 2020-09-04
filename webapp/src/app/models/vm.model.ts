@@ -19,6 +19,7 @@ export class VM {
     vCpu: number;
     ram: number;
     disk: number;
+    teamId: number;
     team?: Team;
 
     constructor(id: number = 0,
@@ -27,7 +28,8 @@ export class VM {
                 creationDate: string = '',
                 vCpu: number = 1,
                 ram: number = 0.5,
-                disk: number = 2){
+                disk: number = 2,
+                teamId: number = 0){
         this.id = id;
         this.name = name;
         this.path = path;
@@ -35,6 +37,7 @@ export class VM {
         this.vCpu = vCpu;
         this.ram = ram;
         this.disk = disk;
+        this.teamId = teamId;
     }
 
     /**vm

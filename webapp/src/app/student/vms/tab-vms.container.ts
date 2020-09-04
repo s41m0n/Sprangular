@@ -6,6 +6,10 @@ import { first, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { TeamService } from 'src/app/services/team.service';
 import { Team } from 'src/app/models/team.model';
+import { MatDialog } from '@angular/material/dialog';
+import { NewVmComponent } from 'src/app/modals/new-vm/new-vm.component';
+import { ToastrService } from 'ngx-toastr';
+import { VmService } from 'src/app/services/vm.service';
 
 /**
  * VmsContainer
@@ -19,12 +23,14 @@ import { Team } from 'src/app/models/team.model';
 export class TabStudentVmsContainer implements OnInit, OnDestroy {
 
   private course: Course;                                      // The current selected course
-  private team: Team;
+  team: Team;
   vms: VM[] = [];                             // The current vms
   private destroy$: Subject<boolean> = new Subject<boolean>();  // Private subject to perform the unsubscriptions when the component is destroyed
 
-  constructor(private teamService: TeamService,
-              private courseService: CourseService) { }
+  constructor(public dialog: MatDialog,
+    private teamService: TeamService,
+    private vmService: VmService,
+    private courseService: CourseService) { }
 
   ngOnInit(): void {
     // Subscribe to the Broadcaster course selected, to update the current rendered course
@@ -51,11 +57,16 @@ export class TabStudentVmsContainer implements OnInit, OnDestroy {
       this.vms = [];
       return;
     }
-    this.teamService.getTeamVms(this.team).pipe(first()).subscribe(vms => this.vms = vms);
+    this.vmService.getTeamVms(this.team).pipe(first()).subscribe(vms => this.vms = vms);
   }
 
-    newVm() {
-        console.log('method to implement');
+  newVm() {
+    const dialogRef = this.dialog.open(NewVmComponent);
+    dialogRef.afterClosed()
+      .pipe(first())
+      .subscribe(result => {
+        if(result) this.refreshVMs();
+    });
     }
 }
 

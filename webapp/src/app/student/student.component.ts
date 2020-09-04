@@ -38,7 +38,6 @@ export class StudentComponent implements OnDestroy {
       this.courseService.getCourseByPath(coursename).pipe(takeUntil(this.destroy$)).subscribe(course => {
         //Announce the current course and, if empty, signal NotFound
         this.courseService.currentCourseSubject.next(course);
-        console.log(course)
         if(!course || !course.id) {
           this.error = of(`Course ${coursename} does not exist`);
         } else {

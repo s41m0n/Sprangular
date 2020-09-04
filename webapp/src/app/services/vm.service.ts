@@ -7,6 +7,8 @@ import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { VmModel } from '../models/vm-model.model';
 import { Course } from '../models/course.model';
+import { VM } from '../models/vm.model';
+import { Team } from '../models/team.model';
 
 /** Vm service
  * 
@@ -44,6 +46,22 @@ export class VmService {
     return this.http.put<VmModel>(`${environment.base_vm_models_url}/${model.id}`, model, environment.base_http_headers).pipe(
       tap(x => console.log(`updated course model - assignVmModelToCourse(${course.id})`)),
       catchError(this.handleError<VmModel>(`assignVmModelToCourse(${course.id})`, null, false))
+    );
+  }
+
+  public createVmForTeam(vm: VM, team: Team) : Observable<VM> {
+    vm.teamId = team.id;
+    return this.http.post<VM>(environment.base_vms_url, vm, environment.base_http_headers).pipe(
+      tap(x => this.toastrService.success(`Created VM ${x.name} for team ${team.name}`, 'Congratulations 😃')),
+      catchError(this.handleError<VM>(`createVmForTeam(${team.id})`, null, false))
+    );
+  }
+
+  public getTeamVms(team: Team) : Observable<VM[]>{
+    return this.http.get<VM[]>(`${environment.base_vms_url}/?teamId_like=${team.id}`)
+      .pipe(
+        tap(() => console.log(`fetched team ${team.id} vms - getTeamVms()`)),
+        catchError(this.handleError<VM[]>(`getTeamVms(${team.id}`))
     );
   }
 
