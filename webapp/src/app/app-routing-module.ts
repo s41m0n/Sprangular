@@ -15,7 +15,7 @@ import { TabStudentVmsContainer } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsContainer } from './student/assignments/tab-assignments.container';
 import { AdminComponent } from './admin/admin.component'; 
 import { TabAdminProfessorsContainer } from './admin/professors/tab-professors.container';
-import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
+import { TabAdminVmModelContainer } from './admin/vmmodels/tab-model.container';
 
 //Supported and admitted routes by now
 //Could do multiple and sub-forRoot, but since we have few routes there's no need now
@@ -46,14 +46,14 @@ const routes = [
     ]
   },
   {
-    path:'admin', /* to finish /admin/course/X... */
+    path:'admin/course/:coursename',
     component: AdminComponent,
     canActivate: [AuthGuard],
     data: { roles: [Role.Admin]},
     children: [
       { path:'', pathMatch:'full', redirectTo:'professors'},
       { path:'professors', component: TabAdminProfessorsContainer},
-      { path:'models', component: TabAdminVmModelsContainer}
+      { path:'models', component: TabAdminVmModelContainer}
     ]
   },
   { path: '**', component: PageNotFoundComponent},

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { first, switchMap, takeUntil, finalize } from 'rxjs/operators';
-import { Subject, Observable } from 'rxjs';
+import { first, switchMap, takeUntil, mergeMap } from 'rxjs/operators';
+import { Subject, Observable, of, from } from 'rxjs';
 
 import { Student } from '../../models/student.model';
 import { Course } from '../../models/course.model';
@@ -9,6 +9,8 @@ import { StudentService } from '../../services/student.service';
 import { CourseService } from '../../services/course.service';
 import { Team } from 'src/app/models/team.model';
 import { TeamService } from 'src/app/services/team.service';
+import { AuthService } from 'src/app/services/auth.service';
+import { TeamProposal } from 'src/app/models/team-proposal.model';
 
 /**
  * TabTeamContainer class
@@ -30,7 +32,8 @@ export class TabTeamContainer implements OnInit, OnDestroy{
 
   constructor(private studentService : StudentService,
     private courseService: CourseService,
-    private teamService : TeamService) {}
+    private teamService : TeamService,
+    private authService: AuthService) {}
 
   ngOnInit(): void {
     //Subscribe to current course
@@ -44,7 +47,7 @@ export class TabTeamContainer implements OnInit, OnDestroy{
     this.filteredStudents = this.searchTerms.pipe(
       takeUntil(this.destroy$),
       // switch to new search observable each time the term changes
-      switchMap((name: string) => this.studentService.searchStudents(name)),
+      switchMap((name: string) => this.studentService.searchStudentsInCourseAvailable(name, this.course)),
     );
   }
 
@@ -63,6 +66,19 @@ export class TabTeamContainer implements OnInit, OnDestroy{
     this.searchTerms.next(name);
   }
 
+  submitTeam(proposal: TeamProposal): void {
+    console.log(proposal)
+    this.teamService.createTeam(proposal.name, this.course).subscribe(team => {
+      if(team.id) {
+        from(proposal.students).pipe(
+          mergeMap(student => {
+            return this.studentService.setStudentTeam(team.id, student)
+          })
+        ).subscribe(x => alert("daje")) // TODO: also modify team for the current user and modify data in order to render the new page
+      }
+    });
+  }
+
   /** Private function to refresh the list of enrolled students*/
   private refreshAvailableStudents() {
     //Check if already received the current course or has a team
@@ -70,6 +86,6 @@ export class TabTeamContainer implements OnInit, OnDestroy{
       this.availableStudents = [];
       return;
     }
-    this.courseService.getAvailableStudents(this.course).pipe(first()).subscribe(students => this.availableStudents = students);
+    this.studentService.searchStudentsInCourseAvailable('', this.course, true).pipe(first()).subscribe(students => this.availableStudents = students);
   }
 }

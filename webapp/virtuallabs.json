@@ -22,7 +22,7 @@
       "surname": "MARCHI",
       "name": "RICCARDO",
       "courseId": 1,
-      "teamId": 0
+      "teamId": 3
     },
     {
       "id": 4,
@@ -37,8 +37,8 @@
       "email": "s5@studenti.polito.it",
       "surname": "POSTOLOV",
       "name": "ENRICO",
-      "courseId": 0,
-      "teamId": 0
+      "courseId": 1,
+      "teamId": 3
     }
   ],
   "professors": [
@@ -54,12 +54,16 @@
     {
       "id": 1,
       "name": "Internet Applications",
-      "path": "internet-applications"
+      "path": "internet-applications",
+      "professorId": 1,
+      "acronym": "ia"
     },
     {
       "id": 2,
       "name": "Cloud computing",
-      "path": "cloud-computing"
+      "path": "cloud-computing",
+      "professorId": 1,
+      "acronym": "cc"
     }
   ],
   "teams": [
@@ -67,6 +71,16 @@
       "id": 1,
       "courseId": 1,
       "name": "Calvary"
+    },
+    {
+      "name": null,
+      "courseId": 1,
+      "id": 2
+    },
+    {
+      "name": "Hi",
+      "courseId": 1,
+      "id": 3
     }
   ],
   "assignments": [
@@ -90,21 +104,16 @@
       "id": 1,
       "name": "experiment",
       "path": "experiment",
-      "vCpu": "2",
-      "ram": "3",
-      "disk": "4",
       "courseId": 1,
       "teamId": 1
-    },
+    }
+  ],
+  "vmmodels": [
     {
-      "id": 2,
-      "name": "test",
-      "path": "test/prova",
-      "vCpu": "1",
-      "ram": "4",
-      "disk": "2",
-      "courseId": 1,
-      "teamId": 1
+      "id": 1,
+      "name": "base",
+      "path": "base",
+      "courseId": 2
     }
   ],
   "users": [
@@ -121,10 +130,23 @@
       "role": "student"
     },
     {
+      "email": "s3@studenti.polito.it",
+      "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
+      "id": 3,
+      "role": "student"
+    },
+    {
       "email": "a1@polito.it",
       "password": "$2a$10$9SFIVF0tDrwRoUlZOo9Q0urEs0cnpBXu9RWGf/TxuHjFzDteQhvDW",
       "id": 3,
       "role": "admin"
+    },
+    {
+      "email": "s7@studenti.polito.it",
+      "password": "$2a$10$Ip6vauaxM8PIbsZusqNtxOLvEHSdXnozwHPAWyTiBMjARUq0U.Y2u",
+      "name": "dio",
+      "surname": "madonna",
+      "id": 4
     }
   ]
 }

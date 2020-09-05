@@ -1,3 +1,5 @@
+import { Professor } from './professor.model';
+
 /**
  * Model for Course resource
  * 
@@ -9,10 +11,13 @@ export class Course {
     id: number;
     name: string;
     path: string;
+    professorId: number;
+    professor? : Professor;
 
-    constructor(id: number = 0, name: string = '', path: string = ''){
+    constructor(id: number = 0, name: string = '', path: string = '', professorId: number = 0){
         this.id = id;
         this.name = name;
         this.path = path;
+        this.professorId = professorId;
     }
   }

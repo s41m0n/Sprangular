@@ -13,6 +13,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { MaterialFileInputModule } from 'ngx-material-file-input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSortModule } from '@angular/material/sort';
@@ -26,7 +27,7 @@ import { TabProfessorVmsComponent } from './professor/vms/tab-vms.component';
 import { AppRoutingModule } from './app-routing-module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
-import { LoginDialogComponent } from './login/login-dialog.component';
+import { LoginDialogComponent } from './modals/login/login-dialog.component';
 import { MatCardModule } from '@angular/material/card';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -46,14 +47,18 @@ import { TabStudentVmsContainer } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsComponent } from './student/assignments/tab-assignments.component';
 import { TabStudentAssignmentsContainer } from './student/assignments/tab-assignments.container';
 
-import { TabAdminProfessorsContainer } from './admin/professors/tab-professors.container';
 import { AdminComponent } from './admin/admin.component';
-import { TabAdminVmModelsContainer } from './admin/models/tab-models.container';
 import {MatMenuModule} from "@angular/material/menu";
 import { VmOptionsModalComponent } from './modals/vm-options-modal/vm-options-modal.component';
 import {MatSliderModule} from "@angular/material/slider";
 import { NewVmComponent } from './modals/new-vm/new-vm.component';
 import {MatSelectModule} from "@angular/material/select";
+import { TabAdminProfessorsContainer } from './admin/professors/tab-professors.container';
+import { TabAdminProfessorsComponent} from './admin/professors/tab-professors.component';
+import { TabAdminVmModelContainer } from './admin/vmmodels/tab-model.container';
+import { TabAdminVmModelComponent } from './admin/vmmodels/tab-model.component';
+
+import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 
 @NgModule({
   declarations: [
@@ -78,9 +83,12 @@ import {MatSelectModule} from "@angular/material/select";
     TabProfessorVmsContainer,
     AdminComponent,
     TabAdminProfessorsContainer,
-    TabAdminVmModelsContainer,
     VmOptionsModalComponent,
-    NewVmComponent
+    NewVmComponent,
+    TabAdminProfessorsComponent,
+    TabAdminVmModelContainer,
+    TabAdminVmModelComponent,
+    RegisterDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -94,6 +102,7 @@ import {MatSelectModule} from "@angular/material/select";
     MatCheckboxModule,
     MatButtonModule,
     MatInputModule,
+    MaterialFileInputModule,
     ReactiveFormsModule,
     MatAutocompleteModule,
     MatSortModule,
@@ -115,7 +124,8 @@ import {MatSelectModule} from "@angular/material/select";
     MatSelectModule,
   ],
   entryComponents: [
-    LoginDialogComponent
+    LoginDialogComponent,
+    RegisterDialogComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

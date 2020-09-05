@@ -7,8 +7,13 @@
 
     <span class="example-fill-remaining-space"></span>
     <span *ngIf="currentUser">Welcome back, {{currentUser.email}}</span>
-    <button mat-button (click)="openLogin()" *ngIf="!currentUser" >Login</button>
-    <button mat-button (click)="logout()" *ngIf="currentUser" >Logout</button>
+    <div *ngIf="!currentUser; else elseBlock">
+      <button mat-button (click)="openLogin()" >Login</button>
+      <button mat-button (click)="openRegister()" >Register</button>
+    </div>
+    <ng-template #elseBlock>
+      <button mat-button (click)="logout()" *ngIf="currentUser" >Logout</button>
+    </ng-template>
   </mat-toolbar>
 
 

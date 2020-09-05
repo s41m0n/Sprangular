@@ -23,6 +23,16 @@ export class AdminComponent implements OnDestroy {
 
   constructor(private route: ActivatedRoute,
     private courseService: CourseService) {
+      //Register to route params to check and try to load the course requested as parameter (:coursename)
+      this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const coursename = params['coursename'];
+      //Retrieve the course associated to that parameter
+      this.courseService.getCourseByPath(coursename).pipe(first()).subscribe(course => {
+        //Announce the current course and, if empty, signal NotFound
+        this.courseService.currentCourseSubject.next(course);
+        this.error = of(course? null : `Course ${coursename} does not exist`);
+      });
+    });
   }
 
   ngOnDestroy(): void {
