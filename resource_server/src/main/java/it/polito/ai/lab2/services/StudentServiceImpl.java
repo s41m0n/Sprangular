@@ -1,16 +1,16 @@
 package it.polito.ai.lab2.services;
 
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.entities.Course;
+import it.polito.ai.lab2.entities.Proposal;
 import it.polito.ai.lab2.entities.Role;
 import it.polito.ai.lab2.entities.Student;
 import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
-import it.polito.ai.lab2.exceptions.StudentNotInCourseException;
+import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.repositories.*;
+import it.polito.ai.lab2.utility.ProposalStatus;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.Reader;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +43,12 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     NotificationService notificationService;
+
+    @Autowired
+    ProposalRepository proposalRepository;
+
+    @Autowired
+    TeamRepository teamRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -86,48 +90,11 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public boolean addStudentToCourse(String studentId, String courseId) {
-        Student student = studentRepository.findById(studentId).orElse(null);
-        if (student == null) throw new StudentNotFoundException("Student " + studentId + " does not exist");
-
-        Course course = courseRepository.findById(courseId).orElse(null);
-        if (course == null) throw new CourseNotFoundException("Course " + courseId + " does not exist");
-
-        if (student.getCourses().contains(course) || !course.isEnabled()) return false;
-        student.addCourse(course);
-        return true;
-    }
-
-    @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public List<Boolean> addAll(List<StudentDTO> students) {
         return students.stream()
                 .map(this::addStudent)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public List<Boolean> enrollAll(List<String> studentIds, String courseId) {
-        return studentIds.stream()
-                .map(studentId -> addStudentToCourse(studentId, courseId))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public List<Boolean> addAndEnroll(Reader r, String courseId) {
-        CsvToBean<StudentDTO> csvToBean = new CsvToBeanBuilder(r)
-                .withType(StudentDTO.class)
-                .withIgnoreLeadingWhiteSpace(true)
-                .build();
-
-        List<StudentDTO> students = csvToBean.parse();
-
-        this.addAll(students);
-
-        return enrollAll(students.stream().map(StudentDTO::getId).collect(Collectors.toList()), courseId);
     }
 
     @Override
@@ -141,18 +108,36 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public boolean removeStudentFromCourse(String studentId, String courseId) {
-        Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
-
+    @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.isStudentEnrolled(#courseId)")
+    public List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId) {
+        studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
-        if(!course.getStudents().contains(student)){
-            throw new StudentNotInCourseException("Some student is not enrolled in course " + courseId);
+        List<Proposal> proposals = proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, course.getAcronym());
+
+        if (proposals.isEmpty()) {
+            return null;
         }
 
-        student.removeCourse(course); //symmetric method, it updates also the course
-        return true;
+        List<TeamProposalDetails> proposalsDetails = new ArrayList<>();
+
+        for (Proposal p : proposals) {
+            TeamProposalDetails tpd = new TeamProposalDetails();
+            tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
+            tpd.setProposalCreator(studentRepository.getOne(p.getProposalCreatorId()));
+
+            Map<Student, ProposalStatus> teamApprovalDetails = new HashMap<>();
+
+            for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
+                teamApprovalDetails.put(studentRepository.getOne(pr.getInvitedUserId()), pr.getStatus());
+            }
+
+            tpd.setMembersAndStatus(teamApprovalDetails);
+
+            proposalsDetails.add(tpd);
+        }
+
+        return proposalsDetails;
     }
 
     private String getPredefinedRegisterMessage(String id, String pwd) {

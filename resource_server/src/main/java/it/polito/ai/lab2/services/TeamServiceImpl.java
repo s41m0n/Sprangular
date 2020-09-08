@@ -5,9 +5,9 @@ import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
@@ -213,41 +213,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.isStudentEnrolled(#courseId)")
-    public List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId) {
-        studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
-
-        List<Proposal> proposals = proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, course.getAcronym());
-
-        if (proposals.isEmpty()) {
-            return null;
-        }
-
-        List<TeamProposalDetails> proposalsDetails = new ArrayList<>();
-
-        for (Proposal p : proposals) {
-            TeamProposalDetails tpd = new TeamProposalDetails();
-            tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
-            tpd.setProposalCreator(studentRepository.getOne(p.getProposalCreatorId()));
-
-            Map<Student, ProposalStatus> teamApprovalDetails = new HashMap<>();
-
-            for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
-                teamApprovalDetails.put(studentRepository.getOne(pr.getInvitedUserId()), pr.getStatus());
-            }
-
-            tpd.setMembersAndStatus(teamApprovalDetails);
-
-            proposalsDetails.add(tpd);
-        }
-
-        return proposalsDetails;
-    }
-
-    @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)")
-    public boolean setVmsResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances) {
+    public TeamDTO setVmsResourceLimits(Long teamId, SetVmsResourceLimits vmResourceLimits) {
         Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
 
         int actualVCpu = 0;
@@ -264,16 +231,16 @@ public class TeamServiceImpl implements TeamService {
             }
         }
 
-        if (actualVCpu > vCpu || actualRam > ram || actualDiskStorage > diskStorage || numOfActiveVms > maxActiveInstances || team.getVms().size() > maxTotalInstances) {
+        if (actualVCpu > vmResourceLimits.getVCpu() || actualRam > vmResourceLimits.getRam() || actualDiskStorage > vmResourceLimits.getDiskStorage() || numOfActiveVms > vmResourceLimits.getMaxActiveInstances() || team.getVms().size() > vmResourceLimits.getMaxTotalInstances()) {
             throw new TooManyActualResourcesException("Cannot set VMs resource limits, actual used resources are higher than the new limits");
         }
 
-        team.setMaxVCpu(vCpu);
-        team.setMaxRam(ram);
-        team.setMaxDiskStorage(diskStorage);
-        team.setMaxActiveInstances(maxActiveInstances);
-        team.setMaxTotalInstances(maxTotalInstances);
+        team.setMaxVCpu(vmResourceLimits.getVCpu());
+        team.setMaxRam(vmResourceLimits.getRam());
+        team.setMaxDiskStorage(vmResourceLimits.getDiskStorage());
+        team.setMaxActiveInstances(vmResourceLimits.getMaxActiveInstances());
+        team.setMaxTotalInstances(vmResourceLimits.getMaxTotalInstances());
         teamRepository.save(team);
-        return true;
+        return modelMapper.map(team, TeamDTO.class);
     }
 }

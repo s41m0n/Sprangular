@@ -3,7 +3,7 @@ package it.polito.ai.lab2.services;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
-import it.polito.ai.lab2.pojos.TeamProposalDetails;
+import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -33,7 +33,5 @@ public interface TeamService {
 
     CourseDTO getCourseForTeam(Long id);
 
-    List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId);
-
-    boolean setVmsResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances);
+    TeamDTO setVmsResourceLimits(Long teamId, SetVmsResourceLimits vmResourceLimits);
 }

@@ -91,7 +91,7 @@ class SprangularBackendTests {
     @Order(6)
     void testAddStudentToCourse() {
         Boolean verifier = courseService.getEnrolledStudents(courseID).stream().noneMatch(x -> x.getId().equals(studentID));
-        assertThat(studentService.addStudentToCourse(studentID, courseID)).isEqualTo(verifier);
+        assertThat(courseService.addStudentToCourse(studentID, courseID)).isEqualTo(verifier);
     }
 
     @Test
@@ -112,7 +112,7 @@ class SprangularBackendTests {
         try {
             Reader r = new BufferedReader(new FileReader("/home/s41m0n/Desktop/ApplicazioniInternet/labs/students.csv"));
             /*Checking only that it does not throw exception*/
-            studentService.addAndEnroll(r, courseID);
+            courseService.addAndEnroll(r, courseID);
         }catch (IOException e) {
             fail("File not found");
         }

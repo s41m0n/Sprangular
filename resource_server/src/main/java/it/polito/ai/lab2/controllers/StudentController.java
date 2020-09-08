@@ -7,6 +7,7 @@ import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotInTeamOfCourseException;
+import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.services.CustomUserDetailsService;
 import it.polito.ai.lab2.services.StudentService;
 import it.polito.ai.lab2.services.TeamService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -98,7 +100,7 @@ public class StudentController {
         }
     }
 
-    @GetMapping("/{studentId}/ownerVmsOfCourse/{courseId}")
+    @GetMapping("/{studentId}/ownedVmsOfCourse/{courseId}")
     public List<VmDTO> getOwnedVmsOfStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
         try {
             return vmService.getOwnedVmsOfStudentOfCourse(studentId, courseId);
@@ -106,6 +108,16 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (StudentNotInTeamOfCourseException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{studentId}/teamProposalsOfCourse")
+    public List<TeamProposalDetails> getProposalsForStudentOfCourse(@PathVariable String studentId, @RequestBody Map<String, String> reqBody){
+        try {
+            String courseId = reqBody.get("courseId");
+            return studentService.getProposalsForStudentOfCourse(studentId, courseId);
+        } catch (CourseNotFoundException | StudentNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 }

@@ -4,6 +4,7 @@ import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.UpdateVmDetails;
 import it.polito.ai.lab2.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,7 +129,7 @@ public class VmServiceImpl implements VmService {
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-    public VmDTO updateVmResources(Long vmId, Long teamId, int vCpu, int diskStorage, int ram) {
+    public VmDTO updateVmResources(Long vmId, Long teamId, UpdateVmDetails updateVmDetails) {
         Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
 
         if (vm.isActive()) {
@@ -151,13 +152,13 @@ public class VmServiceImpl implements VmService {
             actualDiskStorage += v.getDiskStorage();
         }
 
-        if (actualVCpu - vm.getVCpu() + vCpu > team.getMaxVCpu() || actualRam - vm.getRam() + ram > team.getMaxRam() || actualDiskStorage - vm.getDiskStorage() + diskStorage > team.getMaxDiskStorage()) {
+        if (actualVCpu - vm.getVCpu() + updateVmDetails.getVCpu() > team.getMaxVCpu() || actualRam - vm.getRam() + updateVmDetails.getRam() > team.getMaxRam() || actualDiskStorage - vm.getDiskStorage() + updateVmDetails.getDiskStorage() > team.getMaxDiskStorage()) {
             throw new MaxVmResourcesException("Cannot update VM " + vmId + " no more resources available");
         }
 
-        vm.setVCpu(vCpu);
-        vm.setRam(ram);
-        vm.setDiskStorage(diskStorage);
+        vm.setVCpu(updateVmDetails.getVCpu());
+        vm.setRam(updateVmDetails.getRam());
+        vm.setDiskStorage(updateVmDetails.getDiskStorage());
         vmRepository.save(vm);
         return modelMapper.map(vm, VmDTO.class);
     }

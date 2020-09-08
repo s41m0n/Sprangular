@@ -1,10 +1,13 @@
 package it.polito.ai.lab2.services;
 
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.UpdateCourseDetails;
 import it.polito.ai.lab2.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.Reader;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +29,12 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     ProfessorRepository professorRepository;
+
+    @Autowired
+    StudentRepository studentRepository;
+
+    @Autowired
+    StudentService studentService;
 
     @Autowired
     ModelMapper modelMapper;
@@ -97,45 +107,94 @@ public class CourseServiceImpl implements CourseService {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public boolean addProfessorToCourse(String professor, String courseId) {
         Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-        Professor p = professor.isEmpty() ? null : professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
-        if (p != null) p.addCourse(c);
+        Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
+        p.addCourse(c);
         return true;
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public boolean removeProfessorFromCourse(String professor, String courseId) {
+    public ProfessorDTO removeProfessorFromCourse(String professor, String courseId) {
         Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-        Professor p = professor.isEmpty() ? null : professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
-        if (p != null) p.removeCourse(c);
-        return true;
+        Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
+        p.removeCourse(c);
+        return modelMapper.map(p, ProfessorDTO.class);
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
-    public boolean removeCourse(String courseId) {
+    public CourseDTO removeCourse(String courseId) {
         Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
         if (c.getStudents().isEmpty()) {
             throw new CourseNotEmptyException("Course " + courseId + " has one or more students enrolled, you cannot delete it");
         }
         courseRepository.delete(c);
+        return modelMapper.map(c, CourseDTO.class);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+    public CourseDTO updateCourse(String courseId, UpdateCourseDetails updateCourseDetails) {
+        if (updateCourseDetails.getTeamMaxSize() < updateCourseDetails.getTeamMinSize()) {
+            return null;
+        }
+        Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+        c.setTeamMaxSize(updateCourseDetails.getTeamMaxSize());
+        c.setTeamMinSize(updateCourseDetails.getTeamMinSize());
+        c.setEnabled(updateCourseDetails.isEnabled());
+        courseRepository.save(c);
+        return modelMapper.map(c, CourseDTO.class);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+    public boolean addStudentToCourse(String studentId, String courseId) {
+        Student student = studentRepository.findById(studentId).orElse(null);
+        if (student == null) throw new StudentNotFoundException("Student " + studentId + " does not exist");
+
+        Course course = courseRepository.findById(courseId).orElse(null);
+        if (course == null) throw new CourseNotFoundException("Course " + courseId + " does not exist");
+
+        if (student.getCourses().contains(course) || !course.isEnabled()) return false;
+        student.addCourse(course);
         return true;
     }
 
-    //TODO: check che il DTO sia pieno
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public boolean updateCourse(String courseId, CourseDTO courseDTO) {
-        if (courseDTO.getTeamMaxSize() < courseDTO.getTeamMinSize()) {
-            return false;
+    public List<Boolean> enrollAll(List<String> studentIds, String courseId) {
+        return studentIds.stream()
+                .map(studentId -> addStudentToCourse(studentId, courseId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+    public List<Boolean> addAndEnroll(Reader r, String courseId) {
+        CsvToBean<StudentDTO> csvToBean = new CsvToBeanBuilder(r)
+                .withType(StudentDTO.class)
+                .withIgnoreLeadingWhiteSpace(true)
+                .build();
+
+        List<StudentDTO> students = csvToBean.parse();
+
+        studentService.addAll(students);
+
+        return enrollAll(students.stream().map(StudentDTO::getId).collect(Collectors.toList()), courseId);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+    public StudentDTO removeStudentFromCourse(String studentId, String courseId) {
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+
+        if(!course.getStudents().contains(student)){
+            throw new StudentNotInCourseException("Some student is not enrolled in course " + courseId);
         }
-        Course c = courseRepository.findById(courseDTO.getAcronym()).orElseThrow(() -> new CourseNotFoundException("Course " + courseDTO.getAcronym() + " does not exist"));
-        c.setName(courseDTO.getName());
-        c.setAcronym(courseDTO.getAcronym());
-        c.setTeamMaxSize(courseDTO.getTeamMaxSize());
-        c.setTeamMinSize(courseDTO.getTeamMinSize());
-        c.setEnabled(courseDTO.isEnabled());
-        courseRepository.save(c);
-        return true;
+
+        student.removeCourse(course); //symmetric method, it updates also the course
+        return modelMapper.map(student, StudentDTO.class);
     }
 }

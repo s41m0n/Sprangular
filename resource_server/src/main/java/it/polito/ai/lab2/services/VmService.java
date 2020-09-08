@@ -2,6 +2,7 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
+import it.polito.ai.lab2.pojos.UpdateVmDetails;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface VmService {
 
     VmDTO deleteVm(Long vmId, Long teamId);
 
-    VmDTO updateVmResources(Long vmId, Long teamId, int vCpu, int diskStorage, int ram);
+    VmDTO updateVmResources(Long vmId, Long teamId, UpdateVmDetails updateVmDetails);
 
     VmDTO turnOnVm(Long vmId, Long teamId);
 

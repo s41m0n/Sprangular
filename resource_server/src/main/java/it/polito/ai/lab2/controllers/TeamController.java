@@ -5,6 +5,7 @@ import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.pojos.UpdateVmDetails;
 import it.polito.ai.lab2.services.TeamService;
 import it.polito.ai.lab2.services.VmService;
@@ -104,7 +105,7 @@ public class TeamController {
     @PutMapping("/{teamId}/vms/{vmId}")
     public VmDTO updateVm(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody UpdateVmDetails uvd) {
         try {
-            return vmService.updateVmResources(vmId, teamId, uvd.getVCpu(), uvd.getDiskStorage(), uvd.getRam());
+            return vmService.updateVmResources(vmId, teamId, uvd);
         } catch (VmNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (VmNotOfTeamException e) {
@@ -156,6 +157,16 @@ public class TeamController {
             return vmService.getVmsOfTeam(teamId);
         } catch (TeamNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{teamId}/updateVmsResourceLimits")
+    public TeamDTO updateVmsResourceLimits(@PathVariable Long teamId, SetVmsResourceLimits setVmsResourceLimits){
+        try {
+            return teamService.setVmsResourceLimits(teamId, setVmsResourceLimits);
+        } catch (TooManyActualResourcesException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
