@@ -1,11 +1,9 @@
 package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.*;
-import it.polito.ai.lab2.exceptions.CourseNotFoundException;
-import it.polito.ai.lab2.exceptions.CourseProfessorNotAssigned;
-import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
-import it.polito.ai.lab2.exceptions.StudentNotFoundException;
+import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.TeamProposalRequest;
+import it.polito.ai.lab2.pojos.UpdateCourseDetails;
 import it.polito.ai.lab2.services.CourseService;
 import it.polito.ai.lab2.services.StudentService;
 import it.polito.ai.lab2.services.TeamService;
@@ -153,7 +151,7 @@ public class CourseController {
     @PutMapping("/{courseId}/professor")
     public boolean setProfessor(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
         log.info("setProfessor(" + courseId + ", " + reqBody + ") called");
-        String professor = reqBody.get("id");
+        String professor = reqBody.get("professorId");
         if (professor == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
         try {
             return courseService.addProfessorToCourse(professor, courseId);
@@ -165,10 +163,10 @@ public class CourseController {
     @PutMapping("{courseId}/enrollOne")
     public boolean enrollStudent(@RequestBody Map<String, String> reqBody, @PathVariable String courseId) {
         log.info("enrollStudent(" + courseId + ", " + reqBody + ") called");
-        String studentId = reqBody.get("id");
+        String studentId = reqBody.get("studentId");
         if (studentId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
         try {
-            return studentService.addStudentToCourse(studentId, courseId);
+            return courseService.addStudentToCourse(studentId, courseId);
         } catch (CourseNotFoundException | StudentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -180,7 +178,7 @@ public class CourseController {
         if (multipartFile.getContentType() == null || !multipartFile.getContentType().equals("text/csv"))
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
-            return studentService.addAndEnroll(new InputStreamReader(multipartFile.getInputStream()), courseId);
+            return courseService.addAndEnroll(new InputStreamReader(multipartFile.getInputStream()), courseId);
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
@@ -222,6 +220,52 @@ public class CourseController {
     public List<VmDTO> getVmsOfCourse(@PathVariable String courseId) {
         try {
             return vmService.getVmsOfCourse(courseId);
+        } catch (CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseId}/removeStudentFromCourse")
+    public StudentDTO removeStudentFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
+        try {
+            String studentId = reqBody.get("studentId");
+            return courseService.removeStudentFromCourse(studentId, courseId);
+        } catch (StudentNotFoundException | CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (StudentNotInCourseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseId}/removeProfessorFromCourse")
+    public ProfessorDTO removeProfessorFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
+        try {
+            String professorId = reqBody.get("professorId");
+            return courseService.removeProfessorFromCourse(professorId, courseId);
+        } catch (ProfessorNotFoundException | CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{courseId}")
+    public CourseDTO deleteCourse(@PathVariable String courseId) {
+        try {
+            return courseService.removeCourse(courseId);
+        } catch (CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (CourseNotEmptyException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseId}")
+    public CourseDTO updateCourse(@PathVariable String courseId, @RequestBody UpdateCourseDetails updateCourseDetails) {
+        try {
+            CourseDTO c = courseService.updateCourse(courseId, updateCourseDetails);
+            if (c == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TeamMaxSize has to be greater than TeamMinSize");
+            }
+            return c;
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
