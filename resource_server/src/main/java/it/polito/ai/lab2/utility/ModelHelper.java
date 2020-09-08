@@ -18,13 +18,13 @@ public class ModelHelper {
 
     static public CourseDTO enrich(CourseDTO courseDTO) {
         courseDTO.add(Arrays.asList(
-                linkTo(methodOn(CourseController.class).enrolledStudents(courseDTO.getName())).withRel("enrolled"),
-                linkTo(CourseController.class).slash(courseDTO.getName()).withSelfRel(),
-                linkTo(methodOn(CourseController.class).getProfessors(courseDTO.getName())).withRel("professors"),
-                linkTo(methodOn(CourseController.class).getTeams(courseDTO.getName())).withRel("teams"),
-                linkTo(methodOn(CourseController.class).getAvailableStudents(courseDTO.getName())).withRel("availableStudents"),
-                linkTo(methodOn(CourseController.class).getUnavailableStudents(courseDTO.getName())).withRel("unavailableStudents"),
-                linkTo(methodOn(CourseController.class).getVmsOfCourse(courseDTO.getName())).withRel("vms")
+                linkTo(methodOn(CourseController.class).enrolledStudents(courseDTO.getAcronym())).withRel("enrolled"),
+                linkTo(CourseController.class).slash(courseDTO.getAcronym()).withSelfRel(),
+                linkTo(methodOn(CourseController.class).getProfessors(courseDTO.getAcronym())).withRel("professors"),
+                linkTo(methodOn(CourseController.class).getTeams(courseDTO.getAcronym())).withRel("teams"),
+                linkTo(methodOn(CourseController.class).getAvailableStudents(courseDTO.getAcronym())).withRel("availableStudents"),
+                linkTo(methodOn(CourseController.class).getUnavailableStudents(courseDTO.getAcronym())).withRel("unavailableStudents"),
+                linkTo(methodOn(CourseController.class).getVmsOfCourse(courseDTO.getAcronym())).withRel("vms")
         ));
         return courseDTO;
     }

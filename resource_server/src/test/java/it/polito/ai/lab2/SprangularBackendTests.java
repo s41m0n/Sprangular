@@ -106,16 +106,4 @@ class SprangularBackendTests {
         assertThat(studentService.getAllStudents().size()).isGreaterThanOrEqualTo(1);
     }
 
-    @Test
-    @Order(9)
-    void testAddAndEnroll() {
-        try {
-            Reader r = new BufferedReader(new FileReader("/home/s41m0n/Desktop/ApplicazioniInternet/labs/students.csv"));
-            /*Checking only that it does not throw exception*/
-            courseService.addAndEnroll(r, courseID);
-        }catch (IOException e) {
-            fail("File not found");
-        }
-    }
-
 }

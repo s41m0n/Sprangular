@@ -1,0 +1,28 @@
+========== TESTED ENDPOINTS ==========
+
+CourseController:
+    - all;
+    - getOne;
+    - enrolled;
+    - professors;
+    - getTeams;
+    - getAvailableStudents;
+    - add;
+    - enableDisable;
+    - setProfessor;
+    - enrollStudent;
+
+NotificationController:
+    -
+
+ProfessorController:
+    -
+
+StudentController:
+    -
+
+TeamController:
+    -
+
+UserController:
+    -

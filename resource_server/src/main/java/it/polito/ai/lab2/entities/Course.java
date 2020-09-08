@@ -38,4 +38,12 @@ public class Course {
 
     @OneToMany(mappedBy = "course")
     List<Assignment> assignments = new ArrayList<>();
+
+    public void addProfessor(Professor professor){
+        professor.addCourse(this);
+    }
+
+    public void removeProfessor(Professor professor){
+        professor.removeCourse(this);
+    }
 }

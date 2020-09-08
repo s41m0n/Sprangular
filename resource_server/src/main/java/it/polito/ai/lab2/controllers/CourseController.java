@@ -11,6 +11,7 @@ import it.polito.ai.lab2.services.VmService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -128,9 +129,13 @@ public class CourseController {
     @PostMapping({"", "/"})
     public CourseDTO add(@RequestBody CourseDTO courseDTO) {
         log.info("add(" + courseDTO + ") called");
-        if (!courseService.addCourse(courseDTO))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Course `" + courseDTO.getAcronym() + "` already exists");
-        return ModelHelper.enrich(courseDTO);
+        try {
+            if (!courseService.addCourse(courseDTO))
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Course " + courseDTO.getAcronym() + " already exists");
+            return ModelHelper.enrich(courseDTO);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "A course with the same name (" + courseDTO.getName() + ") already exists");
+        }
     }
 
     @PutMapping("/{courseId}/enabled")
@@ -178,7 +183,7 @@ public class CourseController {
         if (multipartFile.getContentType() == null || !multipartFile.getContentType().equals("text/csv"))
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
-            return courseService.addAndEnroll(new InputStreamReader(multipartFile.getInputStream()), courseId);
+            return courseService.enrollAll(new InputStreamReader(multipartFile.getInputStream()), courseId);
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {

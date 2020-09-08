@@ -12,6 +12,7 @@ import it.polito.ai.lab2.repositories.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -42,10 +43,14 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public boolean addCourse(CourseDTO course) {
-        if (course.getTeamMaxSize() < course.getTeamMinSize() || courseRepository.existsById(course.getAcronym()))
+        if (course.getTeamMaxSize() < course.getTeamMinSize() || courseRepository.existsById(course.getAcronym())) {
             return false;
+        }
         Course c = modelMapper.map(course, Course.class);
         courseRepository.save(c);
+        if(professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent()){
+            this.addProfessorToCourse(professorRepository.getOne(SecurityContextHolder.getContext().getAuthentication().getName()).getId(), course.getAcronym());
+        }
         return true;
     }
 
@@ -162,15 +167,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public List<Boolean> enrollAll(List<String> studentIds, String courseId) {
-        return studentIds.stream()
-                .map(studentId -> addStudentToCourse(studentId, courseId))
-                .collect(Collectors.toList());
-    }
+    public List<Boolean> enrollAll(Reader r, String courseId) {
+        courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
-    @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-    public List<Boolean> addAndEnroll(Reader r, String courseId) {
         CsvToBean<StudentDTO> csvToBean = new CsvToBeanBuilder(r)
                 .withType(StudentDTO.class)
                 .withIgnoreLeadingWhiteSpace(true)
@@ -178,9 +177,14 @@ public class CourseServiceImpl implements CourseService {
 
         List<StudentDTO> students = csvToBean.parse();
 
-        studentService.addAll(students);
+        List<StudentDTO> enrolledStudents = this.getEnrolledStudents(courseId);
 
-        return enrollAll(students.stream().map(StudentDTO::getId).collect(Collectors.toList()), courseId);
+        if(enrolledStudents.containsAll(students)){
+            return students.stream()
+                    .map(studentId -> addStudentToCourse(studentId.getId(), courseId))
+                    .collect(Collectors.toList());
+        }
+        throw new StudentNotInCourseException("One or more students are not enrolled in course " + courseId);
     }
 
     @Override
@@ -190,7 +194,7 @@ public class CourseServiceImpl implements CourseService {
 
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
-        if(!course.getStudents().contains(student)){
+        if (!course.getStudents().contains(student)) {
             throw new StudentNotInCourseException("Some student is not enrolled in course " + courseId);
         }
 
