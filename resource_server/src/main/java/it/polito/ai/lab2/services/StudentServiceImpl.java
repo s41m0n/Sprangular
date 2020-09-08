@@ -71,12 +71,14 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
     public Optional<StudentDTO> getStudent(String studentId) {
         return studentRepository.findById(studentId)
                 .map(student -> modelMapper.map(student, StudentDTO.class));
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public List<StudentDTO> getAllStudents() {
         return studentRepository.findAll().stream()
                 .map(student -> modelMapper.map(student, StudentDTO.class))
@@ -129,6 +131,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
     public List<CourseDTO> getStudentCourses(String studentId) {
         return studentRepository.findById(studentId)
                 .map(student -> student.getCourses().stream()
@@ -138,6 +141,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
     public boolean removeStudentFromCourse(String studentId, String courseId) {
         Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 

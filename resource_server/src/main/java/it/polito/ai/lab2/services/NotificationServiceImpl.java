@@ -50,7 +50,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (!proposalRepository.findAllByTeamId(t.getTeamId()).isEmpty()) return false;
 
-        teamService.activeTeam(t.getTeamId());
+        teamService.activateTeam(t.getTeamId());
         return true;
     }
 

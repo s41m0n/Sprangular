@@ -41,6 +41,8 @@ public class ProfessorServiceImpl implements ProfessorService{
     PasswordEncoder passwordEncoder;
 
     @Override
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public List<ProfessorDTO> getProfessors() {
         return professorRepository.findAll().stream()
                 .map(professor -> modelMapper.map(professor, ProfessorDTO.class))
@@ -69,12 +71,14 @@ public class ProfessorServiceImpl implements ProfessorService{
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public Optional<ProfessorDTO> getProfessor(String id) {
         return professorRepository.findById(id)
                 .map(professor -> modelMapper.map(professor, ProfessorDTO.class));
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public List<CourseDTO> getProfessorCourses(String id) {
         return professorRepository.findById(id)
                 .map(p -> p.getCourses().stream()

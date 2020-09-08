@@ -59,7 +59,6 @@ public class TeamServiceImpl implements TeamService {
     @Autowired
     TaskScheduler scheduler;
 
-
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
     public List<TeamDTO> getTeamsForStudent(String studentId) {
@@ -92,7 +91,6 @@ public class TeamServiceImpl implements TeamService {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
         if (!course.isEnabled()) throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
-
 
         if (course.getTeams().stream().anyMatch(x -> x.getName().equals(name)))
             throw new TeamNameAlreadyInCourseException("Team `" + name + "` already in course `" + courseId + "`");
@@ -181,7 +179,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void activeTeam(Long id) {
+    public void activateTeam(Long id) {
         Team team = teamRepository.findById(id).orElseThrow(() -> new TeamNotFoundException("Team + " + id + " does not exist"));
         team.setStatus(1);
     }
@@ -192,7 +190,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public List<TeamDTO> getTeams() {
         return teamRepository.findAll().stream()
                 .map(t -> modelMapper.map(t, TeamDTO.class))
@@ -248,7 +246,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)")
     public boolean setVmsResourceLimits(Long teamId, int vCpu, int diskStorage, int ram, int maxActiveInstances, int maxTotalInstances) {
         Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
 

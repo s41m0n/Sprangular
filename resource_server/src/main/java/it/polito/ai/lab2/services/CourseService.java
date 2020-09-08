@@ -13,7 +13,7 @@ public interface CourseService {
 
     boolean removeCourse(String courseId);
 
-    boolean updateCourse(CourseDTO courseDTO);
+    boolean updateCourse(String courseId, CourseDTO courseDTO);
 
     Optional<CourseDTO> getCourse(String courseId);
 
