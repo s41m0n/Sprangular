@@ -162,6 +162,8 @@ public class CourseController {
             return courseService.addProfessorToCourse(professor, courseId);
         } catch (CourseNotFoundException | ProfessorNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (UserNotVerifiedException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -174,6 +176,8 @@ public class CourseController {
             return courseService.addStudentToCourse(studentId, courseId);
         } catch (CourseNotFoundException | StudentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (UserNotVerifiedException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
@@ -184,7 +188,7 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
         try {
             return courseService.enrollAll(new InputStreamReader(multipartFile.getInputStream()), courseId);
-        } catch (CourseNotFoundException e) {
+        } catch (CourseNotFoundException | StudentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

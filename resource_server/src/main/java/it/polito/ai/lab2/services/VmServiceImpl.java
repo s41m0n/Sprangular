@@ -216,6 +216,10 @@ public class VmServiceImpl implements VmService {
             throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
         }
 
+        if (!student.isVerified()) {
+            throw new UserNotVerifiedException("Student " + studentId + " is not verified");
+        }
+
         if (!vm.getOwners().contains(student)) {
             vm.addOwner(student);
         }

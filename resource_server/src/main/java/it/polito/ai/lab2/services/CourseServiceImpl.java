@@ -48,7 +48,7 @@ public class CourseServiceImpl implements CourseService {
         }
         Course c = modelMapper.map(course, Course.class);
         courseRepository.save(c);
-        if(professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent()){
+        if (professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent()) {
             this.addProfessorToCourse(professorRepository.getOne(SecurityContextHolder.getContext().getAuthentication().getName()).getId(), course.getAcronym());
         }
         return true;
@@ -113,8 +113,11 @@ public class CourseServiceImpl implements CourseService {
     public boolean addProfessorToCourse(String professor, String courseId) {
         Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
         Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
-        p.addCourse(c);
-        return true;
+        if (p.isVerified()) {
+            p.addCourse(c);
+            return true;
+        }
+        throw new UserNotVerifiedException("Professor " + professor + " is not verified");
     }
 
     @Override
@@ -160,9 +163,14 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(courseId).orElse(null);
         if (course == null) throw new CourseNotFoundException("Course " + courseId + " does not exist");
 
-        if (student.getCourses().contains(course) || !course.isEnabled()) return false;
-        student.addCourse(course);
-        return true;
+        if (student.getCourses().contains(course) || !course.isEnabled()) {
+            return false;
+        }
+        if (student.isVerified()) {
+            student.addCourse(course);
+            return true;
+        }
+        throw new UserNotVerifiedException("Student " + studentId + " is not verified");
     }
 
     @Override
@@ -179,12 +187,19 @@ public class CourseServiceImpl implements CourseService {
 
         List<StudentDTO> enrolledStudents = this.getEnrolledStudents(courseId);
 
-        if(enrolledStudents.containsAll(students)){
-            return students.stream()
-                    .map(studentId -> addStudentToCourse(studentId.getId(), courseId))
-                    .collect(Collectors.toList());
+        for (StudentDTO s : students) {
+            Student student = studentRepository.findById(s.getId()).orElseThrow(() -> new StudentNotFoundException("Student " + s.getId() + " does not exist"));
+            if (!student.isVerified()) {
+                throw new UserNotVerifiedException("Student " + s.getId() + " is not verified");
+            }
+            if (!enrolledStudents.contains(modelMapper.map(student, StudentDTO.class))) {
+                throw new StudentNotInCourseException("Student " + s.getId() + " is not enrolled in course " + courseId);
+            }
         }
-        throw new StudentNotInCourseException("One or more students are not enrolled in course " + courseId);
+
+        return students.stream()
+                .map(studentId -> addStudentToCourse(studentId.getId(), courseId))
+                .collect(Collectors.toList());
     }
 
     @Override

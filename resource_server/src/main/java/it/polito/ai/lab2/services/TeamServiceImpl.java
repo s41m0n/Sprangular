@@ -100,6 +100,10 @@ public class TeamServiceImpl implements TeamService {
 
         List<Student> members = studentRepository.findAllById(memberIds);
 
+        if(members.stream().anyMatch(User::isVerified)){
+            throw new UserNotVerifiedException("Some student's account is not verified");
+        }
+
         if (members.size() != memberIds.size())
             throw new StudentNotFoundException("Some student does not exist in the database");
 
