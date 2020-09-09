@@ -14,7 +14,6 @@ CourseController:
     - addProfessor;
     - enrollStudent;
     - enrollStudents;
-        - MANCA LA PROPOSE TEAM
     - createVmModel;
     - updateVmModel;
     - getVmsOfCourse;
@@ -22,6 +21,8 @@ CourseController:
     - removeProfessorFromCourse;
     - deleteCourse;
     - updateCourse;
+
+    MANCA PROPOSE TEAM
 
 NotificationController:
     -

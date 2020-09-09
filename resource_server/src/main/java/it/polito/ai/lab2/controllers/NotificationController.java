@@ -18,18 +18,20 @@ public class NotificationController {
     NotificationService notificationService;
 
     @GetMapping("/confirm/{token}")
-    public String confirmToken(@PathVariable String token, Model model) {
-        log.info("confirmToken(" + token +") called");
-        if(!notificationService.confirm(token)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
-        model.addAttribute("tokenResult", "You've successfully accepted the team invitation!");
-        return "token";
+    public boolean confirmToken(@PathVariable String token) {
+        log.info("confirmToken(" + token + ") called");
+        if (!notificationService.confirm(token)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
+        }
+        return true;
     }
 
     @GetMapping("/reject/{token}")
-    public String rejectToken(@PathVariable String token, Model model) {
-        log.info("rejectToken(" + token +") called");
-        if(!notificationService.reject(token)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
-        model.addAttribute("tokenResult",  "You've successfully rejected the team invitation");
-        return "token";
+    public boolean rejectToken(@PathVariable String token) {
+        log.info("rejectToken(" + token + ") called");
+        if (!notificationService.reject(token)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
+        }
+        return true;
     }
 }
