@@ -153,8 +153,8 @@ public class CourseController {
         }
     }
 
-    @PutMapping("/{courseId}/professor")
-    public boolean setProfessor(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
+    @PutMapping("/{courseId}/addProfessor")
+    public boolean addProfessor(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
         log.info("setProfessor(" + courseId + ", " + reqBody + ") called");
         String professor = reqBody.get("professorId");
         if (professor == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
@@ -181,7 +181,7 @@ public class CourseController {
         }
     }
 
-    @PostMapping("{courseId}/enrollMany")
+    @PutMapping("{courseId}/enrollMany")
     public List<Boolean> enrollStudents(@PathVariable String courseId, @RequestParam("file") MultipartFile multipartFile) {
         log.info("enrollStudents(" + courseId + ", " + multipartFile + ") called");
         if (multipartFile.getContentType() == null || !multipartFile.getContentType().equals("text/csv"))
@@ -212,7 +212,7 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/{courseId}/createVmModel")
+    @PostMapping("/{courseId}/vmModel")
     public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO) {
         try {
             if (vmService.createVmModel(vmModelDTO, courseId)) {
@@ -220,6 +220,15 @@ public class CourseController {
             } else {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Course " + courseId + " already has a VM model");
             }
+        } catch (CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseId}/vmModel")
+    public VmModelDTO updateVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO) {
+        try {
+            return vmService.updateVmModel(vmModelDTO, courseId);
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -234,7 +243,7 @@ public class CourseController {
         }
     }
 
-    @PutMapping("/{courseId}/removeStudentFromCourse")
+    @PutMapping("/{courseId}/removeStudent")
     public StudentDTO removeStudentFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
         try {
             String studentId = reqBody.get("studentId");
@@ -246,7 +255,7 @@ public class CourseController {
         }
     }
 
-    @PutMapping("/{courseId}/removeProfessorFromCourse")
+    @PutMapping("/{courseId}/removeProfessor")
     public ProfessorDTO removeProfessorFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
         try {
             String professorId = reqBody.get("professorId");

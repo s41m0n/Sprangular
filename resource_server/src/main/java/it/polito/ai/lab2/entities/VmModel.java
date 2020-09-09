@@ -23,4 +23,9 @@ public class VmModel {
   List<Vm> vms = new ArrayList<>();
 
   String imagePath;
+
+  public void assignToCourse(Course c){
+    this.course = c;
+    c.setVmModel(this);
+  }
 }

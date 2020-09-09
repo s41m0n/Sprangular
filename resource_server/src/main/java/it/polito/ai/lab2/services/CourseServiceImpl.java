@@ -125,17 +125,21 @@ public class CourseServiceImpl implements CourseService {
     public ProfessorDTO removeProfessorFromCourse(String professor, String courseId) {
         Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
         Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
-        p.removeCourse(c);
-        return modelMapper.map(p, ProfessorDTO.class);
+        if (p.getCourses().size() != 1) {
+            p.removeCourse(c);
+            return modelMapper.map(p, ProfessorDTO.class);
+        }
+        throw new CourseWithoutProfessorException("Cannot remove professor " + professor + " from course " + courseId + ", it is the only professor");
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public CourseDTO removeCourse(String courseId) {
         Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-        if (c.getStudents().isEmpty()) {
-            throw new CourseNotEmptyException("Course " + courseId + " has one or more students enrolled, you cannot delete it");
+        if (!c.getStudents().isEmpty() || !c.getAssignments().isEmpty() || !c.getTeams().isEmpty()) {
+            throw new CourseNotEmptyException("Course " + courseId + " has some students/teams/assignments associated to it");
         }
+
         courseRepository.delete(c);
         return modelMapper.map(c, CourseDTO.class);
     }
@@ -185,15 +189,10 @@ public class CourseServiceImpl implements CourseService {
 
         List<StudentDTO> students = csvToBean.parse();
 
-        List<StudentDTO> enrolledStudents = this.getEnrolledStudents(courseId);
-
         for (StudentDTO s : students) {
             Student student = studentRepository.findById(s.getId()).orElseThrow(() -> new StudentNotFoundException("Student " + s.getId() + " does not exist"));
             if (!student.isVerified()) {
                 throw new UserNotVerifiedException("Student " + s.getId() + " is not verified");
-            }
-            if (!enrolledStudents.contains(modelMapper.map(student, StudentDTO.class))) {
-                throw new StudentNotInCourseException("Student " + s.getId() + " is not enrolled in course " + courseId);
             }
         }
 
@@ -210,7 +209,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
         if (!course.getStudents().contains(student)) {
-            throw new StudentNotInCourseException("Some student is not enrolled in course " + courseId);
+            throw new StudentNotInCourseException("Student " + studentId + " is not enrolled in course " + courseId);
         }
 
         student.removeCourse(course); //symmetric method, it updates also the course

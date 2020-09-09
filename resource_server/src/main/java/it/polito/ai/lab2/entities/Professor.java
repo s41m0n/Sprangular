@@ -12,8 +12,9 @@ import java.util.List;
 @Data
 public class Professor extends User {
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "professor_course", joinColumns = @JoinColumn(name = "professor_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
+    //@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    //@JoinTable(name = "professor_course", joinColumns = @JoinColumn(name = "professor_id"), inverseJoinColumns = @JoinColumn(name = "course_acronym"))
+    @ManyToMany(mappedBy = "professors")
     List<Course> courses = new ArrayList<>();
 
     @OneToMany(mappedBy = "professor")

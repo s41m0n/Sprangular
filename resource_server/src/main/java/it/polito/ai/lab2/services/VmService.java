@@ -10,6 +10,8 @@ public interface VmService {
 
     boolean createVmModel(VmModelDTO vmModelDTO, String courseId);
 
+    VmModelDTO updateVmModel(VmModelDTO vmModelDTO, String courseId);
+
     VmDTO createVm(Long teamId, VmDTO vmDTO);
 
     VmDTO deleteVm(Long vmId, Long teamId);

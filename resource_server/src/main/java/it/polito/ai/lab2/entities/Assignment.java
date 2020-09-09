@@ -20,11 +20,11 @@ public class Assignment {
   String imagePath;
 
   @ManyToOne
-  @JoinColumn(name = "course_id")
+  @JoinColumn(name = "course_acronym")
   Course course;
 
   @ManyToOne
-  @JoinColumn(name = "professor_id")
+  @JoinColumn(name = "professor_acronym")
   Professor professor;
 
   @OneToMany(mappedBy = "assignment")

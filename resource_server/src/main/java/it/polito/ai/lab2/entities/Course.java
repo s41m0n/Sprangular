@@ -22,11 +22,13 @@ public class Course {
 
     boolean enabled;
 
-    @ManyToMany(mappedBy = "courses")
+    //@ManyToMany(mappedBy = "courses")
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "professor_course", joinColumns = @JoinColumn(name = "course_acronym"), inverseJoinColumns = @JoinColumn(name = "professor_id"))
     List<Professor> professors = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "course_student", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
+    @JoinTable(name = "course_student", joinColumns = @JoinColumn(name = "course_acronym"), inverseJoinColumns = @JoinColumn(name = "student_id"))
     List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "course")

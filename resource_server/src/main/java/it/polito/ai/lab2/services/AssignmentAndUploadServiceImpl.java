@@ -61,7 +61,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   public List<AssignmentDTO> getAssignmentsForCourse(String courseId) {
-    Course course = courseRepository.findByName(courseId)
+    Course course = courseRepository.findById(courseId)
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     return course.getAssignments().stream()
         .map(assignment -> modelMapper.map(assignment, AssignmentDTO.class))
@@ -107,7 +107,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   public AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseId, String professorId) {
-    Course course = courseRepository.findByName(courseId)
+    Course course = courseRepository.findById(courseId)
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     Professor professor = professorRepository.findById(professorId)
         .orElseThrow(() -> new ProfessorNotFoundException("Professor " + professorId + " does not exist"));
