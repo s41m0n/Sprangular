@@ -33,7 +33,6 @@ public class SprangularBackend {
                 Files.createDirectory(Paths.get(Utility.imagesRootDir));
                 Files.createDirectory(Utility.photosDir);
                 Files.createDirectory(Utility.assignmentsDir);
-                Files.createDirectory(Utility.assignmentSolutionsDir);
                 Files.createDirectory(Utility.uploadsDir);
                 Files.createDirectory(Utility.vmModelsDir);
                 Files.createDirectory(Utility.vmsDir);

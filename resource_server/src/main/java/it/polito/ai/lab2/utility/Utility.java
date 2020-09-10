@@ -10,7 +10,6 @@ public class Utility {
   public static final String imagesRootDir = "uploads";
   public static final Path photosDir = Paths.get(imagesRootDir).resolve("photos");
   public static final Path assignmentsDir = Paths.get(imagesRootDir).resolve("assignments");
-  public static final Path assignmentSolutionsDir = Paths.get(imagesRootDir).resolve("assignment-solutions");
   public static final Path uploadsDir = Paths.get(imagesRootDir).resolve("uploads");
   public static final Path vmModelsDir = Paths.get(imagesRootDir).resolve("vm-models");
   public static final Path vmsDir = Paths.get(imagesRootDir).resolve("vms");

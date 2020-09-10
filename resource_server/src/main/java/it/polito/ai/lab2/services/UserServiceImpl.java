@@ -28,10 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 
 @Service
 @Transactional
@@ -60,12 +57,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(sDetails.getId()))
             throw new UserAlreadyRegisteredException("User " + sDetails.getId() + " already registered");
         Path photoPath = Utility.photosDir.resolve(sDetails.getId());
-        try {
-            Files.copy(sDetails.getPhoto().getInputStream(), photoPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Cannot store the file: " + e.getMessage());
-        }
         Student student = new Student();
         student.setEmail(sDetails.getEmail());
         student.setId(sDetails.getId());
@@ -78,6 +69,12 @@ public class UserServiceImpl implements UserService {
         student.setVerified(false);
         student.setPhotoPath(photoPath.toString());
         userRepository.save(student);
+        try {
+            Files.copy(sDetails.getPhoto().getInputStream(), photoPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Cannot store the file: " + e.getMessage());
+        }
         //TODO: send notification to verify
     }
 
@@ -89,11 +86,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(pDetails.getId()))
             throw new UserAlreadyRegisteredException("User " + pDetails.getId() + " already registered");
         Path photoPath = Utility.photosDir.resolve(pDetails.getId());
-        try {
-            Files.copy(pDetails.getPhoto().getInputStream(), photoPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot store the file: " + e.getMessage());
-        }
         Professor professor = new Professor();
         professor.setEmail(pDetails.getEmail());
         professor.setId(pDetails.getId());
@@ -106,6 +98,11 @@ public class UserServiceImpl implements UserService {
         professor.setVerified(false);
         professor.setPhotoPath(photoPath.toString());
         userRepository.save(professor);
+        try {
+            Files.copy(pDetails.getPhoto().getInputStream(), photoPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot store the file: " + e.getMessage());
+        }
         //TODO: send notification to verify
     }
 
