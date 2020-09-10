@@ -90,14 +90,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
-    public List<Boolean> addAll(List<StudentDTO> students) {
-        return students.stream()
-                .map(this::addStudent)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
     public List<CourseDTO> getStudentCourses(String studentId) {
         return studentRepository.findById(studentId)
@@ -125,6 +117,7 @@ public class StudentServiceImpl implements StudentService {
             TeamProposalDetails tpd = new TeamProposalDetails();
             tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
             tpd.setProposalCreator(studentRepository.getOne(p.getProposalCreatorId()));
+            tpd.setToken(p.getId());
 
             Map<Student, ProposalStatus> teamApprovalDetails = new HashMap<>();
 

@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 public class Proposal {
 
     @Id
-    String id;
+    String id; //= token
 
     String proposalCreatorId;
 

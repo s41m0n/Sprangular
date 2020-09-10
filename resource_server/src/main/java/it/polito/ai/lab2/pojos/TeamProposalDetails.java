@@ -12,6 +12,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class TeamProposalDetails {
 
+    String token; //ci serve per creare il link cliccabile nel frontend
+
     Student proposalCreator;
 
     String teamName;

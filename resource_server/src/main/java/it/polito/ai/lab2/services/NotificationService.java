@@ -12,6 +12,6 @@ public interface NotificationService {
 
     boolean reject(String token);
 
-    void notifyTeam(TeamDTO dto, List<String> memberIds);
+    void notifyTeam(TeamDTO dto, List<String> memberIds, String courseId);
 
 }

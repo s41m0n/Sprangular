@@ -1,5 +1,6 @@
 package it.polito.ai.lab2.controllers;
 
+import com.sun.istack.NotNull;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
@@ -7,6 +8,7 @@ import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.pojos.UpdateVmDetails;
+import it.polito.ai.lab2.services.NotificationService;
 import it.polito.ai.lab2.services.TeamService;
 import it.polito.ai.lab2.services.VmService;
 import it.polito.ai.lab2.utility.ModelHelper;
@@ -30,6 +32,9 @@ public class TeamController {
 
     @Autowired
     VmService vmService;
+
+    @Autowired
+    NotificationService notificationService;
 
     @GetMapping({"", "/"})
     public List<TeamDTO> all() {
@@ -141,7 +146,7 @@ public class TeamController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/{teamId}/vms/{vmId}/addOwner")
-    public void addVmOwner(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody Map<String, String> reqBody) {
+    public void addVmOwner(@PathVariable Long teamId, @PathVariable Long vmId, @NotNull @RequestBody Map<String, String> reqBody) {
         try {
             vmService.addVmOwner(vmId, teamId, reqBody.get("studentId"));
         } catch (VmNotFoundException | TeamNotFoundException e) {
@@ -170,6 +175,22 @@ public class TeamController {
         } catch (TooManyActualResourcesException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
+    }
+
+    @GetMapping("/confirmInvitation/{token}")
+    public boolean confirmInvitation(@PathVariable String token) {
+        if (!notificationService.confirm(token)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
+        }
+        return true;
+    }
+
+    @GetMapping("/rejectInvitation/{token}")
+    public boolean rejectInvitation(@PathVariable String token) {
+        if (!notificationService.reject(token)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
+        }
+        return true;
     }
 
 }

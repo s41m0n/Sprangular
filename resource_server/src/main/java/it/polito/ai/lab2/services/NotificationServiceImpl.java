@@ -3,6 +3,7 @@ package it.polito.ai.lab2.services;
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.Proposal;
 import it.polito.ai.lab2.repositories.ProposalRepository;
+import it.polito.ai.lab2.utility.ProposalStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -42,53 +43,62 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public boolean confirm(String token) {
-        Proposal t = proposalRepository.findById(token).orElse(null);
+        Proposal proposal = proposalRepository.findById(token).orElse(null);
 
-        if (t == null || t.getDeadline().before(new Timestamp(System.currentTimeMillis()))) return false;
+        if (proposal == null) {
+            return false;
+        }
 
-        proposalRepository.delete(t);
+        if(proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))){ //if the proposal is expired I delete all the proposals
+            proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+            return false;
+        }
 
-        if (!proposalRepository.findAllByTeamId(t.getTeamId()).isEmpty()) return false;
+        proposal.setStatus(ProposalStatus.ACCEPTED);
+        proposalRepository.save(proposal);
 
-        teamService.activateTeam(t.getTeamId());
+        for(Proposal p : proposalRepository.findAllByTeamId(proposal.getTeamId())) {
+            if(p.getStatus() == ProposalStatus.PENDING) {
+                return false; //There is at least one proposal which is in pending status
+            }
+        }
+
+        teamService.activateTeam(proposal.getTeamId());
+        proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
         return true;
     }
 
     @Override
     public boolean reject(String token) {
-        Proposal t = proposalRepository.findById(token).orElse(null);
-        if (t == null || t.getDeadline().before(new Timestamp(System.currentTimeMillis())))
-            return false;
+        Proposal proposal = proposalRepository.findById(token).orElse(null);
 
-        proposalRepository.deleteAll(proposalRepository.findAllByTeamId(t.getTeamId()));
-        teamService.evictTeam(t.getTeamId());
+        if (proposal == null) {
+            return false;
+        }
+
+        if(proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))){ //if the proposal is expired I delete all the proposals
+            proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+            return false;
+        }
+
+        proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+        teamService.evictTeam(proposal.getTeamId());
         return true;
     }
 
     @Override
-    @Transactional
-    public void notifyTeam(TeamDTO dto, List<String> memberIds) {
-        Timestamp expiryDate = new Timestamp(System.currentTimeMillis() + 3600000);
-        String members = String.join("\n- s", memberIds);
+    public void notifyTeam(TeamDTO dto, List<String> memberIds, String courseId) {
+        String members = String.join("\n- ", memberIds);
+        String url = "http://localhost:8080/API/courses/" + courseId; //TODO: fatti dare link giusto
 
         memberIds.remove(SecurityContextHolder.getContext().getAuthentication().getName());
         memberIds.forEach(memberId -> {
-            Proposal proposal = new Proposal();
-            proposal.setDeadline(expiryDate);
-            proposal.setId((UUID.randomUUID().toString()));
-            proposal.setTeamId(dto.getId());
-
-            proposalRepository.save(proposal);
-
-            String email = "s" +  memberId + "@studenti.polito.it";
-            String confirm = "http://localhost:8080/API/notification/confirm/" + proposal.getId();
-            String reject = "http://localhost:8080/API/notification/reject/" + proposal.getId();
+            String email = memberId + "@studenti.polito.it";
             sendMessage(email, "[SpringExample] Someone wants to create a team with you",
                     "Dear " + email + ",\n\n" +
                             "You have been requested to create the team `" + dto.getName() +"`.\n" +
-                    "The members would be:\n- s" + members +
-                    "\n\nIf you are willing to confirm, visit the url ->" + confirm +
-                    "\nOtherwise, to reject visit -> " + reject +
+                    "The members would be:\n- " + members +
+                    "\n\nTo confirm or reject the proposal enter in your personal page at ->" + url +
                     "\n\nBest Regards,\nSpringExample Team");
         });
     }
