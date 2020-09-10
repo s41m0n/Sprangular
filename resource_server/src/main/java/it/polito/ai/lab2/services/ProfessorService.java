@@ -10,8 +10,6 @@ public interface ProfessorService {
 
     List<ProfessorDTO> getProfessors();
 
-    boolean addProfessor(ProfessorDTO professorDTO);
-
     Optional<ProfessorDTO> getProfessor(String professorId);
 
     List<CourseDTO> getProfessorCourses(String professorId);

@@ -50,27 +50,6 @@ public class ProfessorServiceImpl implements ProfessorService{
     }
 
     @Override
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public boolean addProfessor(ProfessorDTO professorDTO) {
-        if (userRepository.findById(professorDTO.getId()).isPresent()) return false;
-
-        Role role = roleRepository.findByName("ROLE_PROFESSOR").orElseGet(() -> {
-            Role r = new Role();
-            r.setName("ROLE_PROFESSOR");
-            return r;
-        });
-
-        Professor p = modelMapper.map(professorDTO, Professor.class);
-        String pwd = RandomStringUtils.random(10, true, true);
-        p.setPassword(passwordEncoder.encode(pwd));
-        p.addRole(role);
-        p.setVerified(false);
-        userRepository.save(p);
-        notificationService.sendMessage("p" + professorDTO.getId() + "@polito.it", "Account Creation", getPredefinedRegisterMessage(professorDTO.getId(), pwd));
-        return true;
-    }
-
-    @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
     public Optional<ProfessorDTO> getProfessor(String id) {
         return professorRepository.findById(id)

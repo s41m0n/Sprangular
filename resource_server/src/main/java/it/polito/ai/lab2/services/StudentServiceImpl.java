@@ -54,27 +54,6 @@ public class StudentServiceImpl implements StudentService {
     PasswordEncoder passwordEncoder;
 
     @Override
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
-    public boolean addStudent(StudentDTO student) {
-        if (userRepository.findById(student.getId()).isPresent()) return false;
-
-        Role role = roleRepository.findByName("ROLE_STUDENT").orElseGet(() -> {
-            Role r = new Role();
-            r.setName("ROLE_STUDENT");
-            return r;
-        });
-
-        Student s = modelMapper.map(student, Student.class);
-        String pwd = RandomStringUtils.random(10, true, true);
-        s.setPassword(passwordEncoder.encode(pwd));
-        s.getRoles().add(role);
-        s.setVerified(false);
-        userRepository.save(s);
-        notificationService.sendMessage("s" + student.getId() + "@studenti.polito.it", "Account Creation", getPredefinedRegisterMessage(student.getId(), pwd));
-        return true;
-    }
-
-    @Override
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
     public Optional<StudentDTO> getStudent(String studentId) {
         return studentRepository.findById(studentId)
@@ -131,13 +110,5 @@ public class StudentServiceImpl implements StudentService {
         }
 
         return proposalsDetails;
-    }
-
-    private String getPredefinedRegisterMessage(String id, String pwd) {
-        return "Welcome to SpringExample app!\n\n" +
-                "Your access credentials are:\n" +
-                "-Username: " + id +
-                "\n-Password: " + pwd + "" +
-                "\n\nAuthenticate through http://localhost:8080/API/authenticate and enjoy!";
     }
 }

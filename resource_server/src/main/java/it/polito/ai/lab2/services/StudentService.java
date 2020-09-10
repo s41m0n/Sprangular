@@ -13,8 +13,6 @@ public interface StudentService {
 
     List<StudentDTO> getAllStudents();
 
-    boolean addStudent(StudentDTO student);
-
     List<CourseDTO> getStudentCourses(String studentId);
 
     List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId);

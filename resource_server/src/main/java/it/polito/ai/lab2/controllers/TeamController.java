@@ -146,7 +146,7 @@ public class TeamController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/{teamId}/vms/{vmId}/addOwner")
-    public void addVmOwner(@PathVariable Long teamId, @PathVariable Long vmId, @NotNull @RequestBody Map<String, String> reqBody) {
+    public void addVmOwner(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody Map<String, String> reqBody) {
         try {
             vmService.addVmOwner(vmId, teamId, reqBody.get("studentId"));
         } catch (VmNotFoundException | TeamNotFoundException e) {

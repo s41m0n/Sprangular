@@ -1,6 +1,5 @@
 package it.polito.ai.lab2.controllers;
 
-import com.sun.istack.NotNull;
 import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.TeamProposalRequest;
@@ -140,7 +139,7 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}/enabled")
-    public void enableDisable(@PathVariable String courseId, @NotNull @RequestBody Map<String, Boolean> reqBody) {
+    public void enableDisable(@PathVariable String courseId, @RequestBody Map<String, Boolean> reqBody) {
         log.info("enableDisable(" + courseId + ", " + reqBody + ") called");
         Boolean enable = reqBody.get("enabled");
         if (enable == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "enabled {true,false} required");
@@ -155,7 +154,7 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}/addProfessor")
-    public boolean addProfessor(@PathVariable String courseId, @NotNull @RequestBody Map<String, String> reqBody) {
+    public boolean addProfessor(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
         log.info("setProfessor(" + courseId + ", " + reqBody + ") called");
         String professor = reqBody.get("professorId");
         if (professor == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
@@ -169,7 +168,7 @@ public class CourseController {
     }
 
     @PutMapping("{courseId}/enrollOne")
-    public boolean enrollStudent(@NotNull @RequestBody Map<String, String> reqBody, @PathVariable String courseId) {
+    public boolean enrollStudent(@RequestBody Map<String, String> reqBody, @PathVariable String courseId) {
         log.info("enrollStudent(" + courseId + ", " + reqBody + ") called");
         String studentId = reqBody.get("studentId");
         if (studentId == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "id required");
@@ -245,7 +244,7 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}/removeStudent")
-    public StudentDTO removeStudentFromCourse(@PathVariable String courseId, @NotNull @RequestBody Map<String, String> reqBody) {
+    public StudentDTO removeStudentFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
         try {
             String studentId = reqBody.get("studentId");
             return courseService.removeStudentFromCourse(studentId, courseId);
@@ -257,7 +256,7 @@ public class CourseController {
     }
 
     @PutMapping("/{courseId}/removeProfessor")
-    public ProfessorDTO removeProfessorFromCourse(@PathVariable String courseId, @NotNull @RequestBody Map<String, String> reqBody) {
+    public ProfessorDTO removeProfessorFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
         try {
             String professorId = reqBody.get("professorId");
             return courseService.removeProfessorFromCourse(professorId, courseId);

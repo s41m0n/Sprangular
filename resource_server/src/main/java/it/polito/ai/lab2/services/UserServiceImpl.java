@@ -1,7 +1,5 @@
 package it.polito.ai.lab2.services;
 
-import it.polito.ai.lab2.SprangularBackend;
-import it.polito.ai.lab2.dtos.UserDTO;
 import it.polito.ai.lab2.entities.Professor;
 import it.polito.ai.lab2.entities.Role;
 import it.polito.ai.lab2.entities.Student;
@@ -11,23 +9,16 @@ import it.polito.ai.lab2.exceptions.UserAlreadyRegisteredException;
 import it.polito.ai.lab2.exceptions.UserNotFoundException;
 import it.polito.ai.lab2.exceptions.UserRoleNotFounException;
 import it.polito.ai.lab2.pojos.RegistrationDetails;
-import it.polito.ai.lab2.repositories.ProfessorRepository;
 import it.polito.ai.lab2.repositories.RoleRepository;
-import it.polito.ai.lab2.repositories.StudentRepository;
 import it.polito.ai.lab2.repositories.UserRepository;
 import it.polito.ai.lab2.utility.Utility;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.RoleNotFoundException;
 import javax.transaction.Transactional;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.file.*;
 
 @Service
@@ -64,7 +55,7 @@ public class UserServiceImpl implements UserService {
         student.setSurname(sDetails.getSurname());
         student.setPassword(passwordEncoder.encode(sDetails.getPassword()));
         Role role = roleRepository.findByName("ROLE_STUDENT")
-            .orElseThrow(() -> new UserRoleNotFounException("ROLE_STUDENT not found"));
+                .orElseThrow(() -> new UserRoleNotFounException("ROLE_STUDENT not found"));
         student.addRole(role);
         student.setVerified(false);
         student.setPhotoPath(photoPath.toString());
@@ -75,7 +66,7 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             throw new RuntimeException("Cannot store the file: " + e.getMessage());
         }
-        //TODO: send notification to verify
+        notificationService.sendMessage(sDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(sDetails.getId()));
     }
 
     @Override
@@ -93,7 +84,7 @@ public class UserServiceImpl implements UserService {
         professor.setSurname(pDetails.getSurname());
         professor.setPassword(passwordEncoder.encode(pDetails.getPassword()));
         Role role = roleRepository.findByName("ROLE_PROFESSOR")
-            .orElseThrow(() -> new UserRoleNotFounException("ROLE_PROFESSOR not found"));
+                .orElseThrow(() -> new UserRoleNotFounException("ROLE_PROFESSOR not found"));
         professor.addRole(role);
         professor.setVerified(false);
         professor.setPhotoPath(photoPath.toString());
@@ -103,7 +94,7 @@ public class UserServiceImpl implements UserService {
         } catch (IOException e) {
             throw new RuntimeException("Cannot store the file: " + e.getMessage());
         }
-        //TODO: send notification to verify
+        notificationService.sendMessage(pDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(pDetails.getId()));
     }
 
     @Override
@@ -115,5 +106,14 @@ public class UserServiceImpl implements UserService {
             return true;
         }
         return false; //user already verified
+    }
+
+    private String getPredefinedRegisterMessage(String id) {
+        String url = "http://localhost:8080/API/users/" + id + "/confirmEmail";
+        return "Welcome to SpringExample app!\n\n" +
+                "Your username to access the system is:" + id +
+                "\n\nConfirm your email address clicking this link:\n" + url +
+                "\n\nAuthenticate through: http://localhost:8080/API/authentication/login" +
+                "\n\nBest Regards,\nthe SpringExample Team";
     }
 }
