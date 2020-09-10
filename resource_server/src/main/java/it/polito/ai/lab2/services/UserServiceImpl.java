@@ -43,8 +43,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void registerStudent(RegistrationDetails sDetails) {
         if (!sDetails.getEmail().substring(0, 7).equals(sDetails.getId())
-                || !sDetails.getEmail().matches("^s[0-9]{6}@studenti.polito.it$"))
-            throw new InvalidIdEmailException("Student format: id -> s<6 numbers>, email -> <id>@studenti.polito.it");
+                || !sDetails.getEmail().matches("^s[1-9][0-9]*@studenti.polito.it$"))
+            throw new InvalidIdEmailException("Student format: id -> s<numbers>, email -> <id>@studenti.polito.it");
         if (userRepository.existsById(sDetails.getId()))
             throw new UserAlreadyRegisteredException("User " + sDetails.getId() + " already registered");
         Path photoPath = Utility.photosDir.resolve(sDetails.getId());
@@ -72,8 +72,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void registerProfessor(RegistrationDetails pDetails) {
         if (!pDetails.getEmail().substring(0, 7).equals(pDetails.getId())
-                || !pDetails.getEmail().matches("^d[0-9]{6}@polito.it$"))
-            throw new InvalidIdEmailException("Professor format: id -> d<6 numbers>, email -> <id>@polito.it");
+                || !pDetails.getEmail().matches("^d[1-9][0-9]*@polito.it$"))
+            throw new InvalidIdEmailException("Professor format: id -> d<numbers>, email -> <id>@polito.it");
         if (userRepository.existsById(pDetails.getId()))
             throw new UserAlreadyRegisteredException("User " + pDetails.getId() + " already registered");
         Path photoPath = Utility.photosDir.resolve(pDetails.getId());
