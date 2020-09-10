@@ -1,5 +1,6 @@
 package it.polito.ai.lab2.controllers;
 
+import com.sun.istack.NotNull;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
@@ -112,7 +113,7 @@ public class StudentController {
     }
 
     @GetMapping("/{studentId}/teamProposalsOfCourse")
-    public List<TeamProposalDetails> getProposalsForStudentOfCourse(@PathVariable String studentId, @RequestBody Map<String, String> reqBody){
+    public List<TeamProposalDetails> getProposalsForStudentOfCourse(@PathVariable String studentId, @NotNull @RequestBody Map<String, String> reqBody){
         try {
             String courseId = reqBody.get("courseId");
             return studentService.getProposalsForStudentOfCourse(studentId, courseId);

@@ -151,7 +151,7 @@ public class TeamServiceImpl implements TeamService {
                 }
             };
             scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
-            notificationService.notifyTeam(t, memberIds);
+            notificationService.notifyTeam(t, memberIds, courseId);
         }
         return t;
     }
