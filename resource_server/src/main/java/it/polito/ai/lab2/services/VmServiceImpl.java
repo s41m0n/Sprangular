@@ -134,17 +134,24 @@ public class VmServiceImpl implements VmService {
         vm.setVCpu(vmDTO.getVCpu());
         vm.setRam(vmDTO.getRam());
         vm.setDiskStorage(vmDTO.getDiskStorage());
-        vm.setImagePath(vmDTO.getImagePath());
         vm.setTeam(team);
         vm.addOwner(owner);
-        vmRepository.save(vm);
-        return modelMapper.map(vm, VmDTO.class);
+        Vm savedVm = vmRepository.save(vm);
+        Path vmPath = Utility.vmsDir.resolve(savedVm.getId().toString());
+        savedVm.setImagePath(vmPath.toString());
+        try {
+            Files.copy(Paths.get(vm.getVmModel().getImagePath()), vmPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot store the file: " + e.getMessage());
+        }
+        return modelMapper.map(savedVm, VmDTO.class);
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
     public VmDTO deleteVm(Long vmId, Long teamId) {
-        Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
+        Vm vm = vmRepository.findById(vmId)
+            .orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
 
         if (!vm.getTeam().getId().equals(teamId)) {
             throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
@@ -152,6 +159,11 @@ public class VmServiceImpl implements VmService {
 
         if (!vm.isActive()) {
             vmRepository.delete(vm);
+            try {
+                Files.delete(Paths.get(vm.getImagePath()));
+            } catch (IOException e) {
+                throw new RuntimeException("Cannot delete the file: " + e.getMessage());
+            }
             return modelMapper.map(vm, VmDTO.class);
         }
         throw new CannotDeleteVmException("VM " + vmId + " cannot be deleted. VM is still active");
