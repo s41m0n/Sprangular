@@ -5,6 +5,8 @@ import it.polito.ai.lab2.dtos.AssignmentSolutionDTO;
 import it.polito.ai.lab2.dtos.UploadDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.AssignmentDetails;
+import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.AssignmentStatus;
 import it.polito.ai.lab2.utility.Utility;
@@ -14,15 +16,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -106,12 +109,15 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  public AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseId, String professorId) {
+  public AssignmentDTO createAssignment(AssignmentDetails details, String courseId, String professorId) {
     Course course = courseRepository.findById(courseId)
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     Professor professor = professorRepository.findById(professorId)
         .orElseThrow(() -> new ProfessorNotFoundException("Professor " + professorId + " does not exist"));
-    Assignment assignment = modelMapper.map(assignmentDTO, Assignment.class);
+    Assignment assignment = new Assignment();
+    assignment.setName(details.getName());
+    assignment.setReleaseDate(details.getReleaseDate());
+    assignment.setDueDate(details.getDueDate());
     assignment.setCourse(course);
     assignment.setProfessor(professor);
     course.getStudents().forEach(student -> {
@@ -122,25 +128,44 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           assignmentSolution.setStatus(AssignmentStatus.NULL);
           assignmentSolutionRepository.save(assignmentSolution);
         });
-    Runnable automaticDelivery = () -> {
-      assignment.getSolutions().forEach(
-          assignmentSolution -> assignmentSolution.setStatus(AssignmentStatus.DELIVERED)
-      );
-    };
+    Assignment savedAssignment = assignmentRepository.save(assignment);
+    Path assignmentPath = Utility.assignmentsDir.resolve(savedAssignment.getId().toString());
+    savedAssignment.setImagePath(assignmentPath.toString());
+    try {
+      Files.copy(details.getDocument().getInputStream(), assignmentPath, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot store the file: " + e.getMessage());
+    }
+
+    Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
+        assignmentSolution -> assignmentSolution.setStatus(AssignmentStatus.DELIVERED)
+    );
     scheduler.schedule(automaticDelivery, new CronTrigger(Utility.timestampToCronTrigger(assignment.getDueDate())));
-    return modelMapper.map(assignmentRepository.save(assignment), AssignmentDTO.class);
+    return modelMapper.map(savedAssignment, AssignmentDTO.class);
   }
 
   @Override
-  public UploadDTO uploadStudentUpload(UploadDTO uploadDTO, Long assignmentSolutionId) {
+  public UploadDTO uploadStudentUpload(UploadDetails details, Long assignmentSolutionId) {
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
             "Assignment solution " + assignmentSolutionId + " does not exist"));
-    StudentUpload studentUpload = modelMapper.map(uploadDTO, StudentUpload.class);
+    StudentUpload studentUpload = new StudentUpload();
     studentUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    studentUpload.setComment(details.getComment());
+    studentUpload.setAssignmentSolution(assignmentSolution);
     assignmentSolution.getStudentUploads().add(studentUpload);
     assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
-    return modelMapper.map(studentUploadRepository.save(studentUpload), UploadDTO.class);
+
+    StudentUpload savedUpload = studentUploadRepository.save(studentUpload);
+    Path uploadPath = Utility.uploadsDir.resolve(savedUpload.getId().toString());
+    savedUpload.setImagePath(uploadPath.toString());
+    try {
+      Files.copy(details.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot store the file: " + e.getMessage());
+    }
+
+    return modelMapper.map(savedUpload, UploadDTO.class);
   }
 
   @Override
@@ -161,18 +186,29 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  public UploadDTO uploadProfessorUpload(UploadDTO uploadDTO, Long studentUploadId, boolean reUploadable) {
+  public UploadDTO uploadProfessorUpload(UploadDetails details, Long studentUploadId, boolean reUploadable) {
     StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId)
         .orElseThrow(() -> new StudentUploadNotFoundException("Student upload " + studentUploadId + " does not exist"));
-    ProfessorUpload professorUpload = modelMapper.map(uploadDTO, ProfessorUpload.class);
+    ProfessorUpload professorUpload = new ProfessorUpload();
     professorUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    professorUpload.setComment(details.getComment());
     studentUpload.setTeacherRevision(professorUpload);
     professorUpload.setRevisedSolution(studentUpload);
     if (reUploadable)
       studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED_UPLOADABLE);
     else
       studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED);
-    return modelMapper.map(professorUploadRepository.save(professorUpload), UploadDTO.class);
+
+    ProfessorUpload savedUpload = professorUploadRepository.save(professorUpload);
+    Path uploadPath = Utility.uploadsDir.resolve(savedUpload.getId().toString());
+    savedUpload.setImagePath(uploadPath.toString());
+    try {
+      Files.copy(details.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING)
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot store the file: " + e.getMessage());
+    }
+
+    return modelMapper.map(savedUpload, UploadDTO.class);
   }
 
   @Override
