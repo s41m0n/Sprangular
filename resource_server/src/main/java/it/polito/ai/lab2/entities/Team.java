@@ -17,7 +17,7 @@ public class Team {
     @Column(unique = true)
     String name;
 
-    int status;
+    boolean active;
 
     @ManyToOne
     @JoinColumn(name = "course_acronym")

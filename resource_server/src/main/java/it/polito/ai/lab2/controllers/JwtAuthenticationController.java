@@ -2,9 +2,7 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.config.JwtTokenUtil;
 import it.polito.ai.lab2.dtos.UserDTO;
-import it.polito.ai.lab2.exceptions.InvalidIdEmailException;
-import it.polito.ai.lab2.exceptions.UserAlreadyRegisteredException;
-import it.polito.ai.lab2.exceptions.UserNotVerifiedException;
+import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.RegistrationDetails;
 import it.polito.ai.lab2.services.CustomUserDetailsService;
 import it.polito.ai.lab2.services.UserService;
@@ -43,7 +41,7 @@ public class JwtAuthenticationController {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getId(), authenticationRequest.getPassword()));
         } catch (DisabledException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User `" + authenticationRequest.getId() + "` is disabled");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User " + authenticationRequest.getId() + " is disabled");
         } catch (BadCredentialsException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials {" + authenticationRequest.getId() + "," + authenticationRequest.getPassword() + "}");
         } catch (InternalAuthenticationServiceException e) {
@@ -83,5 +81,14 @@ public class JwtAuthenticationController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/confirmEmail/{token}")
+    public ResponseEntity<?> confirmEmail(@PathVariable String id, @PathVariable String token) {
+        try {
+            return ResponseEntity.ok(userService.confirmEmail(id, token));
+        } catch (UserNotFoundException | ConfirmEmailTokenNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }

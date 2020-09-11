@@ -2,11 +2,8 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
-import it.polito.ai.lab2.entities.Professor;
-import it.polito.ai.lab2.entities.Role;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
 import it.polito.ai.lab2.repositories.*;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class ProfessorServiceImpl implements ProfessorService{
+public class ProfessorServiceImpl implements ProfessorService {
 
     @Autowired
     UserRepository userRepository;
@@ -64,13 +61,5 @@ public class ProfessorServiceImpl implements ProfessorService{
                         .map(course -> modelMapper.map(course, CourseDTO.class))
                         .collect(Collectors.toList()))
                 .orElseThrow(() -> new ProfessorNotFoundException("Professor `" + id + "` does not exist"));
-    }
-
-    private String getPredefinedRegisterMessage(String id, String pwd) {
-        return "Welcome to SpringExample app!\n\n" +
-                "Your access credentials are:\n" +
-                "-Username: " + id +
-                "\n-Password: " + pwd + "" +
-                "\n\nAuthenticate through http://localhost:8080/API/authenticate and enjoy!";
     }
 }

@@ -6,5 +6,5 @@ import it.polito.ai.lab2.pojos.RegistrationDetails;
 public interface UserService {
     void registerStudent(RegistrationDetails studentRegistrationDetails);
     void registerProfessor(RegistrationDetails professorRegistrationDetails);
-    boolean confirmEmail(String id);
+    boolean confirmEmail(String id, String token);
 }

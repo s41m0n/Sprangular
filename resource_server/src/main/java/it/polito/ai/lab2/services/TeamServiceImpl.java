@@ -124,12 +124,13 @@ public class TeamServiceImpl implements TeamService {
         team.setMembers(members);
         team.setCourse(course);
         team.setName(name);
-        team.setStatus(isAlone ? 1 : 0);
+        team.setActive(isAlone);
         TeamDTO t = modelMapper.map(teamRepository.save(team), TeamDTO.class);
         if (!isAlone) {
             members.forEach(
                     member -> {
                         Proposal proposal = new Proposal();
+                        proposal.setId(UUID.randomUUID().toString());
                         proposal.setProposalCreatorId(creator.getId());
                         proposal.setInvitedUserId(member.getId());
                         proposal.setTeamId(t.getId());
@@ -185,7 +186,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void activateTeam(Long id) {
         Team team = teamRepository.findById(id).orElseThrow(() -> new TeamNotFoundException("Team + " + id + " does not exist"));
-        team.setStatus(1);
+        team.setActive(true);
     }
 
     @Override

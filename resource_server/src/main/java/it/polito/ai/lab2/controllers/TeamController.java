@@ -1,6 +1,5 @@
 package it.polito.ai.lab2.controllers;
 
-import com.sun.istack.NotNull;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;

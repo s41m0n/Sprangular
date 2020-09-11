@@ -47,17 +47,6 @@ class SprangularBackendTests {
     }
 
     @Test
-    @Order(2)
-    void testAddStudent() {
-        Boolean verifier = studentService.getStudent(studentID).orElse(null) == null;
-        StudentDTO s = new StudentDTO();
-        s.setId(studentID);
-        s.setName("Test");
-        s.setSurname("Test");
-        assertThat(studentService.addStudent(s)).isEqualTo(verifier);
-    }
-
-    @Test
     @Order(3)
     void testAddCourse() {
         Boolean verifier = courseService.getCourse(courseID).orElse(null) == null;

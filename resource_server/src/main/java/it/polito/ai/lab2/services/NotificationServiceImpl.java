@@ -99,7 +99,7 @@ public class NotificationServiceImpl implements NotificationService {
                             "You have been requested to create the team `" + dto.getName() +"`.\n" +
                     "The members would be:\n- " + members +
                     "\n\nTo confirm or reject the proposal enter in your personal page at ->" + url +
-                    "\n\nBest Regards,\nthe SpringExample Team");
+                    "\n\nBest Regards,\nSpringExample Team");
         });
     }
 

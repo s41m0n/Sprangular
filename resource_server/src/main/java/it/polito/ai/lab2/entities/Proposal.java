@@ -9,7 +9,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import java.sql.Timestamp;
 
-
 @Entity
 @Data
 public class Proposal {

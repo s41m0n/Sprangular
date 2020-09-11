@@ -50,11 +50,4 @@ public class ProfessorController {
         }
     }
 
-    @PostMapping({"", "/"})
-    public ProfessorDTO add(@RequestBody ProfessorDTO professorDTO) {
-        log.info("add(" + professorDTO + ") called");
-        if(!professorService.addProfessor(professorDTO)) throw new ResponseStatusException(HttpStatus.CONFLICT, professorDTO.getId());
-        return ModelHelper.enrich(professorDTO);
-    }
-
 }

@@ -1,6 +1,5 @@
 package it.polito.ai.lab2.controllers;
 
-import com.sun.istack.NotNull;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
@@ -17,7 +16,6 @@ import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -55,7 +53,7 @@ public class StudentController {
         log.info("getOne(" + id + ") called");
         return studentService.getStudent(id)
                 .map(ModelHelper::enrich)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student `" + id + "` does not exist"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student " + id + " does not exist"));
     }
 
     @GetMapping("/{id}/courses")
@@ -80,14 +78,6 @@ public class StudentController {
         } catch (StudentNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
-    }
-
-    @PostMapping({"", "/"})
-    public StudentDTO add(@RequestBody StudentDTO studentDTO) {
-        log.info("add(" + studentDTO + ") called");
-        if (!studentService.addStudent(studentDTO))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already present student `" + studentDTO.getId() + "`");
-        return ModelHelper.enrich(studentDTO);
     }
 
     @GetMapping("/{studentId}/vmsOfCourse/{courseId}")

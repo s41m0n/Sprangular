@@ -19,7 +19,7 @@ public class TeamDTO extends RepresentationModel<TeamDTO> {
     @NotEmpty
     String name;
 
-    int status;
+    boolean active;
 
     int maxVCpu;
 

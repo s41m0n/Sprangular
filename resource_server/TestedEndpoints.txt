@@ -20,18 +20,32 @@ CourseController:
     - removeStudentFromCourse;
     - removeProfessorFromCourse;
     - deleteCourse;
-    - updateCourse;
+    - updateCourse.
 
-    MANCA PROPOSE TEAM
+    Missing:
+        - proposeTeam;
 
 ProfessorController:
-    -
+    - all;
+    - getOne;
+    - getProfessorCourses.
 
 StudentController:
-    -
+    - all;
+    - getOne;
+    - getCourses;
+    - getTeams;
+
+    Missing:
+        - getVmsOfStudentOfCourse;
+        - getOwnedVmsOfStudentOfCourse;
+        - getProposalsForStudentOfCourse.
 
 TeamController:
     -
 
-UserController:
-    -
+JwtAuthController:
+    - createAuthenticationToken;
+    - registerStudent;
+    - registerProfessor;
+    - confirmEmail.
