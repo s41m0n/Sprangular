@@ -4,6 +4,7 @@ import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.TeamProposalRequest;
 import it.polito.ai.lab2.pojos.UpdateCourseDetails;
+import it.polito.ai.lab2.pojos.VmModelDetails;
 import it.polito.ai.lab2.services.CourseService;
 import it.polito.ai.lab2.services.StudentService;
 import it.polito.ai.lab2.services.TeamService;
@@ -213,22 +214,20 @@ public class CourseController {
     }
 
     @PostMapping("/{courseId}/vmModel")
-    public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO) {
+    public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDetails vmModelDetails) {
         try {
-            if (vmService.createVmModel(vmModelDTO, courseId)) {
-                return vmModelDTO;
-            } else {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Course " + courseId + " already has a VM model");
-            }
+            return vmService.createVmModel(vmModelDetails, courseId);
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (VmModelAlreadyPresentException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
     @PutMapping("/{courseId}/vmModel")
-    public VmModelDTO updateVmModel(@PathVariable String courseId, @RequestBody VmModelDTO vmModelDTO) {
+    public VmModelDTO updateVmModel(@PathVariable String courseId, @RequestBody VmModelDetails vmModelDetails) {
         try {
-            return vmService.updateVmModel(vmModelDTO, courseId);
+            return vmService.updateVmModel(vmModelDetails, courseId);
         } catch (CourseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
