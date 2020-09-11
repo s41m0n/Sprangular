@@ -3,6 +3,8 @@ package it.polito.ai.lab2.services;
 import it.polito.ai.lab2.dtos.AssignmentDTO;
 import it.polito.ai.lab2.dtos.AssignmentSolutionDTO;
 import it.polito.ai.lab2.dtos.UploadDTO;
+import it.polito.ai.lab2.pojos.AssignmentDetails;
+import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.utility.AssignmentStatus;
 import org.springframework.core.io.Resource;
 
@@ -21,13 +23,13 @@ public interface AssignmentAndUploadService {
 
     List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId);
 
-    AssignmentDTO createAssignment(AssignmentDTO assignmentDTO, String courseId, String professorId);
+    AssignmentDTO createAssignment(AssignmentDetails details, String courseId, String professorId);
 
-    UploadDTO uploadStudentUpload(UploadDTO uploadDTO, Long assignmentSolutionId);
+    UploadDTO uploadStudentUpload(UploadDetails uploadDetails, Long assignmentSolutionId);
 
     Resource getAssignmentForStudent(Long assignmentId, String studentId) throws FileNotFoundException;
 
-    UploadDTO uploadProfessorUpload(UploadDTO uploadDTO, Long studentUploadId, boolean reUploadable);
+    UploadDTO uploadProfessorUpload(UploadDetails uploadDetails, Long studentUploadId, boolean reUploadable);
 
     void assignGrade(Long assignmentSolutionId, String grade);
 }
