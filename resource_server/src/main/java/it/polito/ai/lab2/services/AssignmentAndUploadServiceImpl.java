@@ -203,7 +203,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     Path uploadPath = Utility.uploadsDir.resolve(savedUpload.getId().toString());
     savedUpload.setImagePath(uploadPath.toString());
     try {
-      Files.copy(details.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING)
+      Files.copy(details.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING);
     } catch (IOException e) {
       throw new RuntimeException("Cannot store the file: " + e.getMessage());
     }
