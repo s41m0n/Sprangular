@@ -187,6 +187,7 @@ public class TeamServiceImpl implements TeamService {
     public void activateTeam(Long id) {
         Team team = teamRepository.findById(id).orElseThrow(() -> new TeamNotFoundException("Team + " + id + " does not exist"));
         team.setActive(true);
+        teamRepository.save(team);
     }
 
     @Override
