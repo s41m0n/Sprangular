@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     NotificationService notificationService;
 
     @Override
-    public void registerStudent(RegistrationDetails sDetails) {
+    public boolean registerStudent(RegistrationDetails sDetails) {
         if (!sDetails.getEmail().substring(0, 7).equals(sDetails.getId())
                 || !sDetails.getEmail().matches("^s[1-9][0-9]*@studenti.polito.it$"))
             throw new InvalidIdEmailException("Student format: id -> s<numbers>, email -> <id>@studenti.polito.it");
@@ -74,10 +74,11 @@ public class UserServiceImpl implements UserService {
         confirmEmailTokenRepository.save(confirmEmailToken);
 
         notificationService.sendMessage(sDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(sDetails.getId(), confirmEmailToken));
+        return true;
     }
 
     @Override
-    public void registerProfessor(RegistrationDetails pDetails) {
+    public boolean registerProfessor(RegistrationDetails pDetails) {
         if (!pDetails.getEmail().substring(0, 7).equals(pDetails.getId())
                 || !pDetails.getEmail().matches("^d[1-9][0-9]*@polito.it$"))
             throw new InvalidIdEmailException("Professor format: id -> d<numbers>, email -> <id>@polito.it");
@@ -109,6 +110,7 @@ public class UserServiceImpl implements UserService {
         confirmEmailTokenRepository.save(confirmEmailToken);
 
         notificationService.sendMessage(pDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(pDetails.getId(), confirmEmailToken));
+        return true;
     }
 
     @Override

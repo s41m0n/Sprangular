@@ -65,22 +65,20 @@ public class JwtAuthenticationController {
     public ResponseEntity<?> registerStudent(@ModelAttribute RegistrationDetails registrationDetails) {
         log.info("Registration attempt for student " + registrationDetails.getId());
         try {
-            userService.registerStudent(registrationDetails);
+            return ResponseEntity.ok(userService.registerStudent(registrationDetails));
         } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("register/professor")
     public ResponseEntity<?> registerProfessor(@ModelAttribute RegistrationDetails registrationDetails) {
         log.info("Registration attempt for student " + registrationDetails.getId());
         try {
-            userService.registerProfessor(registrationDetails);
+            return ResponseEntity.ok(userService.registerProfessor(registrationDetails));
         } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/{id}/confirmEmail/{token}")
