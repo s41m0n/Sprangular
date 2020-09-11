@@ -5,7 +5,9 @@ import it.polito.ai.lab2.dtos.VmModelDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.UpdateVmDetails;
+import it.polito.ai.lab2.pojos.VmModelDetails;
 import it.polito.ai.lab2.repositories.*;
+import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +15,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,27 +48,40 @@ public class VmServiceImpl implements VmService {
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
-    public boolean createVmModel(VmModelDTO vmModelDTO, String courseId) {
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+    public VmModelDTO createVmModel(VmModelDetails details, String courseId) {
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
         if (course.getVmModel() != null) {
-            return false;
+            throw new VmModelAlreadyPresentException("Course " + courseId + " already has a VmModel");
         }
         VmModel v = new VmModel();
-        v.setName(vmModelDTO.getName());
-        v.setImagePath(vmModelDTO.getImagePath());
+        v.setName(details.getName());
         v.assignToCourse(course);
-        vmModelRepository.save(v);
-        return true;
+        VmModel savedVmModel = vmModelRepository.save(v);
+        Path vmModelPath = Utility.vmModelsDir.resolve(savedVmModel.getId().toString());
+        savedVmModel.setImagePath(vmModelPath.toString());
+        try {
+            Files.copy(details.getImage().getInputStream(), vmModelPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot store the file: " + e.getMessage());
+        }
+        return modelMapper.map(savedVmModel, VmModelDTO.class);
     }
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
-    public VmModelDTO updateVmModel(VmModelDTO vmModelDTO, String courseId) {
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
-        VmModel v = modelMapper.map(vmModelDTO, VmModel.class);
-        v.assignToCourse(course);
-        vmModelRepository.save(v);
-        return vmModelDTO;
+    public VmModelDTO updateVmModel(VmModelDetails details, String courseId) {
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+        VmModel v = course.getVmModel();
+        v.setName(details.getName());
+
+        try {
+            Files.copy(details.getImage().getInputStream(), Paths.get(v.getImagePath()), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot store the file: " + e.getMessage());
+        }
+        return modelMapper.map(v, VmModelDTO.class);
     }
 
     @Override

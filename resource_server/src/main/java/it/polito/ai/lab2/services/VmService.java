@@ -3,14 +3,15 @@ package it.polito.ai.lab2.services;
 import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
 import it.polito.ai.lab2.pojos.UpdateVmDetails;
+import it.polito.ai.lab2.pojos.VmModelDetails;
 
 import java.util.List;
 
 public interface VmService {
 
-    boolean createVmModel(VmModelDTO vmModelDTO, String courseId);
+    VmModelDTO createVmModel(VmModelDetails vmModelDetails, String courseId);
 
-    VmModelDTO updateVmModel(VmModelDTO vmModelDTO, String courseId);
+    VmModelDTO updateVmModel(VmModelDetails vmModelDetails, String courseId);
 
     VmDTO createVm(Long teamId, VmDTO vmDTO);
 
