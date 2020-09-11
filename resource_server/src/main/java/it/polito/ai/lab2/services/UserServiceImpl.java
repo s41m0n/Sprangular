@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(sDetails.getId()))
             throw new UserAlreadyRegisteredException("User " + sDetails.getId() + " already registered");
 
-        Path photoPath = Utility.photosDir.resolve(sDetails.getId());
+        Path photoPath = Utility.PHOTOS_DIR.resolve(sDetails.getId());
 
         Student student = new Student();
         student.setEmail(sDetails.getEmail());
@@ -55,8 +55,8 @@ public class UserServiceImpl implements UserService {
         student.setName(sDetails.getName());
         student.setSurname(sDetails.getSurname());
         student.setPassword(passwordEncoder.encode(sDetails.getPassword()));
-        Role role = roleRepository.findByName("ROLE_STUDENT")
-                .orElseThrow(() -> new UserRoleNotFounException("ROLE_STUDENT not found"));
+        Role role = roleRepository.findByName(Utility.STUDENT_ROLE)
+                .orElseThrow(() -> new UserRoleNotFounException(Utility.STUDENT_ROLE + " not found"));
         student.addRole(role);
         student.setVerified(false);
         student.setPhotoPath(photoPath.toString());
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsById(pDetails.getId()))
             throw new UserAlreadyRegisteredException("User " + pDetails.getId() + " already registered");
 
-        Path photoPath = Utility.photosDir.resolve(pDetails.getId());
+        Path photoPath = Utility.PHOTOS_DIR.resolve(pDetails.getId());
 
         Professor professor = new Professor();
         professor.setEmail(pDetails.getEmail());
@@ -93,8 +93,8 @@ public class UserServiceImpl implements UserService {
         professor.setName(pDetails.getName());
         professor.setSurname(pDetails.getSurname());
         professor.setPassword(passwordEncoder.encode(pDetails.getPassword()));
-        Role role = roleRepository.findByName("ROLE_PROFESSOR")
-                .orElseThrow(() -> new UserRoleNotFounException("ROLE_PROFESSOR not found"));
+        Role role = roleRepository.findByName(Utility.PROFESSOR_ROLE)
+                .orElseThrow(() -> new UserRoleNotFounException(Utility.PROFESSOR_ROLE + " not found"));
         professor.addRole(role);
         professor.setVerified(false);
         professor.setPhotoPath(photoPath.toString());

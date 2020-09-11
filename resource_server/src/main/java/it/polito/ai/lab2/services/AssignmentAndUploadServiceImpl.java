@@ -129,7 +129,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           assignmentSolutionRepository.save(assignmentSolution);
         });
     Assignment savedAssignment = assignmentRepository.save(assignment);
-    Path assignmentPath = Utility.assignmentsDir.resolve(savedAssignment.getId().toString());
+    Path assignmentPath = Utility.ASSIGNMENTS_DIR.resolve(savedAssignment.getId().toString());
     savedAssignment.setImagePath(assignmentPath.toString());
     try {
       Files.copy(details.getDocument().getInputStream(), assignmentPath, StandardCopyOption.REPLACE_EXISTING);
@@ -157,7 +157,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
 
     StudentUpload savedUpload = studentUploadRepository.save(studentUpload);
-    Path uploadPath = Utility.uploadsDir.resolve(savedUpload.getId().toString());
+    Path uploadPath = Utility.UPLOADS_DIR.resolve(savedUpload.getId().toString());
     savedUpload.setImagePath(uploadPath.toString());
     try {
       Files.copy(details.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING);
@@ -200,7 +200,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED);
 
     ProfessorUpload savedUpload = professorUploadRepository.save(professorUpload);
-    Path uploadPath = Utility.uploadsDir.resolve(savedUpload.getId().toString());
+    Path uploadPath = Utility.UPLOADS_DIR.resolve(savedUpload.getId().toString());
     savedUpload.setImagePath(uploadPath.toString());
     try {
       Files.copy(details.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING);

@@ -58,7 +58,7 @@ public class VmServiceImpl implements VmService {
         v.setName(details.getName());
         v.assignToCourse(course);
         VmModel savedVmModel = vmModelRepository.save(v);
-        Path vmModelPath = Utility.vmModelsDir.resolve(savedVmModel.getId().toString());
+        Path vmModelPath = Utility.VM_MODELS_DIR.resolve(savedVmModel.getId().toString());
         savedVmModel.setImagePath(vmModelPath.toString());
         try {
             Files.copy(details.getImage().getInputStream(), vmModelPath, StandardCopyOption.REPLACE_EXISTING);
@@ -137,7 +137,7 @@ public class VmServiceImpl implements VmService {
         vm.setTeam(team);
         vm.addOwner(owner);
         Vm savedVm = vmRepository.save(vm);
-        Path vmPath = Utility.vmsDir.resolve(savedVm.getId().toString());
+        Path vmPath = Utility.VMS_DIR.resolve(savedVm.getId().toString());
         savedVm.setImagePath(vmPath.toString());
         try {
             Files.copy(Paths.get(vm.getVmModel().getImagePath()), vmPath, StandardCopyOption.REPLACE_EXISTING);
