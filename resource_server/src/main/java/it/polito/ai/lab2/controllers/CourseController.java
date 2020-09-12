@@ -2,18 +2,17 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.AssignmentDetails;
 import it.polito.ai.lab2.pojos.TeamProposalRequest;
 import it.polito.ai.lab2.pojos.UpdateCourseDetails;
 import it.polito.ai.lab2.pojos.VmModelDetails;
-import it.polito.ai.lab2.services.CourseService;
-import it.polito.ai.lab2.services.StudentService;
-import it.polito.ai.lab2.services.TeamService;
-import it.polito.ai.lab2.services.VmService;
+import it.polito.ai.lab2.services.*;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,6 +38,9 @@ public class CourseController {
 
     @Autowired
     VmService vmService;
+
+    @Autowired
+    AssignmentAndUploadService assAndUploadService;
 
     @GetMapping({"", "/"})
     public List<CourseDTO> all() {
@@ -284,6 +286,26 @@ public class CourseController {
             }
             return c;
         } catch (CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseId}/assignments")
+    public List<AssignmentDTO> getAssignments(@PathVariable String courseId) {
+        try {
+            return assAndUploadService.getAssignmentsForCourse(courseId);
+        } catch (CourseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{courseId}/assignments")
+    public AssignmentDTO getSolutionsForAssignment(@PathVariable String courseId,
+                                                   @ModelAttribute AssignmentDetails assignmentDetails) {
+        try {
+            return assAndUploadService.createAssignment(assignmentDetails, courseId,
+                SecurityContextHolder.getContext().getAuthentication().getName());
+        } catch (CourseNotFoundException | ProfessorNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }

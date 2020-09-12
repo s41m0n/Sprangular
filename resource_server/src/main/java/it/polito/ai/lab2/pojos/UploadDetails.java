@@ -7,4 +7,5 @@ import org.springframework.web.multipart.MultipartFile;
 public class UploadDetails {
   String comment;
   MultipartFile document;
+  boolean reUploadable;
 }

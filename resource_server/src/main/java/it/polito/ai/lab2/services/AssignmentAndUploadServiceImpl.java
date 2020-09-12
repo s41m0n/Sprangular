@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,12 +101,21 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   public List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId) {
+    if (!studentRepository.existsById(studentId))
+      throw new StudentNotFoundException("Student " + studentId + " not found");
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
         assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
             "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
-    return assignmentSolution.getStudentUploads().stream()
-        .map(upload -> modelMapper.map(upload, UploadDTO.class))
-        .collect(Collectors.toList());
+    List<UploadDTO> toReturn = new ArrayList<>();
+    assignmentSolution.getStudentUploads().forEach(
+        studentUpload -> {
+          toReturn.add(modelMapper.map(studentUpload, UploadDTO.class));
+          ProfessorUpload professorUpload = studentUpload.getTeacherRevision();
+          if (professorUpload != null)
+            toReturn.add(modelMapper.map(professorUpload, UploadDTO.class));
+        }
+    );
+    return toReturn;
   }
 
   @Override
@@ -145,10 +155,10 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  public UploadDTO uploadStudentUpload(UploadDetails details, Long assignmentSolutionId) {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId)
+  public UploadDTO uploadStudentUpload(UploadDetails details, String studentId, Long assignmentId) {
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
-            "Assignment solution " + assignmentSolutionId + " does not exist"));
+            "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     StudentUpload studentUpload = new StudentUpload();
     studentUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
     studentUpload.setComment(details.getComment());
@@ -170,6 +180,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   public Resource getAssignmentForStudent(Long assignmentId, String studentId) throws FileNotFoundException {
+    if (!studentRepository.existsById(studentId))
+      throw new StudentNotFoundException("Student " + studentId + " does not exist");
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
         assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
             "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
@@ -186,7 +198,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  public UploadDTO uploadProfessorUpload(UploadDetails details, Long studentUploadId, boolean reUploadable) {
+  public UploadDTO uploadProfessorUpload(UploadDetails details, Long studentUploadId) {
     StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId)
         .orElseThrow(() -> new StudentUploadNotFoundException("Student upload " + studentUploadId + " does not exist"));
     ProfessorUpload professorUpload = new ProfessorUpload();
@@ -194,7 +206,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     professorUpload.setComment(details.getComment());
     studentUpload.setTeacherRevision(professorUpload);
     professorUpload.setRevisedSolution(studentUpload);
-    if (reUploadable)
+    if (details.isReUploadable())
       studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED_UPLOADABLE);
     else
       studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED);
@@ -212,17 +224,18 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  public void assignGrade(Long assignmentSolutionId, String grade) {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId)
+  public AssignmentSolutionDTO assignGrade(String studentId, Long assignmentId, String grade) {
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
-            "Assignment solution " + assignmentSolutionId + " does not exist"));
+            "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     if (assignmentSolution.getStatus().equals(AssignmentStatus.DEFINITIVE))
       throw new DefinitiveAssignmentSolutionStatusException(
-          "Assignment solution " + assignmentSolutionId + " status already definitive");
+          "Assignment solution for assignment " + assignmentId + " and student " + studentId + " status already definitive");
     if (!assignmentSolution.getStatus().equals(AssignmentStatus.REVIEWED))
       throw new AssignmentSolutionNotReviewedException(
-          "Assignment solution " + assignmentSolutionId + " status already definitive");
+          "Assignment solution for assignment " + assignmentId + " and student " + studentId + " not reviewed yet");
     assignmentSolution.setGrade(grade);
     assignmentSolution.setStatus(AssignmentStatus.DEFINITIVE);
+    return modelMapper.map(assignmentSolution, AssignmentSolutionDTO.class);
   }
 }

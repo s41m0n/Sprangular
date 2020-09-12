@@ -19,17 +19,18 @@ public interface AssignmentAndUploadService {
 
     List<AssignmentDTO> getStudentAssignments(String studentId);
 
+    // TODO: do we really need this?
     List<AssignmentSolutionDTO> filterAssignmentSolutionsForStatus(Long assignmentId, AssignmentStatus status);
 
     List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId);
 
     AssignmentDTO createAssignment(AssignmentDetails details, String courseId, String professorId);
 
-    UploadDTO uploadStudentUpload(UploadDetails uploadDetails, Long assignmentSolutionId);
+    UploadDTO uploadStudentUpload(UploadDetails uploadDetails, String studentId, Long assignmentId);
 
     Resource getAssignmentForStudent(Long assignmentId, String studentId) throws FileNotFoundException;
 
-    UploadDTO uploadProfessorUpload(UploadDetails uploadDetails, Long studentUploadId, boolean reUploadable);
+    UploadDTO uploadProfessorUpload(UploadDetails uploadDetails, Long studentUploadId);
 
-    void assignGrade(Long assignmentSolutionId, String grade);
+    AssignmentSolutionDTO assignGrade(String studentId, Long assignmentId, String grade);
 }
