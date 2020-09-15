@@ -1,6 +1,5 @@
 package it.polito.ai.lab2.controllers;
 
-import it.polito.ai.lab2.dtos.AssignmentDTO;
 import it.polito.ai.lab2.dtos.AssignmentSolutionDTO;
 import it.polito.ai.lab2.exceptions.AssignmentNotFoundException;
 import it.polito.ai.lab2.services.AssignmentAndUploadService;

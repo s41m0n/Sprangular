@@ -23,70 +23,70 @@ import java.util.AbstractMap;
 @RequestMapping("/API/authentication")
 public class JwtAuthenticationController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+  @Autowired
+  private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+  @Autowired
+  private JwtTokenUtil jwtTokenUtil;
 
-    @Autowired
-    CustomUserDetailsService customUserDetailsService;
+  @Autowired
+  CustomUserDetailsService customUserDetailsService;
 
-    @Autowired
-    UserService userService;
+  @Autowired
+  UserService userService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody UserDTO authenticationRequest) {
-        log.info("createAuthenticationToken(" + authenticationRequest + ")");
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getId(), authenticationRequest.getPassword()));
-        } catch (DisabledException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User " + authenticationRequest.getId() + " is disabled");
-        } catch (BadCredentialsException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials {" + authenticationRequest.getId() + "," + authenticationRequest.getPassword() + "}");
-        } catch (InternalAuthenticationServiceException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
-        }
-
-        UserDetails userDetails;
-        try {
-             userDetails = customUserDetailsService
-                .loadUserByUsername(authenticationRequest.getId());
-        } catch (UserNotVerifiedException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
-        }
-
-        final String token = jwtTokenUtil.generateToken(userDetails);
-
-        return ResponseEntity.ok(new AbstractMap.SimpleEntry<>("id_token", token));
+  @PostMapping("/login")
+  public ResponseEntity<?> createAuthenticationToken(@RequestBody UserDTO authenticationRequest) {
+    log.info("createAuthenticationToken(" + authenticationRequest + ")");
+    try {
+      authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getId(), authenticationRequest.getPassword()));
+    } catch (DisabledException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User " + authenticationRequest.getId() + " is disabled");
+    } catch (BadCredentialsException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials {" + authenticationRequest.getId() + "," + authenticationRequest.getPassword() + "}");
+    } catch (InternalAuthenticationServiceException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
-    @PostMapping("/register/student")
-    public ResponseEntity<?> registerStudent(@ModelAttribute RegistrationDetails registrationDetails) {
-        log.info("Registration attempt for student " + registrationDetails.getId());
-        try {
-            return ResponseEntity.ok(userService.registerStudent(registrationDetails));
-        } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+    UserDetails userDetails;
+    try {
+      userDetails = customUserDetailsService
+          .loadUserByUsername(authenticationRequest.getId());
+    } catch (UserNotVerifiedException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
-    @PostMapping("register/professor")
-    public ResponseEntity<?> registerProfessor(@ModelAttribute RegistrationDetails registrationDetails) {
-        log.info("Registration attempt for student " + registrationDetails.getId());
-        try {
-            return ResponseEntity.ok(userService.registerProfessor(registrationDetails));
-        } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-    }
+    final String token = jwtTokenUtil.generateToken(userDetails);
 
-    @GetMapping("/{id}/confirmEmail/{token}")
-    public ResponseEntity<?> confirmEmail(@PathVariable String id, @PathVariable String token) {
-        try {
-            return ResponseEntity.ok(userService.confirmEmail(id, token));
-        } catch (UserNotFoundException | ConfirmEmailTokenNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+    return ResponseEntity.ok(new AbstractMap.SimpleEntry<>("id_token", token));
+  }
+
+  @PostMapping("/register/student")
+  public ResponseEntity<?> registerStudent(@ModelAttribute RegistrationDetails registrationDetails) {
+    log.info("Registration attempt for student " + registrationDetails.getId());
+    try {
+      return ResponseEntity.ok(userService.registerStudent(registrationDetails));
+    } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+  }
+
+  @PostMapping("register/professor")
+  public ResponseEntity<?> registerProfessor(@ModelAttribute RegistrationDetails registrationDetails) {
+    log.info("Registration attempt for student " + registrationDetails.getId());
+    try {
+      return ResponseEntity.ok(userService.registerProfessor(registrationDetails));
+    } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  @GetMapping("/{id}/confirmEmail/{token}")
+  public ResponseEntity<?> confirmEmail(@PathVariable String id, @PathVariable String token) {
+    try {
+      return ResponseEntity.ok(userService.confirmEmail(id, token));
+    } catch (UserNotFoundException | ConfirmEmailTokenNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
 }

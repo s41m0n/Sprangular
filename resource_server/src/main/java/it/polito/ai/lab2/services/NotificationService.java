@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface NotificationService {
 
-    void sendMessage(String address, String subject, String body);
+  void sendMessage(String address, String subject, String body);
 
-    boolean confirm(String token);
+  boolean confirm(String token);
 
-    boolean reject(String token);
+  boolean reject(String token);
 
-    void notifyTeam(TeamDTO dto, List<String> memberIds, String courseId);
+  void notifyTeam(TeamDTO dto, List<String> memberIds, String courseId);
 
 }

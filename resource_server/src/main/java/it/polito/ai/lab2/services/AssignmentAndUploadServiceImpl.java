@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -64,6 +65,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   //TODO: add more integrity checks
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId) or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
   public List<AssignmentDTO> getAssignmentsForCourse(String courseId) {
     Course course = courseRepository.findById(courseId)
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
@@ -73,6 +75,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId) or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
   public List<AssignmentSolutionDTO> getAssignmentSolutionsForAssignment(Long assignmentId) {
     Assignment assignment = assignmentRepository.findById(assignmentId)
         .orElseThrow(() -> new AssignmentNotFoundException("Assignment " + assignmentId + " does not exist"));
@@ -84,7 +87,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   @Override
   public List<AssignmentDTO> getStudentAssignments(String studentId) {
     if (!studentRepository.existsById(studentId))
-        throw new StudentNotFoundException("Student " + studentId + " does not exist");
+      throw new StudentNotFoundException("Student " + studentId + " does not exist");
     return assignmentSolutionRepository.findByStudentId(studentId).stream()
         .map(solution -> modelMapper.map(solution.getAssignment(), AssignmentDTO.class))
         .collect(Collectors.toList());
@@ -105,7 +108,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       throw new StudentNotFoundException("Student " + studentId + " not found");
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
         assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
-            "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
+        "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     List<UploadDTO> toReturn = new ArrayList<>();
     assignmentSolution.getStudentUploads().forEach(
         studentUpload -> {
@@ -131,13 +134,13 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     assignment.setCourse(course);
     assignment.setProfessor(professor);
     course.getStudents().forEach(student -> {
-          AssignmentSolution assignmentSolution = new AssignmentSolution();
-          assignmentSolution.setAssignment(assignment);
-          assignment.getSolutions().add(assignmentSolution);
-          assignmentSolution.setStudent(student);
-          assignmentSolution.setStatus(AssignmentStatus.NULL);
-          assignmentSolutionRepository.save(assignmentSolution);
-        });
+      AssignmentSolution assignmentSolution = new AssignmentSolution();
+      assignmentSolution.setAssignment(assignment);
+      assignment.getSolutions().add(assignmentSolution);
+      assignmentSolution.setStudent(student);
+      assignmentSolution.setStatus(AssignmentStatus.NULL);
+      assignmentSolutionRepository.save(assignmentSolution);
+    });
     Assignment savedAssignment = assignmentRepository.save(assignment);
     Path assignmentPath = Utility.ASSIGNMENTS_DIR.resolve(savedAssignment.getId().toString());
     savedAssignment.setImagePath(assignmentPath.toString());
@@ -184,7 +187,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       throw new StudentNotFoundException("Student " + studentId + " does not exist");
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
         assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
-            "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
+        "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     Resource file = null;
     try {
       file = new UrlResource(assignmentSolution.getAssignment().getImagePath());

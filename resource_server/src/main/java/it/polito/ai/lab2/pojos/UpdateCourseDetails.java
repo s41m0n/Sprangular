@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class UpdateCourseDetails {
-    int teamMinSize;
-    int teamMaxSize;
-    boolean enabled;
+  int teamMinSize;
+  int teamMaxSize;
+  boolean enabled;
 }

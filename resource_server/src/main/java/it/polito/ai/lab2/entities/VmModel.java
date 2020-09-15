@@ -24,7 +24,7 @@ public class VmModel {
 
   String imagePath;
 
-  public void assignToCourse(Course c){
+  public void assignToCourse(Course c) {
     this.course = c;
     c.setVmModel(this);
   }

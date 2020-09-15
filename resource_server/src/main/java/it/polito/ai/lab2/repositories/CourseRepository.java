@@ -7,14 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, String> {
 
-    @Query("SELECT s FROM Student s INNER JOIN s.teams t INNER JOIN t.course c WHERE c.acronym=:courseId")
-    List<Student> getStudentsInTeams(String courseId);
+  @Query("SELECT s FROM Student s INNER JOIN s.teams t INNER JOIN t.course c WHERE c.acronym=:courseId")
+  List<Student> getStudentsInTeams(String courseId);
 
-    @Query("SELECT s FROM Student s INNER JOIN s.courses c WHERE c.acronym=:courseId AND s NOT IN (SELECT s FROM Student s INNER JOIN s.teams t INNER JOIN t.course c WHERE c.acronym=:courseId)")
-    List<Student> getStudentsNotInTeams(String courseId);
+  @Query("SELECT s FROM Student s INNER JOIN s.courses c WHERE c.acronym=:courseId AND s NOT IN (SELECT s FROM Student s INNER JOIN s.teams t INNER JOIN t.course c WHERE c.acronym=:courseId)")
+  List<Student> getStudentsNotInTeams(String courseId);
 }

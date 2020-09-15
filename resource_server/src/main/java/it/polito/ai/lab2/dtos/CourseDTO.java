@@ -12,17 +12,17 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class CourseDTO extends RepresentationModel<CourseDTO> {
 
-    String acronym;
+  String acronym;
 
-    @NotNull
-    @NotEmpty
-    String name;
+  @NotNull
+  @NotEmpty
+  String name;
 
-    @Min(0)
-    int teamMinSize;
+  @Min(0)
+  int teamMinSize;
 
-    @Min(0)
-    int teamMaxSize;
+  @Min(0)
+  int teamMaxSize;
 
-    boolean enabled;
+  boolean enabled;
 }

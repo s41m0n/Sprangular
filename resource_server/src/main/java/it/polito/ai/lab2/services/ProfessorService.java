@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface ProfessorService {
 
-    List<ProfessorDTO> getProfessors();
+  List<ProfessorDTO> getProfessors();
 
-    Optional<ProfessorDTO> getProfessor(String professorId);
+  Optional<ProfessorDTO> getProfessor(String professorId);
 
-    List<CourseDTO> getProfessorCourses(String professorId);
+  List<CourseDTO> getProfessorCourses(String professorId);
 }

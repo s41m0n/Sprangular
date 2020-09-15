@@ -15,101 +15,103 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
 @EnableScheduling
 public class NotificationServiceImpl implements NotificationService {
 
-    @Autowired
-    JavaMailSender emailSender;
+  @Autowired
+  JavaMailSender emailSender;
 
-    @Autowired
-    ProposalRepository proposalRepository;
+  @Autowired
+  ProposalRepository proposalRepository;
 
-    @Autowired
-    TeamService teamService;
+  @Autowired
+  TeamService teamService;
 
-    @Override
-    @Async
-    public void sendMessage(String address, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(address);
-        message.setSubject(subject);
-        message.setText(body);
-        emailSender.send(message);
+  @Override
+  @Async
+  public void sendMessage(String address, String subject, String body) {
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setTo(address);
+    message.setSubject(subject);
+    message.setText(body);
+    emailSender.send(message);
+  }
+
+  @Override
+  public boolean confirm(String token) {
+    Proposal proposal = proposalRepository.findById(token).orElse(null);
+
+    if (proposal == null) {
+      return false;
     }
 
-    @Override
-    public boolean confirm(String token) {
-        Proposal proposal = proposalRepository.findById(token).orElse(null);
-
-        if (proposal == null) {
-            return false;
-        }
-
-        if(proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))){ //if the proposal is expired I delete all the proposals
-            proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
-            return false;
-        }
-
-        proposal.setStatus(ProposalStatus.ACCEPTED);
-        proposalRepository.save(proposal);
-
-        for(Proposal p : proposalRepository.findAllByTeamId(proposal.getTeamId())) {
-            if(p.getStatus() == ProposalStatus.PENDING) {
-                return false; //There is at least one proposal which is in pending status
-            }
-        }
-
-        teamService.activateTeam(proposal.getTeamId());
-        proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
-        return true;
+    if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) { //if the proposal is expired I delete all the proposals
+      proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+      return false;
     }
 
-    @Override
-    public boolean reject(String token) {
-        Proposal proposal = proposalRepository.findById(token).orElse(null);
+    proposal.setStatus(ProposalStatus.ACCEPTED);
+    proposalRepository.save(proposal);
 
-        if (proposal == null) {
-            return false;
-        }
-
-        if(proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))){ //if the proposal is expired I delete all the proposals
-            proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
-            return false;
-        }
-
-        proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
-        teamService.evictTeam(proposal.getTeamId());
-        return true;
+    for (Proposal p : proposalRepository.findAllByTeamId(proposal.getTeamId())) {
+      if (p.getStatus() == ProposalStatus.PENDING) {
+        return false; //There is at least one proposal which is in pending status
+      }
     }
 
-    @Override
-    public void notifyTeam(TeamDTO dto, List<String> memberIds, String courseId) {
-        String members = String.join("\n- ", memberIds);
-        String url = "http://localhost:8080/API/courses/" + courseId; //TODO: fatti dare link giusto
+    teamService.activateTeam(proposal.getTeamId());
+    proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+    return true;
+  }
 
-        memberIds.remove(SecurityContextHolder.getContext().getAuthentication().getName());
-        memberIds.forEach(memberId -> {
-            String email = memberId + "@studenti.polito.it";
-            sendMessage(email, "[SpringExample] Someone wants to create a team with you",
-                    "Dear " + email + ",\n\n" +
-                            "You have been requested to create the team `" + dto.getName() +"`.\n" +
-                    "The members would be:\n- " + members +
-                    "\n\nTo confirm or reject the proposal enter in your personal page at ->" + url +
-                    "\n\nBest Regards,\nSpringExample Team");
-        });
+  @Override
+  public boolean reject(String token) {
+    Proposal proposal = proposalRepository.findById(token).orElse(null);
+
+    if (proposal == null) {
+      return false;
     }
 
-    @Scheduled(fixedDelay = 60 * 60 * 1000)
-    public void fixedTokenClear() {
-        Set<Long> teamIds = new HashSet<>();
-        proposalRepository.findAllByDeadlineAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
-            teamIds.add(proposal.getTeamId());
-            proposalRepository.delete(proposal);
-        });
-        teamIds.forEach(team -> teamService.evictTeam(team));
+    if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) { //if the proposal is expired I delete all the proposals
+      proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+      return false;
     }
+
+    proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+    teamService.evictTeam(proposal.getTeamId());
+    return true;
+  }
+
+  @Override
+  public void notifyTeam(TeamDTO dto, List<String> memberIds, String courseId) {
+    String members = String.join("\n- ", memberIds);
+    String url = "http://localhost:8080/API/courses/" + courseId; //TODO: fatti dare link giusto
+
+    memberIds.remove(SecurityContextHolder.getContext().getAuthentication().getName());
+    memberIds.forEach(memberId -> {
+      String email = memberId + "@studenti.polito.it";
+      sendMessage(email, "[SpringExample] Someone wants to create a team with you",
+          "Dear " + email + ",\n\n" +
+              "You have been requested to create the team `" + dto.getName() + "`.\n" +
+              "The members would be:\n- " + members +
+              "\n\nTo confirm or reject the proposal enter in your personal page at ->" + url +
+              "\n\nBest Regards,\nSpringExample Team");
+    });
+  }
+
+  @Scheduled(fixedDelay = 60 * 60 * 1000)
+  public void fixedTokenClear() {
+    Set<Long> teamIds = new HashSet<>();
+    proposalRepository.findAllByDeadlineAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
+      teamIds.add(proposal.getTeamId());
+      proposalRepository.delete(proposal);
+    });
+    teamIds.forEach(team -> teamService.evictTeam(team));
+  }
 }

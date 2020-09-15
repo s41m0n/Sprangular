@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class UpdateVmDetails {
-    int vCpu;
-    int diskStorage;
-    int ram;
+  int vCpu;
+  int diskStorage;
+  int ram;
 }

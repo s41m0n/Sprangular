@@ -19,20 +19,20 @@ import java.util.Collection;
 @Transactional
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    UserRepository userRepository;
+  @Autowired
+  UserRepository userRepository;
 
-    //UserDetails = username, password e authorities
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + username));
-        if (!user.isVerified())
-            throw new UserNotVerifiedException("User " + username + " not verified yet. Check your email.");
-        return new org.springframework.security.core.userdetails.User(user.getId(), user.getPassword(), getAuthorities(user));
-    }
+  //UserDetails = username, password e authorities
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    User user = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + username));
+    if (!user.isVerified())
+      throw new UserNotVerifiedException("User " + username + " not verified yet. Check your email.");
+    return new org.springframework.security.core.userdetails.User(user.getId(), user.getPassword(), getAuthorities(user));
+  }
 
-    private static Collection<? extends GrantedAuthority> getAuthorities(User user) {
-        String[] userRoles = user.getRoles().stream().map(Role::getName).toArray(String[]::new);
-        return AuthorityUtils.createAuthorityList(userRoles);
-    }
+  private static Collection<? extends GrantedAuthority> getAuthorities(User user) {
+    String[] userRoles = user.getRoles().stream().map(Role::getName).toArray(String[]::new);
+    return AuthorityUtils.createAuthorityList(userRoles);
+  }
 }

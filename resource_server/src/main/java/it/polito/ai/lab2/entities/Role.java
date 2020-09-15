@@ -2,7 +2,10 @@ package it.polito.ai.lab2.entities;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +13,12 @@ import java.util.List;
 @Data
 public class Role {
 
-    @Id
-    @GeneratedValue
-    Long id;
+  @Id
+  @GeneratedValue
+  Long id;
 
-    String name;
+  String name;
 
-    @ManyToMany(mappedBy = "roles")
-    List<User> users = new ArrayList<>();
+  @ManyToMany(mappedBy = "roles")
+  List<User> users = new ArrayList<>();
 }

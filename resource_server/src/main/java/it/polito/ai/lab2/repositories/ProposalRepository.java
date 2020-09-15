@@ -10,10 +10,10 @@ import java.util.List;
 @Repository
 public interface ProposalRepository extends JpaRepository<Proposal, String> {
 
-    List<Proposal> findAllByDeadlineAfter(Timestamp t);
+  List<Proposal> findAllByDeadlineAfter(Timestamp t);
 
-    List<Proposal> findAllByTeamId(Long teamId);
+  List<Proposal> findAllByTeamId(Long teamId);
 
-    List<Proposal> findAllByInvitedUserIdAndCourseId(String userId, String courseId);
+  List<Proposal> findAllByInvitedUserIdAndCourseId(String userId, String courseId);
 
 }

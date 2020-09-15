@@ -10,28 +10,28 @@ import java.util.List;
 @Data
 public class User {
 
-    @Id
-    String id;
+  @Id
+  String id;
 
-    String password;
+  String password;
 
-    @Column(unique = true)
-    String email;
+  @Column(unique = true)
+  String email;
 
-    String name;
+  String name;
 
-    String surname;
+  String surname;
 
-    String photoPath;
+  String photoPath;
 
-    boolean verified;
+  boolean verified;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    List<Role> roles = new ArrayList<>();
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+  List<Role> roles = new ArrayList<>();
 
-    public void addRole(Role role) {
-        roles.add(role);
-        role.getUsers().add(this);
-    }
+  public void addRole(Role role) {
+    roles.add(role);
+    role.getUsers().add(this);
+  }
 }

@@ -9,21 +9,21 @@ import java.sql.Timestamp;
 @Data
 public class StudentUpload {
 
-    @Id
-    @GeneratedValue
-    Long id;
+  @Id
+  @GeneratedValue
+  Long id;
 
-    String imagePath;
+  String imagePath;
 
-    Timestamp timestamp;
+  Timestamp timestamp;
 
-    String comment;
+  String comment;
 
-    @ManyToOne
-    @JoinColumn(name = "assignmentSolution_id")
-    AssignmentSolution assignmentSolution;
+  @ManyToOne
+  @JoinColumn(name = "assignmentSolution_id")
+  AssignmentSolution assignmentSolution;
 
-    @OneToOne
-    @JoinColumn(name = "teacherUpload_id")
-    ProfessorUpload teacherRevision;
+  @OneToOne
+  @JoinColumn(name = "teacherUpload_id")
+  ProfessorUpload teacherRevision;
 }

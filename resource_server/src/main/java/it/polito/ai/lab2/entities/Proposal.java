@@ -13,19 +13,19 @@ import java.sql.Timestamp;
 @Data
 public class Proposal {
 
-    @Id
-    String id; //= token
+  @Id
+  String id; //= token
 
-    String proposalCreatorId;
+  String proposalCreatorId;
 
-    String invitedUserId;
+  String invitedUserId;
 
-    Long teamId;
+  Long teamId;
 
-    String courseId;
+  String courseId;
 
-    Timestamp deadline;
+  Timestamp deadline;
 
-    @Enumerated(EnumType.STRING)
-    ProposalStatus status;
+  @Enumerated(EnumType.STRING)
+  ProposalStatus status;
 }

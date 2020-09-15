@@ -26,170 +26,170 @@ import java.util.stream.Collectors;
 @RequestMapping("/API/teams")
 public class TeamController {
 
-    @Autowired
-    TeamService teamService;
+  @Autowired
+  TeamService teamService;
 
-    @Autowired
-    VmService vmService;
+  @Autowired
+  VmService vmService;
 
-    @Autowired
-    NotificationService notificationService;
+  @Autowired
+  NotificationService notificationService;
 
-    @GetMapping({"", "/"})
-    public List<TeamDTO> all() {
-        log.info("all() called");
-        return teamService.getTeams().stream()
-                .map(ModelHelper::enrich)
-                .collect(Collectors.toList());
+  @GetMapping({"", "/"})
+  public List<TeamDTO> all() {
+    log.info("all() called");
+    return teamService.getTeams().stream()
+        .map(ModelHelper::enrich)
+        .collect(Collectors.toList());
+  }
+
+  @GetMapping("/{id}")
+  public TeamDTO getOne(@PathVariable Long id) {
+    log.info("getOne(" + id + ") called");
+    return teamService.getTeam(id)
+        .map(ModelHelper::enrich)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team `" + id + "` does not exist"));
+  }
+
+  @GetMapping("/{id}/members")
+  public List<StudentDTO> getMembers(@PathVariable Long id) {
+    log.info("getMembers(" + id + ") called");
+    try {
+      return teamService.getTeamMembers(id).stream()
+          .map(ModelHelper::enrich)
+          .collect(Collectors.toList());
+    } catch (TeamNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
+  }
 
-    @GetMapping("/{id}")
-    public TeamDTO getOne(@PathVariable Long id) {
-        log.info("getOne(" + id + ") called");
-        return teamService.getTeam(id)
-                .map(ModelHelper::enrich)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team `" + id + "` does not exist"));
+  @GetMapping("/{id}/course")
+  public CourseDTO getCourse(@PathVariable Long id) {
+    log.info("getCourse(" + id + ") called");
+    try {
+      return ModelHelper.enrich(teamService.getCourseForTeam(id));
+    } catch (TeamNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
+  }
 
-    @GetMapping("/{id}/members")
-    public List<StudentDTO> getMembers(@PathVariable Long id) {
-        log.info("getMembers(" + id + ") called");
-        try {
-            return teamService.getTeamMembers(id).stream()
-                    .map(ModelHelper::enrich)
-                    .collect(Collectors.toList());
-        } catch (TeamNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+  @GetMapping("/{teamId}/vms/{vmId}")
+  public VmDTO getVm(@PathVariable Long teamId, @PathVariable Long vmId) {
+    try {
+      return vmService.getVm(vmId, teamId);
+    } catch (VmNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (VmNotOfTeamException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     }
+  }
 
-    @GetMapping("/{id}/course")
-    public CourseDTO getCourse(@PathVariable Long id) {
-        log.info("getCourse(" + id + ") called");
-        try {
-            return ModelHelper.enrich(teamService.getCourseForTeam(id));
-        } catch (TeamNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+  @PostMapping("/{id}/vms")
+  public VmDTO createVm(@PathVariable Long id, @RequestBody VmDTO vmDTO) {
+    try {
+      return vmService.createVm(id, vmDTO);
+    } catch (VmModelNotFoundException | StudentNotFoundException | CourseNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+  }
 
-    @GetMapping("/{teamId}/vms/{vmId}")
-    public VmDTO getVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-        try {
-            return vmService.getVm(vmId, teamId);
-        } catch (VmNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (VmNotOfTeamException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-        }
+  @DeleteMapping("/{teamId}/vms/{vmId}")
+  public VmDTO deleteVm(@PathVariable Long teamId, @PathVariable Long vmId) {
+    try {
+      return vmService.deleteVm(vmId, teamId);
+    } catch (CannotDeleteVmException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+    } catch (VmNotOfTeamException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     }
+  }
 
-    @PostMapping("/{id}/vms")
-    public VmDTO createVm(@PathVariable Long id, @RequestBody VmDTO vmDTO) {
-        try {
-            return vmService.createVm(id, vmDTO);
-        } catch (VmModelNotFoundException | StudentNotFoundException | CourseNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+  @PutMapping("/{teamId}/vms/{vmId}")
+  public VmDTO updateVm(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody UpdateVmDetails uvd) {
+    try {
+      return vmService.updateVmResources(vmId, teamId, uvd);
+    } catch (VmNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (VmNotOfTeamException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+  }
 
-    @DeleteMapping("/{teamId}/vms/{vmId}")
-    public VmDTO deleteVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-        try {
-            return vmService.deleteVm(vmId, teamId);
-        } catch (CannotDeleteVmException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        } catch (VmNotOfTeamException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-        }
+  @PutMapping("/{teamId}/vms/{vmId}/turnOnVm")
+  public VmDTO turnOnVm(@PathVariable Long teamId, @PathVariable Long vmId) {
+    try {
+      return vmService.turnOnVm(vmId, teamId);
+    } catch (VmNotFoundException | TeamNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (VmNotOfTeamException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+    } catch (MaxVmResourcesException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+  }
 
-    @PutMapping("/{teamId}/vms/{vmId}")
-    public VmDTO updateVm(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody UpdateVmDetails uvd) {
-        try {
-            return vmService.updateVmResources(vmId, teamId, uvd);
-        } catch (VmNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (VmNotOfTeamException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+  @PutMapping("/{teamId}/vms/{vmId}/turnOffVm")
+  public VmDTO turnOffVm(@PathVariable Long teamId, @PathVariable Long vmId) {
+    try {
+      return vmService.turnOffVm(vmId, teamId);
+    } catch (VmNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (VmNotOfTeamException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     }
+  }
 
-    @PutMapping("/{teamId}/vms/{vmId}/turnOnVm")
-    public VmDTO turnOnVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-        try {
-            return vmService.turnOnVm(vmId, teamId);
-        } catch (VmNotFoundException | TeamNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (VmNotOfTeamException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-        } catch (MaxVmResourcesException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/{teamId}/vms/{vmId}/addOwner")
+  public void addVmOwner(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody Map<String, String> reqBody) {
+    try {
+      vmService.addVmOwner(vmId, teamId, reqBody.get("studentId"));
+    } catch (VmNotFoundException | TeamNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (VmNotOfTeamException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+    } catch (UserNotVerifiedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+  }
 
-    @PutMapping("/{teamId}/vms/{vmId}/turnOffVm")
-    public VmDTO turnOffVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-        try {
-            return vmService.turnOffVm(vmId, teamId);
-        } catch (VmNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (VmNotOfTeamException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-        }
+  @GetMapping("/{teamId}/vms")
+  public List<VmDTO> getVmsOfTeam(@PathVariable Long teamId) {
+    try {
+      return vmService.getVmsOfTeam(teamId);
+    } catch (TeamNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
+  }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/{teamId}/vms/{vmId}/addOwner")
-    public void addVmOwner(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody Map<String, String> reqBody) {
-        try {
-            vmService.addVmOwner(vmId, teamId, reqBody.get("studentId"));
-        } catch (VmNotFoundException | TeamNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (VmNotOfTeamException e) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-        } catch (UserNotVerifiedException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+  @ResponseStatus(HttpStatus.OK)
+  @PutMapping("/{teamId}/updateVmsResourceLimits")
+  public TeamDTO updateVmsResourceLimits(@PathVariable Long teamId, SetVmsResourceLimits setVmsResourceLimits) {
+    try {
+      return teamService.setVmsResourceLimits(teamId, setVmsResourceLimits);
+    } catch (TooManyActualResourcesException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
     }
+  }
 
-    @GetMapping("/{teamId}/vms")
-    public List<VmDTO> getVmsOfTeam(@PathVariable Long teamId){
-        try {
-            return vmService.getVmsOfTeam(teamId);
-        } catch (TeamNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+  @GetMapping("/confirmInvitation/{token}")
+  public boolean confirmInvitation(@PathVariable String token) {
+    if (!notificationService.confirm(token)) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
     }
+    return true;
+  }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/{teamId}/updateVmsResourceLimits")
-    public TeamDTO updateVmsResourceLimits(@PathVariable Long teamId, SetVmsResourceLimits setVmsResourceLimits){
-        try {
-            return teamService.setVmsResourceLimits(teamId, setVmsResourceLimits);
-        } catch (TooManyActualResourcesException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        }
+  @GetMapping("/rejectInvitation/{token}")
+  public boolean rejectInvitation(@PathVariable String token) {
+    if (!notificationService.reject(token)) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
     }
-
-    @GetMapping("/confirmInvitation/{token}")
-    public boolean confirmInvitation(@PathVariable String token) {
-        if (!notificationService.confirm(token)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
-        }
-        return true;
-    }
-
-    @GetMapping("/rejectInvitation/{token}")
-    public boolean rejectInvitation(@PathVariable String token) {
-        if (!notificationService.reject(token)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
-        }
-        return true;
-    }
+    return true;
+  }
 
 }

@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public interface StudentService {
 
-    Optional<StudentDTO> getStudent(String studentId);
+  Optional<StudentDTO> getStudent(String studentId);
 
-    List<StudentDTO> getAllStudents();
+  List<StudentDTO> getAllStudents();
 
-    List<CourseDTO> getStudentCourses(String studentId);
+  List<CourseDTO> getStudentCourses(String studentId);
 
-    List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId);
+  List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId);
 }

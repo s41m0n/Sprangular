@@ -12,7 +12,7 @@ import javax.persistence.Id;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfirmEmailToken {
-    @Id
-    String token;
-    String userId;
+  @Id
+  String token;
+  String userId;
 }

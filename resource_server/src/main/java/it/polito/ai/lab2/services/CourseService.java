@@ -11,31 +11,31 @@ import java.util.Optional;
 
 public interface CourseService {
 
-    boolean addCourse(CourseDTO course);
+  boolean addCourse(CourseDTO course);
 
-    CourseDTO removeCourse(String courseId);
+  CourseDTO removeCourse(String courseId);
 
-    CourseDTO updateCourse(String courseId, UpdateCourseDetails updateCourseDetails);
+  CourseDTO updateCourse(String courseId, UpdateCourseDetails updateCourseDetails);
 
-    Optional<CourseDTO> getCourse(String courseId);
+  Optional<CourseDTO> getCourse(String courseId);
 
-    List<CourseDTO> getAllCourses();
+  List<CourseDTO> getAllCourses();
 
-    List<StudentDTO> getEnrolledStudents(String courseId);
+  List<StudentDTO> getEnrolledStudents(String courseId);
 
-    void enableCourse(String courseId);
+  void enableCourse(String courseId);
 
-    void disableCourse(String courseId);
+  void disableCourse(String courseId);
 
-    boolean addStudentToCourse(String studentId, String courseId);
+  boolean addStudentToCourse(String studentId, String courseId);
 
-    List<Boolean> enrollAll(Reader r, String courseID);
+  List<Boolean> enrollAll(Reader r, String courseID);
 
-    StudentDTO removeStudentFromCourse(String studentId, String courseId);
+  StudentDTO removeStudentFromCourse(String studentId, String courseId);
 
-    List<ProfessorDTO> getCourseProfessors(String courseId);
+  List<ProfessorDTO> getCourseProfessors(String courseId);
 
-    boolean addProfessorToCourse(String professorId, String courseId);
+  boolean addProfessorToCourse(String professorId, String courseId);
 
-    ProfessorDTO removeProfessorFromCourse(String professorId, String courseId);
+  ProfessorDTO removeProfessorFromCourse(String professorId, String courseId);
 }

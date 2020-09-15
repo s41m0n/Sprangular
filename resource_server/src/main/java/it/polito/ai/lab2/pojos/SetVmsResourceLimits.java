@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class SetVmsResourceLimits {
-    int vCpu;
-    int diskStorage;
-    int ram;
-    int maxActiveInstances;
-    int maxTotalInstances;
+  int vCpu;
+  int diskStorage;
+  int ram;
+  int maxActiveInstances;
+  int maxTotalInstances;
 }

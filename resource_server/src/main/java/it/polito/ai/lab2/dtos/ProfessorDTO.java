@@ -11,15 +11,15 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class ProfessorDTO extends RepresentationModel<ProfessorDTO> {
 
-    String email;
+  String email;
 
-    @NotNull
-    @NotEmpty
-    String id;
+  @NotNull
+  @NotEmpty
+  String id;
 
-    String name;
+  String name;
 
-    String surname;
+  String surname;
 
-    String photoPath;
+  String photoPath;
 }

@@ -11,27 +11,27 @@ import java.util.Optional;
 
 public interface TeamService {
 
-    List<TeamDTO> getTeamsForStudent(String studentId);
+  List<TeamDTO> getTeamsForStudent(String studentId);
 
-    List<StudentDTO> getTeamMembers(Long teamId);
+  List<StudentDTO> getTeamMembers(Long teamId);
 
-    TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Timestamp deadline);
+  TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Timestamp deadline);
 
-    List<TeamDTO> getTeamsForCourse(String courseId);
+  List<TeamDTO> getTeamsForCourse(String courseId);
 
-    List<StudentDTO> getStudentsInTeams(String courseId);
+  List<StudentDTO> getStudentsInTeams(String courseId);
 
-    List<StudentDTO> getAvailableStudents(String courseId);
+  List<StudentDTO> getAvailableStudents(String courseId);
 
-    void activateTeam(Long id);
+  void activateTeam(Long id);
 
-    void evictTeam(Long id);
+  void evictTeam(Long id);
 
-    List<TeamDTO> getTeams();
+  List<TeamDTO> getTeams();
 
-    Optional<TeamDTO> getTeam(Long id);
+  Optional<TeamDTO> getTeam(Long id);
 
-    CourseDTO getCourseForTeam(Long id);
+  CourseDTO getCourseForTeam(Long id);
 
-    TeamDTO setVmsResourceLimits(Long teamId, SetVmsResourceLimits vmResourceLimits);
+  TeamDTO setVmsResourceLimits(Long teamId, SetVmsResourceLimits vmResourceLimits);
 }

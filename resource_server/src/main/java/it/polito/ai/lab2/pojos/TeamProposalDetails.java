@@ -12,13 +12,13 @@ import java.util.Map;
 @NoArgsConstructor
 public class TeamProposalDetails {
 
-    String token; //ci serve per creare il link cliccabile nel frontend
+  String token; //ci serve per creare il link cliccabile nel frontend
 
-    Student proposalCreator;
+  Student proposalCreator;
 
-    String teamName;
+  String teamName;
 
-    Map<Student, ProposalStatus> membersAndStatus;
+  Map<Student, ProposalStatus> membersAndStatus;
 
-    Timestamp deadline;
+  Timestamp deadline;
 }
