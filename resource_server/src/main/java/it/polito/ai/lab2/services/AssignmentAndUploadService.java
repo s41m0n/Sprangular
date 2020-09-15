@@ -17,6 +17,8 @@ public interface AssignmentAndUploadService {
 
   List<AssignmentSolutionDTO> getAssignmentSolutionsForAssignment(Long assignmentId);
 
+  //TODO: fare il getAssignmentSolutionForAssignmentOfStudent
+
   List<AssignmentDTO> getStudentAssignments(String studentId);
 
   // TODO: do we really need this?

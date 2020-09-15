@@ -1,9 +1,6 @@
 package it.polito.ai.lab2.services;
 
-import it.polito.ai.lab2.entities.Professor;
-import it.polito.ai.lab2.entities.Student;
-import it.polito.ai.lab2.entities.Team;
-import it.polito.ai.lab2.entities.Vm;
+import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +26,9 @@ public class SecurityServiceImpl implements SecurityService {
 
   @Autowired
   TeamRepository teamRepository;
+
+  @Autowired
+  AssignmentRepository assignmentRepository;
 
   @Override
   public boolean isStudentSelf(String id) {
@@ -115,5 +115,29 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     return team.getMembers().contains(student);
+  }
+
+  @Override
+  public boolean isAssignmentOfProfessorCourse(Long assignmentId) {
+    Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+    Professor professor = professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+
+    if (assignment == null || professor == null) {
+      return false;
+    }
+
+    return professor.getCourses().contains(assignment.getCourse());
+  }
+
+  @Override
+  public boolean isAssignmentOfProfessor(Long assignmentId) {
+    Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+    Professor professor = professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+
+    if (assignment == null || professor == null) {
+      return false;
+    }
+
+    return assignment.getProfessor().getId().equals(professor.getId());
   }
 }

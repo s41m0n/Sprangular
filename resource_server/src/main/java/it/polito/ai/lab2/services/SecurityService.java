@@ -21,4 +21,8 @@ public interface SecurityService {
   boolean isVmOfStudentTeam(Long vmId);
 
   boolean isStudentInTeam(Long teamId);
+
+  boolean isAssignmentOfProfessorCourse(Long assignmentId);
+
+  boolean isAssignmentOfProfessor(Long assignmentId);
 }
