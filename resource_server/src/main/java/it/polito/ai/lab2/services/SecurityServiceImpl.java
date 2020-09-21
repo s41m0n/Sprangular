@@ -30,6 +30,9 @@ public class SecurityServiceImpl implements SecurityService {
   @Autowired
   AssignmentRepository assignmentRepository;
 
+  @Autowired
+  StudentUploadRepository studentUploadRepository;
+
   @Override
   public boolean isStudentSelf(String id) {
     return SecurityContextHolder.getContext().getAuthentication().getName().equals(id);
@@ -140,4 +143,24 @@ public class SecurityServiceImpl implements SecurityService {
 
     return assignment.getProfessor().getId().equals(professor.getId());
   }
+
+  @Override
+  public boolean hasStudentTheAssignment(Long assignmentId) {
+    Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+    if (assignment == null)
+      return false;
+    return assignment.getCourse().getStudents().stream()
+        .anyMatch(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
+  }
+
+  @Override
+  public boolean isProfessorUploadReviewer(Long studentUploadId) {
+    StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId).orElse(null);
+    if (studentUpload == null)
+      return false;
+    return studentUpload.getAssignmentSolution().getAssignment().getProfessor().getId()
+        .equals(SecurityContextHolder.getContext().getAuthentication().getName());
+  }
+
+
 }

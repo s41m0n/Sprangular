@@ -65,7 +65,9 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   //TODO: add more integrity checks
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId) or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId) " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
   public List<AssignmentDTO> getAssignmentsForCourse(String courseId) {
     Course course = courseRepository.findById(courseId)
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
@@ -75,7 +77,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId)")
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId)")
   public List<AssignmentSolutionDTO> getAssignmentSolutionsForAssignment(Long assignmentId) {
     Assignment assignment = assignmentRepository.findById(assignmentId)
         .orElseThrow(() -> new AssignmentNotFoundException("Assignment " + assignmentId + " does not exist"));
@@ -85,7 +88,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
   public List<AssignmentDTO> getStudentAssignments(String studentId) {
     if (!studentRepository.existsById(studentId))
       throw new StudentNotFoundException("Student " + studentId + " does not exist");
@@ -95,7 +99,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId)")
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId)")
   public List<AssignmentSolutionDTO> filterAssignmentSolutionsForStatus(Long assignmentId, AssignmentStatus status) {
     if (!assignmentRepository.existsById(assignmentId))
       throw new AssignmentNotFoundException("Assignment " + assignmentId + " does not exist");
@@ -105,6 +110,9 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId) " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.hasStudentTheAssignment(#assignmentId) and @securityServiceImpl.isStudentSelf(studentId)")
   public List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId) {
     if (!studentRepository.existsById(studentId))
       throw new StudentNotFoundException("Student " + studentId + " not found");
@@ -124,6 +132,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public AssignmentDTO createAssignment(AssignmentDetails details, String courseId, String professorId) {
     Course course = courseRepository.findById(courseId)
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
@@ -160,6 +170,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.hasStudentTheAssignment(#assignmentId)")
   public UploadDTO uploadStudentUpload(UploadDetails details, String studentId, Long assignmentId) {
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
@@ -184,6 +196,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.hasStudentTheAssignment(#assignmentId)")
   public Resource getAssignmentForStudent(Long assignmentId, String studentId) throws FileNotFoundException {
     if (!studentRepository.existsById(studentId))
       throw new StudentNotFoundException("Student " + studentId + " does not exist");
@@ -203,6 +216,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorUploadReviewer(#studentUploadId)")
   public UploadDTO uploadProfessorUpload(UploadDetails details, Long studentUploadId) {
     StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId)
         .orElseThrow(() -> new StudentUploadNotFoundException("Student upload " + studentUploadId + " does not exist"));
@@ -229,6 +244,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId)")
   public AssignmentSolutionDTO assignGrade(String studentId, Long assignmentId, String grade) {
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
