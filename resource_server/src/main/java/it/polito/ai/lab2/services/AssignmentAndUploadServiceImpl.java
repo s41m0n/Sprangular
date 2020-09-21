@@ -62,8 +62,6 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   @Autowired
   TaskScheduler scheduler;
 
-  //TODO: add more integrity checks
-
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
       "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId) " +
@@ -176,6 +174,10 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
             "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
+    if (!isUploadable(assignmentSolution.getStatus()))
+      throw new UploadNotAllowedException("Student " + studentId + " cannot upload for assignment " + assignmentId
+          + ": solution status is " + assignmentSolution.getStatus().toString());
+
     StudentUpload studentUpload = new StudentUpload();
     studentUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
     studentUpload.setComment(details.getComment());
@@ -221,6 +223,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   public UploadDTO uploadProfessorUpload(UploadDetails details, Long studentUploadId) {
     StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId)
         .orElseThrow(() -> new StudentUploadNotFoundException("Student upload " + studentUploadId + " does not exist"));
+    if (!studentUpload.getAssignmentSolution().getStatus().equals(AssignmentStatus.DELIVERED))
+      throw new UploadNotAllowedException("Student assignment status is not DELIVERED");
     ProfessorUpload professorUpload = new ProfessorUpload();
     professorUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
     professorUpload.setComment(details.getComment());
@@ -259,5 +263,10 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     assignmentSolution.setGrade(grade);
     assignmentSolution.setStatus(AssignmentStatus.DEFINITIVE);
     return modelMapper.map(assignmentSolution, AssignmentSolutionDTO.class);
+  }
+
+  private boolean isUploadable(AssignmentStatus assignmentStatus) {
+    return assignmentStatus.equals(AssignmentStatus.READ)
+        || assignmentStatus.equals(AssignmentStatus.REVIEWED_UPLOADABLE);
   }
 }
