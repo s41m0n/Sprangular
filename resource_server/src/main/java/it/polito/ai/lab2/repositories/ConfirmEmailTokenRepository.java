@@ -1,9 +1,9 @@
 package it.polito.ai.lab2.repositories;
 
-import it.polito.ai.lab2.entities.UserCredential;
+import it.polito.ai.lab2.entities.ConfirmEmailToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserCredentialRepository extends JpaRepository<UserCredential, String> {
+public interface ConfirmEmailTokenRepository extends JpaRepository<ConfirmEmailToken, String> {
 }

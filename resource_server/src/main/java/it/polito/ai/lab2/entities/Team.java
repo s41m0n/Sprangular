@@ -10,30 +10,33 @@ import java.util.List;
 @Data
 public class Team {
 
-    @Id
-    @GeneratedValue
-    Long id;
+  @Id
+  @GeneratedValue
+  Long id;
 
-    @Column(unique = true)
-    String name;
+  @Column(unique = true)
+  String name;
 
-    int status;
+  boolean active;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    Course course;
+  @ManyToOne
+  @JoinColumn(name = "course_acronym")
+  Course course;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "student_team", inverseJoinColumns = @JoinColumn(name = "student_id"), joinColumns = @JoinColumn(name = "team_id"))
-    List<Student> members = new ArrayList<>();
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(name = "student_team", inverseJoinColumns = @JoinColumn(name = "student_id"), joinColumns = @JoinColumn(name = "team_id"))
+  List<Student> members = new ArrayList<>();
 
-    int maxVCpu;
+  @OneToMany(mappedBy = "team")
+  List<Vm> vms = new ArrayList<>();
 
-    int maxDiskStorage;
+  int maxVCpu;
 
-    int maxRam;
+  int maxDiskStorage;
 
-    int maxActiveInstances;
+  int maxRam;
 
-    int maxTotalInstances;
+  int maxActiveInstances;
+
+  int maxTotalInstances;
 }

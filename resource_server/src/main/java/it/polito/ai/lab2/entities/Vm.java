@@ -10,25 +10,44 @@ import java.util.List;
 @Data
 public class Vm {
 
-    @Id
-    @GeneratedValue
-    Long id;
+  @Id
+  @GeneratedValue
+  Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "vmModel_id")
-    VmModel vmModel;
+  @ManyToOne
+  @JoinColumn(name = "vmModel_id")
+  VmModel vmModel;
 
-    int vCpu;
+  int vCpu;
 
-    int diskStorage;
+  int diskStorage;
 
-    int ram;
+  int ram;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "vm_owner", joinColumns = @JoinColumn(name = "vm_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
-    List<Student> owners = new ArrayList<>();
+  @ManyToOne
+  @JoinColumn(name = "team_id")
+  Team team;
 
-    boolean active;
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(name = "vm_owner", joinColumns = @JoinColumn(name = "vm_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
+  List<Student> owners = new ArrayList<>();
 
-    String imagePath;
+  boolean active;
+
+  String imagePath;
+
+  public void setVmModel(VmModel vmModel) {
+    this.vmModel = vmModel;
+    vmModel.getVms().add(this);
+  }
+
+  public void setTeam(Team team) {
+    this.team = team;
+    team.getVms().add(this);
+  }
+
+  public void addOwner(Student student) {
+    this.getOwners().add(student);
+    student.getOwnedVms().add(this);
+  }
 }

@@ -11,23 +11,23 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class TeamDTO extends RepresentationModel<TeamDTO> {
 
-    @NotNull
-    @NotEmpty
-    Long id;
+  @NotNull
+  @NotEmpty
+  Long id;
 
-    @NotNull
-    @NotEmpty
-    String name;
+  @NotNull
+  @NotEmpty
+  String name;
 
-    int status;
+  boolean active;
 
-    int maxVCpu;
+  int maxVCpu;
 
-    int maxDiskStorage;
+  int maxDiskStorage;
 
-    int maxRam;
+  int maxRam;
 
-    int maxActiveInstances;
+  int maxActiveInstances;
 
-    int maxTotalInstances;
+  int maxTotalInstances;
 }

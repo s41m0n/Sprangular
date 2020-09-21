@@ -1,0 +1,51 @@
+========== TESTED ENDPOINTS ==========
+
+CourseController:
+    - all;
+    - getOne;
+    - enrolledStudents;
+    - getProfessors;
+    - getTeams;
+    - getAvailableStudents;
+    - getUnavailableStudents;
+    - getEnabled;
+    - add;
+    - enableDisable;
+    - addProfessor;
+    - enrollStudent;
+    - enrollStudents;
+    - createVmModel;
+    - updateVmModel;
+    - getVmsOfCourse;
+    - removeStudentFromCourse;
+    - removeProfessorFromCourse;
+    - deleteCourse;
+    - updateCourse.
+
+    Missing:
+        - proposeTeam;
+
+ProfessorController:
+    - all;
+    - getOne;
+    - getProfessorCourses.
+
+StudentController:
+    - all;
+    - getOne;
+    - getCourses;
+    - getTeams;
+
+    Missing:
+        - getVmsOfStudentOfCourse;
+        - getOwnedVmsOfStudentOfCourse;
+        - getProposalsForStudentOfCourse.
+
+TeamController:
+    -
+
+JwtAuthController:
+    - createAuthenticationToken;
+    - registerStudent;
+    - registerProfessor;
+    - confirmEmail.

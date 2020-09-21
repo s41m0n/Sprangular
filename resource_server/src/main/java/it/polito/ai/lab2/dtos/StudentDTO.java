@@ -12,20 +12,20 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class StudentDTO extends RepresentationModel<StudentDTO> {
 
-    @CsvBindByName
-    String email;
+  @CsvBindByName
+  String email;
 
-    @NotNull
-    @NotEmpty
-    @CsvBindByName
-    String id;
+  @NotNull
+  @NotEmpty
+  @CsvBindByName
+  String id;
 
-    @CsvBindByName
-    String name;
+  @CsvBindByName
+  String name;
 
-    @CsvBindByName
-    String surname;
+  @CsvBindByName
+  String surname;
 
-    @CsvBindByName
-    String photoPath;
+  @CsvBindByName
+  String photoPath;
 }

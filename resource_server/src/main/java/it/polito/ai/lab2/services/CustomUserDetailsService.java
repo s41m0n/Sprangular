@@ -2,6 +2,7 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.entities.Role;
 import it.polito.ai.lab2.entities.User;
+import it.polito.ai.lab2.exceptions.UserNotVerifiedException;
 import it.polito.ai.lab2.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,17 +19,20 @@ import java.util.Collection;
 @Transactional
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    UserRepository userRepository;
+  @Autowired
+  UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + username));
-        return new org.springframework.security.core.userdetails.User(user.getId(), user.getPassword(), getAuthorities(user));
-    }
+  //UserDetails = username, password e authorities
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    User user = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + username));
+    if (!user.isVerified())
+      throw new UserNotVerifiedException("User " + username + " not verified yet. Check your email.");
+    return new org.springframework.security.core.userdetails.User(user.getId(), user.getPassword(), getAuthorities(user));
+  }
 
-    private static Collection<? extends GrantedAuthority> getAuthorities(User user) {
-        String[] userRoles = user.getRoles().stream().map(Role::getName).toArray(String[]::new);
-        return AuthorityUtils.createAuthorityList(userRoles);
-    }
+  private static Collection<? extends GrantedAuthority> getAuthorities(User user) {
+    String[] userRoles = user.getRoles().stream().map(Role::getName).toArray(String[]::new);
+    return AuthorityUtils.createAuthorityList(userRoles);
+  }
 }

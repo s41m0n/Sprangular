@@ -5,13 +5,17 @@ import lombok.Data;
 @Data
 public class UserDTO {
 
-    String email;
+  String email;
 
-    String id;
+  String password;
 
-    String name;
+  String id;
 
-    String surname;
+  String name;
 
-    String photoPath;
+  String surname;
+
+  String photoPath;
+
+  boolean verified;
 }

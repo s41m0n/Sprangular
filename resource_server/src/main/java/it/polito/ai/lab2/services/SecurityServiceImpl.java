@@ -1,65 +1,166 @@
 package it.polito.ai.lab2.services;
 
-import it.polito.ai.lab2.repositories.CourseRepository;
-import it.polito.ai.lab2.repositories.ProfessorRepository;
-import it.polito.ai.lab2.repositories.StudentRepository;
+import it.polito.ai.lab2.entities.*;
+import it.polito.ai.lab2.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class SecurityServiceImpl implements SecurityService{
+public class SecurityServiceImpl implements SecurityService {
 
-    @Autowired
-    StudentRepository studentRepository;
+  @Autowired
+  StudentRepository studentRepository;
 
-    @Autowired
-    ProfessorRepository professorRepository;
+  @Autowired
+  ProfessorRepository professorRepository;
 
-    @Autowired
-    CourseRepository courseRepository;
+  @Autowired
+  CourseRepository courseRepository;
 
-    @Override
-    public boolean isStudentSelf(String id) {
-        return SecurityContextHolder.getContext().getAuthentication().getName().equals(id);
+  @Autowired
+  VmRepository vmRepository;
+
+  @Autowired
+  TeamRepository teamRepository;
+
+  @Autowired
+  AssignmentRepository assignmentRepository;
+
+  @Autowired
+  StudentUploadRepository studentUploadRepository;
+
+  @Override
+  public boolean isStudentSelf(String id) {
+    return SecurityContextHolder.getContext().getAuthentication().getName().equals(id);
+  }
+
+  @Override
+  public boolean isTeamOfStudentCourse(Long id) {
+    return studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
+        .map(student -> student.getCourses().stream()
+            .anyMatch(course -> course.getTeams().stream()
+                .anyMatch(team -> team.getId().equals(id))))
+        .orElse(false);
+  }
+
+  @Override
+  public boolean isProfessorCourseOwner(String courseId) {
+
+    if (!courseRepository.existsById(courseId) || courseRepository.getOne(courseId).getProfessors().isEmpty()) { //the course does not exists or there are no professors
+      return false;
     }
 
-    @Override
-    public boolean isTeamOfStudentCourse(Long id) {
-        return studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
-                .map(student -> student.getCourses().stream()
-                        .anyMatch(course -> course.getTeams().stream()
-                                .anyMatch(team -> team.getId().equals(id))))
-                .orElse(false);
+    List<String> professorsIds = new ArrayList<>();
+
+    for (Professor p : courseRepository.getOne(courseId).getProfessors()) {
+      professorsIds.add(p.getId());
     }
 
-    @Override
-    public boolean isProfessorCourseOwner(String course) {
-        return courseRepository.findById(course)
-                .map(c -> c.getProfessor() != null && c.getProfessor().getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
-                .orElse(false);
+    return professorsIds.contains(SecurityContextHolder.getContext().getAuthentication().getName());
+  }
+
+  @Override
+  public boolean isStudentEnrolled(String courseId) {
+    return studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
+        .map(student -> student.getCourses().stream().anyMatch(c -> c.getAcronym().equals(courseId)))
+        .orElse(false);
+  }
+
+  @Override
+  public boolean isTeamOfProfessorCourse(Long id) {
+    return professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
+        .map(professor -> professor.getCourses().stream()
+            .anyMatch(course -> course.getTeams().stream()
+                .anyMatch(team -> team.getId().equals(id))))
+        .orElse(false);
+  }
+
+  @Override
+  public boolean isStudentInTeamRequest(List<String> memberIds) {
+    return memberIds.contains(SecurityContextHolder.getContext().getAuthentication().getName());
+  }
+
+  @Override
+  public boolean isStudentOwnerOfVm(Long vmId) {
+    Vm vm = vmRepository.findById(vmId).orElse(null);
+    Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+
+    if (vm == null || student == null) {
+      return false;
     }
 
-    @Override
-    public boolean isStudentEnrolled(String course) {
-        return studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
-                .map(student -> student.getCourses().stream().anyMatch(c -> c.getName().equals(course)))
-                .orElse(false);
+    return vm.getOwners().contains(student);
+  }
+
+  @Override
+  public boolean isVmOfStudentTeam(Long vmId) {
+    Vm vm = vmRepository.findById(vmId).orElse(null);
+    Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+
+    if (vm == null || student == null) {
+      return false;
     }
 
-    @Override
-    public boolean isTeamOfProfessorCourse(Long id) {
-        return professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName())
-                .map(professor -> professor.getProfessorCourses().stream()
-                    .anyMatch(course -> course.getTeams().stream()
-                        .anyMatch(team -> team.getId().equals(id))))
-                .orElse(false);
+    return vm.getTeam().getMembers().contains(student);
+  }
+
+  @Override
+  public boolean isStudentInTeam(Long teamId) {
+    Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+    Team team = teamRepository.findById(teamId).orElse(null);
+
+    if (student == null || team == null) {
+      return false;
     }
 
-    @Override
-    public boolean isStudentInTeamRequest(List<String> memberIds) {
-        return memberIds.contains(SecurityContextHolder.getContext().getAuthentication().getName());
+    return team.getMembers().contains(student);
+  }
+
+  @Override
+  public boolean isAssignmentOfProfessorCourse(Long assignmentId) {
+    Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+    Professor professor = professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+
+    if (assignment == null || professor == null) {
+      return false;
     }
+
+    return professor.getCourses().contains(assignment.getCourse());
+  }
+
+  @Override
+  public boolean isAssignmentOfProfessor(Long assignmentId) {
+    Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+    Professor professor = professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
+
+    if (assignment == null || professor == null) {
+      return false;
+    }
+
+    return assignment.getProfessor().getId().equals(professor.getId());
+  }
+
+  @Override
+  public boolean hasStudentTheAssignment(Long assignmentId) {
+    Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
+    if (assignment == null)
+      return false;
+    return assignment.getCourse().getStudents().stream()
+        .anyMatch(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
+  }
+
+  @Override
+  public boolean isProfessorUploadReviewer(Long studentUploadId) {
+    StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId).orElse(null);
+    if (studentUpload == null)
+      return false;
+    return studentUpload.getAssignmentSolution().getAssignment().getProfessor().getId()
+        .equals(SecurityContextHolder.getContext().getAuthentication().getName());
+  }
+
+
 }
