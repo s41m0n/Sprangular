@@ -144,6 +144,17 @@ public class StudentController {
   }
 
   @GetMapping("/{studentId}/assignments/{assignmentId}")
+  public AssignmentSolutionDTO getAssignmentSolution(@PathVariable String studentId,
+                                                     @PathVariable Long assignmentId) {
+    log.info("getAssignmentSolution() called");
+    try {
+      return assAndUploadService.getAssignmentSolutionForAssignmentOfStudent(assignmentId, studentId);
+    } catch (StudentNotFoundException | AssignmentSolutionNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
+  @GetMapping("/{studentId}/assignments/{assignmentId}/document")
   public Resource getAssignment(@PathVariable String studentId,
                                 @PathVariable Long assignmentId) {
     log.info("getAssignment() called");

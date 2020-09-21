@@ -86,6 +86,18 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.hasStudentTheAssignment(#assignmentId)")
+  public AssignmentSolutionDTO getAssignmentSolutionForAssignmentOfStudent(Long assignmentId, String studentId) {
+    if (!studentRepository.existsById(studentId))
+      throw new StudentNotFoundException("Student " + studentId + " not found");
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
+        assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
+        "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
+    return modelMapper.map(assignmentSolution, AssignmentSolutionDTO.class);
+  }
+
+  @Override
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') " +
       "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
   public List<AssignmentDTO> getStudentAssignments(String studentId) {
