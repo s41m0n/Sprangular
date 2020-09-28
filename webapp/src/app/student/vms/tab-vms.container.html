@@ -1,5 +1,5 @@
 <h2 *ngIf="!team; else elseBlock">You need to join a team to use VMs</h2>
 <ng-template #elseBlock>
-    <app-tab-student-vms [vms]="vms" ></app-tab-student-vms>
+    <app-tab-student-vms [vms]="vms"></app-tab-student-vms>
     <button mat-raised-button color="primary" (click)="newVm()">New VM</button>
 </ng-template>

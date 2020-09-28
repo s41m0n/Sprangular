@@ -1,2 +1,8 @@
-.full-width-input {width: 100%;}
-.centered {display: block; margin: auto;}
+.full-width-input {
+    width: 100%;
+}
+
+.centered {
+    display: block;
+    margin: auto;
+}

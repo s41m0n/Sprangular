@@ -1,7 +1,7 @@
-import {Component, AfterViewInit, Input, ChangeDetectorRef, OnInit} from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
+import {AfterViewInit, Component, Input} from '@angular/core';
+import {MatTableDataSource} from '@angular/material/table';
 
-import { VM } from '../../models/vm.model';
+import {VM} from '../../models/vm.model';
 import {VmOptionsModalComponent} from '../../modals/vm-options-modal/vm-options-modal.component';
 import {MatDialog} from '@angular/material/dialog';
 import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
@@ -18,7 +18,7 @@ import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
 export class TabProfessorVmsComponent implements AfterViewInit {
 
   dataSource = new MatTableDataSource<VM>();                     // Table datasource dynamically modified
-  @Input() set vms( vms: VM[] ) {              // VMs to be displayed in the table
+  @Input() set vms(vms: VM[]) {              // VMs to be displayed in the table
     this.dataSource.data = vms;
   }
 
@@ -33,7 +33,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     const index = this.dataSource.data.findIndex(vm => vm === selectedVm);
     const dialogRef = this.dialog.open(VmOptionsModalComponent, {
       width: '300px',
-      data: { vCpu: selectedVm.vCpu, ram: selectedVm.ram, disk: selectedVm.disk }
+      data: {vCpu: selectedVm.vCpu, ram: selectedVm.ram, disk: selectedVm.disk}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -59,7 +59,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   newVm() {
     const newVmDialog = this.dialog.open(NewVmComponent, {
       width: '300px',
-      data: { teams: ['aggiungere', 'dati'], courses: ['aggiungere', 'dati'] }
+      data: {teams: ['aggiungere', 'dati'], courses: ['aggiungere', 'dati']}
     });
 
     newVmDialog.afterClosed().subscribe(result => {

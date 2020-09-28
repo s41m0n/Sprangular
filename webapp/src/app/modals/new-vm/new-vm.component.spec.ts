@@ -1,6 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { NewVmComponent } from './new-vm.component';
+import {NewVmComponent} from './new-vm.component';
 
 describe('NewVmComponent', () => {
   let component: NewVmComponent;
@@ -8,9 +8,9 @@ describe('NewVmComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NewVmComponent ]
+      declarations: [NewVmComponent]
     })
-    .compileComponents();
+        .compileComponents();
   }));
 
   beforeEach(() => {

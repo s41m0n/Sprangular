@@ -10,7 +10,8 @@ export class VmOptionsModalComponent implements OnInit {
 
   constructor(
       public dialogRef: MatDialogRef<VmOptionsModalComponent>,
-      @Inject(MAT_DIALOG_DATA) public data: any) { }
+      @Inject(MAT_DIALOG_DATA) public data: any) {
+  }
 
   ngOnInit(): void {
   }
@@ -19,6 +20,8 @@ export class VmOptionsModalComponent implements OnInit {
     this.dialogRef.close(this.data);
   }
 
-  getSliderTickInterval(): number | 'auto' { return 'auto'; }
+  getSliderTickInterval(): number | 'auto' {
+    return 'auto';
+  }
 
 }

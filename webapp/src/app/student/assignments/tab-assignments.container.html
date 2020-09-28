@@ -1,4 +1,5 @@
-<app-tab-student-assignments [assignments]="assignments" *ngIf="assignments.length; else elseBlock"></app-tab-student-assignments>
+<app-tab-student-assignments [assignments]="assignments"
+                             *ngIf="assignments.length; else elseBlock"></app-tab-student-assignments>
 <ng-template #elseBlock>
     No Assignments available
 </ng-template>

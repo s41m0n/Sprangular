@@ -1,28 +1,28 @@
 <div class="container">
-  <h2>VmModel</h2>
-  <div class="container" *ngIf="vmModel; else elseBlock" >
-    <p>Id:{{vmModel.courseId}}</p>
-    <p>Name:{{vmModel.name}}</p>
-    <p>Path:{{vmModel.path}}</p>
-  </div>
-  <ng-template #elseBlock>This course does not have a VmModel assigned, assign or create a new one now!</ng-template>
+    <h2>VmModel</h2>
+    <div class="container" *ngIf="vmModel; else elseBlock">
+        <p>Id:{{vmModel.courseId}}</p>
+        <p>Name:{{vmModel.name}}</p>
+        <p>Path:{{vmModel.path}}</p>
+    </div>
+    <ng-template #elseBlock>This course does not have a VmModel assigned, assign or create a new one now!</ng-template>
 
-  <div class="container">
-    <mat-form-field>
-      <mat-label>Assign VmModel</mat-label>
-        <input matInput type="search"
-             placeholder="Assign Professor"
-             aria-label="Number"
-             matInput
-             value=""
-             [formControl]="assignVmModelControl"
-             [matAutocomplete]="auto"> 
-      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-        <mat-option *ngFor="let option of filteredVmModel | async" [value]="option">
-          {{displayFn(option)}}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
-    <button mat-button (click)="assignVmModelToCourse()">Assign</button>
-  </div>
+    <div class="container">
+        <mat-form-field>
+            <mat-label>Assign VmModel</mat-label>
+            <input matInput type="search"
+                   placeholder="Assign Professor"
+                   aria-label="Number"
+                   matInput
+                   value=""
+                   [formControl]="assignVmModelControl"
+                   [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                <mat-option *ngFor="let option of filteredVmModel | async" [value]="option">
+                    {{displayFn(option)}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        <button mat-button (click)="assignVmModelToCourse()">Assign</button>
+    </div>
 </div>

@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {Component} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 
-/** HomeComponent 
- * 
+/** HomeComponent
+ *
  *  It shows the user a basic homepage
  */
 @Component({
@@ -11,5 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class HomeComponent {
   path: string;
-  constructor(private route: ActivatedRoute) {}
+
+  constructor(private route: ActivatedRoute) {
+  }
 }
