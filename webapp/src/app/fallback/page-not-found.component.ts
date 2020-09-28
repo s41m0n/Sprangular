@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 /** PageNotFoundComponent
- * 
+ *
  *  Display a 404-NotFound custom error page.
  *  What => a personalized error message related to a resourse not found (ex /professor/courses/XXXX  whenre XXXX does not exist)
  */
@@ -11,5 +11,5 @@ import { Component, Input } from '@angular/core';
 })
 export class PageNotFoundComponent {
 
-  @Input() what : string;
+  @Input() what: string;
 }

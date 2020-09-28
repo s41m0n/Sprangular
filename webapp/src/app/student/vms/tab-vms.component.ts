@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input} from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { VM } from '../../models/vm.model';
+import {MatTableDataSource} from '@angular/material/table';
+import {VM} from '../../models/vm.model';
 
 /**
  * StudentsComponent

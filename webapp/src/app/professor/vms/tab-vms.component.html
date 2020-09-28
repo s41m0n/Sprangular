@@ -28,7 +28,9 @@
                 <mat-card-actions align="end">
                     <button mat-raised-button color="primary" (click)="connectToVm(vm.id)">CONNECT</button>
                     <button mat-raised-button color="warn" (click)="killVm(vm.id)">KILL</button>
-                    <button mat-icon-button (click)="openDialog(vm.id)"><mat-icon>more_vert</mat-icon></button>
+                    <button mat-icon-button (click)="openDialog(vm.id)">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
                 </mat-card-actions>
             </mat-card>
         </div>

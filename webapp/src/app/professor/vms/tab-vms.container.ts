@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { VM } from '../../models/vm.model';
-import { Course } from '../../models/course.model';
-import { CourseService } from '../../services/course.service';
-import { first, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {VM} from '../../models/vm.model';
+import {Course} from '../../models/course.model';
+import {CourseService} from '../../services/course.service';
+import {first, takeUntil} from 'rxjs/operators';
+import {Subject} from 'rxjs';
 
 /**
  * VmsContainer
@@ -14,13 +14,14 @@ import { Subject } from 'rxjs';
   selector: 'app-tab-professor-vms-cont',
   templateUrl: './tab-vms.container.html'
 })
-export class TabProfessorVmsContainer implements OnInit, OnDestroy {
+export class TabProfessorVmsContComponent implements OnInit, OnDestroy {
 
   private course: Course;                                      // The current selected course
   vms: VM[] = [];                             // The current vms
-  private destroy$: Subject<boolean> = new Subject<boolean>();  // Private subject to perform the unsubscriptions when the component is destroyed
+  private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
-  constructor(private courseService: CourseService) { }
+  constructor(private courseService: CourseService) {
+  }
 
   ngOnInit(): void {
     // Subscribe to the Broadcaster course selected, to update the current rendered course
@@ -37,7 +38,7 @@ export class TabProfessorVmsContainer implements OnInit, OnDestroy {
   }
 
 
-  /** Private function to refresh the list of enrolled students*/
+  /** Private function to refresh the list of enrolled students */
   private refreshAssignments() {
     // Check if already received the current course
     if (!this.course) {
