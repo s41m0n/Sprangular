@@ -44,8 +44,10 @@ public class JwtTokenUtil {
 
   //Generate token for user
   public String generateToken(UserDetails userDetails) {
+    HashMap<String, Object> roles = new HashMap<>();
+    roles.put("roles", userDetails.getAuthorities());
     return Jwts.builder()
-        .setClaims(new HashMap<>())
+        .setClaims(roles)
         .setSubject(userDetails.getUsername())
         .setIssuedAt(new Date(System.currentTimeMillis()))
         .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))

@@ -43,7 +43,7 @@ export class StudentComponent implements OnDestroy {
           this.error = of(`Course ${coursename} does not exist`);
         } else {
           this.error = of(null);
-          this.studentService.getStudentByEmail(this.authService.currentUserValue.email).pipe(first()).subscribe(student => {
+          this.studentService.getStudentByEmail(this.authService.currentUserValue.id).pipe(first()).subscribe(student => {
             if (student.team && student.team.courseId === course.id) {
               this.studentService.getStudentsInTeam(student.teamId).pipe(first()).subscribe(students => {
                 student.team.students = students;

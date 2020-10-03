@@ -31,8 +31,8 @@ export class LoginDialogComponent implements OnInit {
    */
   ngOnInit(): void {
     this.form = this.fb.group({
-      email: ['', Validators.email],
-      password: ['', Validators.pattern('^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,15}$')]
+      email: [''],
+      password: ['']
     });
   }
 

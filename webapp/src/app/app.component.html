@@ -1,46 +1,52 @@
 <!-- First toolbar with menu icon and app name -->
-<mat-toolbar color='primary' class="header">
-    <button mat-icon-button aria-label="Menu icon" (click)="sidebar.toggle()">
-        <mat-icon>menu</mat-icon>
-    </button>
-    <a mat-button [routerLink]="['/']"><h2>VirtualLabs</h2></a>
+<mat-toolbar color="primary" class="header">
+  <button mat-icon-button aria-label="Menu icon" (click)="sidebar.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <a mat-button [routerLink]="['/']"><h2>VirtualLabs</h2></a>
 
-    <span class="example-fill-remaining-space"></span>
-    <span *ngIf="currentUser">Welcome back, {{currentUser.email}}</span>
-    <div *ngIf="!currentUser; else elseBlock">
-        <button mat-button (click)="openLogin()">Login</button>
-        <button mat-button (click)="openRegister()">Register</button>
-    </div>
-    <ng-template #elseBlock>
-        <button mat-button (click)="logout()" *ngIf="currentUser">Logout</button>
-    </ng-template>
+  <span class="example-fill-remaining-space"></span>
+  <span *ngIf="currentUser">Welcome back, {{ currentUser.id }}</span>
+  <div *ngIf="!currentUser; else elseBlock">
+    <button mat-button (click)="openLogin()">Login</button>
+    <button mat-button (click)="openRegister()">Register</button>
+  </div>
+  <ng-template #elseBlock>
+    <button mat-button (click)="logout()" *ngIf="currentUser">Logout</button>
+  </ng-template>
 </mat-toolbar>
-
 
 <!-- Second toolbar with current selected course name -->
 <mat-toolbar class="subheader">
-    Course: {{selectedCourseName || '❓'}}
+  Course: {{ selectedCourseName || '❓' }}
 </mat-toolbar>
 
 <!-- Application views area -->
 <mat-sidenav-container [autosize]="true">
+  <!-- Left sidenav to choose current view course -->
+  <mat-sidenav
+    #sidebar
+    class="navbar"
+    mode="side"
+    opened="true"
+    position="start"
+  >
+    <div class="container">
+      <mat-nav-list>
+        <h3 matSubheader>Your available courses &nbsp;</h3>
+        <mat-divider></mat-divider>
+        <mat-list-item
+          *ngFor="let course of courseList | async"
+          [routerLink]="[currentUser.roles[0] + '/course/' + course.path]"
+        >
+          {{ course.name }}
+        </mat-list-item>
+      </mat-nav-list>
+    </div>
+  </mat-sidenav>
 
-    <!-- Left sidenav to choose current view course -->
-    <mat-sidenav #sidebar class="navbar" mode="side" opened="true" position="start">
-        <div class="container">
-            <mat-nav-list>
-                <h3 matSubheader>Your available courses &nbsp;</h3>
-                <mat-divider></mat-divider>
-                <mat-list-item *ngFor="let course of courseList | async"
-                               [routerLink]="[currentUser.role + '/course/' + course.path]">
-                    {{course.name}}
-                </mat-list-item>
-            </mat-nav-list>
-        </div>
-    </mat-sidenav>
-
-    <!-- Current view content -->
-    <mat-sidenav-content>
-        <router-outlet></router-outlet>
-    </mat-sidenav-content>
+  <!-- Current view content -->
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
 </mat-sidenav-container>

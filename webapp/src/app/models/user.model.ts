@@ -9,14 +9,18 @@
  * @param(role)         the role of the user
  */
 export class User {
-  email: string;
+  id: string;
   accessToken: string;
-  role: string;
+  roles: string[];
 
-  constructor(email: string = null, accessToken: string = null, role: string = null) {
-    this.email = email;
+  constructor(
+    id: string = null,
+    accessToken: string = null,
+    roles: string[] = null
+  ) {
+    this.id = id;
     this.accessToken = accessToken;
-    this.role = role;
+    this.roles = roles;
   }
 
   /**

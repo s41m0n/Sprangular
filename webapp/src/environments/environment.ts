@@ -2,9 +2,9 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import {HttpHeaders} from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 
-const BASE_API = '/api';
+const BASE_API = '/API';
 
 export const environment = {
   production: false,
@@ -16,9 +16,12 @@ export const environment = {
   base_vms_url: `${BASE_API}/vms`,
   base_vm_models_url: `${BASE_API}/vmmodels`,
   base_assignments_url: `${BASE_API}/assignments`,
-  login_url: `${BASE_API}/login`,
-  register_url: `${BASE_API}/register`,
-  base_http_headers: {headers: new HttpHeaders({'Content-Type': 'application/json'})} // Header to be used in POST/PUT
+  login_url: `${BASE_API}/authentication/login`,
+  register_url_student: `${BASE_API}/register/student`,
+  register_url_professor: `${BASE_API}/register/student`,
+  base_http_headers: {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  }, // Header to be used in POST/PUT
 };
 
 /*
