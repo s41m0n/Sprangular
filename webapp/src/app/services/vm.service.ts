@@ -19,7 +19,7 @@ import { Team } from '../models/team.model';
 })
 export class VmService {
   constructor(private http: HttpClient, private toastrService: ToastrService) {}
-
+/*
   public searchModels(name: string): Observable<VmModel[]> {
     // Checking if it is actually a string and does not have whitespaces in the middle (if it has them at beginning or end, trim)
     if (typeof name !== 'string') {
@@ -44,27 +44,23 @@ export class VmService {
         )
       );
   }
-
+*/
   public getModelForCourse(course: Course): Observable<VmModel> {
-    return this.http
-      .get<VmModel[]>(
-        `${environment.base_vm_models_url}?courseId_like=${course.id}`
-      )
-      .pipe(
-        map((x) => x.shift()),
-        tap((x) =>
-          console.log(
-            `found models for course - getModelsForCourse(${course.id})`
-          )
-        ),
-        catchError(
-          this.handleError<VmModel>(
-            `getModelsForCourse(${course.id})`,
-            null,
-            false
-          )
+    return this.http.get<VmModel[]>(`${environment.production}/vmModel`).pipe(
+      map((x) => x.shift()),
+      tap((x) =>
+        console.log(
+          `found models for course - getModelsForCourse(${course.id})`
         )
-      );
+      ),
+      catchError(
+        this.handleError<VmModel>(
+          `getModelsForCourse(${course.id})`,
+          null,
+          false
+        )
+      )
+    );
   }
 
   public assignVmModelToCourse(
@@ -74,7 +70,7 @@ export class VmService {
     model.courseId = course.id;
     return this.http
       .put<VmModel>(
-        `${environment.base_vm_models_url}/${model.id}`,
+        `${environment.base_courses_url}`,
         model,
         environment.base_http_headers
       )
@@ -97,7 +93,7 @@ export class VmService {
   public createVmForTeam(vm: VM, team: Team): Observable<VM> {
     vm.teamId = team.id;
     return this.http
-      .post<VM>(environment.base_vms_url, vm, environment.base_http_headers)
+      .post<VM>(`${environment.base_teams_url}/${team.id}/vms`, vm, environment.base_http_headers)
       .pipe(
         tap((x) =>
           this.toastrService.success(
@@ -113,7 +109,7 @@ export class VmService {
 
   public getTeamVms(team: Team): Observable<VM[]> {
     return this.http
-      .get<VM[]>(`${environment.base_vms_url}/?teamId_like=${team.id}`)
+      .get<VM[]>(`${environment.base_teams_url}/${team.id}/vms`)
       .pipe(
         tap(() => console.log(`fetched team ${team.id} vms - getTeamVms()`)),
         catchError(this.handleError<VM[]>(`getTeamVms(${team.id}`))

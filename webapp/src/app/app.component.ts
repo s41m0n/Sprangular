@@ -8,7 +8,6 @@ import { first } from 'rxjs/operators';
 import { Course } from './models/course.model';
 import { CourseService } from './services/course.service';
 import { Observable, of } from 'rxjs';
-import { Role } from './models/role.model';
 import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
