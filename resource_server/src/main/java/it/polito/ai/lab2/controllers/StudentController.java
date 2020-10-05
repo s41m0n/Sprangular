@@ -39,11 +39,17 @@ public class StudentController {
   AssignmentAndUploadService assAndUploadService;
 
   @GetMapping({"", "/"})
-  public List<StudentDTO> all() {
+  public List<StudentDTO> all(@RequestParam(required = false, name = "surname_like") String pattern) {
     log.info("all() called");
-    return studentService.getAllStudents().stream()
-        .map(ModelHelper::enrich)
-        .collect(Collectors.toList());
+    if (pattern == null || pattern.isEmpty()) {
+      return studentService.getAllStudents().stream()
+          .map(ModelHelper::enrich)
+          .collect(Collectors.toList());
+    } else {
+      return studentService.getStudentsLike(pattern).stream()
+          .map(ModelHelper::enrich)
+          .collect(Collectors.toList());
+    }
   }
 
   @GetMapping("/{id}")
@@ -74,6 +80,15 @@ public class StudentController {
           .map(ModelHelper::enrich)
           .collect(Collectors.toList());
     } catch (StudentNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
+  @GetMapping("/{studentId}/teams/{courseId}")
+  public TeamDTO getTeamOfStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
+    try {
+      return ModelHelper.enrich(teamService.getTeamOfStudentOfCourse(studentId, courseId));
+    } catch (StudentNotFoundException | TeamNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }

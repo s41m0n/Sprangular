@@ -8,12 +8,10 @@ import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -70,6 +68,16 @@ public class TeamServiceImpl implements TeamService {
             .map(team -> modelMapper.map(team, TeamDTO.class))
             .collect(Collectors.toList()))
         .orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
+  public TeamDTO getTeamOfStudentOfCourse(String studentId, String courseId) {
+    return modelMapper.map(studentRepository.findById(studentId)
+        .map(student -> student.getTeams().stream()
+            .filter(x -> x.getCourse().getAcronym().equals(courseId))
+            .findFirst()
+            .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist")), TeamDTO.class);
   }
 
   @Override
@@ -184,6 +192,14 @@ public class TeamServiceImpl implements TeamService {
   public List<StudentDTO> getAvailableStudents(String courseId) {
     return courseRepository.getStudentsNotInTeams(courseId).stream()
         .map(student -> modelMapper.map(student, StudentDTO.class))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<StudentDTO> getAvailableStudentsLike(String courseId, String pattern) {
+    return courseRepository.getStudentsNotInTeams(courseId).stream()
+        .map(student -> modelMapper.map(student, StudentDTO.class))
+        .filter(s -> s.getSurname().toLowerCase().contains(pattern.toLowerCase()))
         .collect(Collectors.toList());
   }
 

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -134,6 +135,28 @@ public class CourseServiceImpl implements CourseService {
       return modelMapper.map(p, ProfessorDTO.class);
     }
     throw new CourseWithoutProfessorException("Cannot remove professor " + professor + " from course " + courseId + ", it is the only professor");
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  public List<StudentDTO> getStudentsOfCourse(String courseId) {
+    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    return c.getStudents().stream()
+        .map(s -> modelMapper.map(s, StudentDTO.class))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  public List<StudentDTO> getStudentsOfCourseLike(String courseId, String pattern) {
+    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    List<StudentDTO> returnedList = new ArrayList<>();
+    for(Student s : c.getStudents()){
+      if(s.getSurname().toLowerCase().contains(pattern.toLowerCase())){
+        returnedList.add(modelMapper.map(s, StudentDTO.class));
+      }
+    }
+    return returnedList;
   }
 
   @Override
