@@ -2,7 +2,7 @@ package it.polito.ai.lab2.dtos;
 
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 public class UploadDTO {
@@ -11,7 +11,7 @@ public class UploadDTO {
 
   String imagePath;
 
-  Timestamp timestamp;
+  LocalDateTime timestamp;
 
   String comment;
 }

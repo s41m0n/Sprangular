@@ -43,7 +43,7 @@ public class JwtAuthenticationController {
     } catch (DisabledException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User " + authenticationRequest.getId() + " is disabled");
     } catch (BadCredentialsException e) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials {" + authenticationRequest.getId() + "," + authenticationRequest.getPassword() + "}");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
     } catch (InternalAuthenticationServiceException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
     }

@@ -5,7 +5,7 @@ import it.polito.ai.lab2.utility.ProposalStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Map;
 
 @Data
@@ -20,5 +20,5 @@ public class TeamProposalDetails {
 
   Map<Student, ProposalStatus> membersAndStatus;
 
-  Timestamp deadline;
+  LocalDate deadline;
 }

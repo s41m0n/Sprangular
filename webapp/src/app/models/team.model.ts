@@ -1,4 +1,4 @@
-import {Student} from './student.model';
+import { Student } from './student.model';
 
 /**
  * Model for Team resource
@@ -10,12 +10,34 @@ import {Student} from './student.model';
 export class Team {
   id: number;
   name: string;
-  students: Array<Student>;
+  students: Student[];
   courseId: number;
+  active: boolean;
+  maxVCpu: number;
+  maxDiskStorage: number;
+  maxRam: number;
+  maxActiveInstances: number;
+  maxTotalInstances: number;
 
-  constructor(id: number, name: string, courseId: number) {
+  constructor(
+    id: number,
+    name: string,
+    courseId: number,
+    active: boolean,
+    maxVCpu: number,
+    maxDiskStorage: number,
+    maxRam: number,
+    maxActiveInstances: number,
+    maxTotalInstances: number
+  ) {
     this.id = id;
     this.name = name;
     this.courseId = courseId;
+    this.active = active;
+    this.maxVCpu = maxVCpu;
+    this.maxDiskStorage = maxDiskStorage;
+    this.maxRam = maxRam;
+    this.maxActiveInstances = maxActiveInstances;
+    this.maxTotalInstances = maxTotalInstances;
   }
 }

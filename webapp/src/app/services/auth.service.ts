@@ -82,7 +82,7 @@ export class AuthService {
           console.log(`logged ${id}`);
         }),
         catchError((err) => {
-          this.toastrService.error('Authentication failed', 'Error 😅');
+          this.toastrService.error(`Error: ${err}`, 'Authentication failed');
           return throwError(err);
         })
       );

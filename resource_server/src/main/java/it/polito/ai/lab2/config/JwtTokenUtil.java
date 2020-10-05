@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
 
 @Component
@@ -45,7 +47,12 @@ public class JwtTokenUtil {
   //Generate token for user
   public String generateToken(UserDetails userDetails) {
     HashMap<String, Object> roles = new HashMap<>();
-    roles.put("roles", userDetails.getAuthorities());
+    List<String> tmp = new ArrayList<>();
+    userDetails.getAuthorities().stream().forEach(x -> {
+      tmp.add(x.toString());
+    });
+    roles.put("roles", tmp);
+
     return Jwts.builder()
         .setClaims(roles)
         .setSubject(userDetails.getUsername())

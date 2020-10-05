@@ -37,7 +37,11 @@
         <mat-divider></mat-divider>
         <mat-list-item
           *ngFor="let course of courseList | async"
-          [routerLink]="[currentUser.roles[0] + '/course/' + course.path]"
+          [routerLink]="[
+            currentUser.roles[0].toLowerCase().replace('role_', '') +
+              '/course/' +
+              course.acronym
+          ]"
         >
           {{ course.name }}
         </mat-list-item>

@@ -1,5 +1,5 @@
-import {Team} from './team.model';
-import {Course} from './course.model';
+import { Team } from './team.model';
+import { Course } from './course.model';
 
 /**
  * Model for Student resource
@@ -18,33 +18,17 @@ export class Student {
   email: string;
   name: string;
   surname: string;
-  courseId: number;
-  teamId: number;
-  team?: Team;
-  course?: Course;
 
-  constructor(id: number = 0, email: string = '', name: string = '', surname: string = '',
-              courseId: number = 0, teamId: number = 0) {
+  constructor(
+    id: number = 0,
+    email: string = '',
+    name: string = '',
+    surname: string = '',
+  ) {
     this.id = id;
     this.email = email;
     this.name = name;
     this.surname = surname;
-    this.courseId = courseId;
-    this.teamId = teamId;
-  }
-
-  /**
-   * Static method to export a student like its server representation.
-   *
-   * In that case, the TEAM property is unset, to avoid that the resource in the server changes its representation
-   * (it already has the teamId, should not also set the entire object inside it)
-   *
-   * @param student the student to be purified
-   */
-  static export(student: Student): Student {
-    delete student.team;
-    delete student.course;
-    return student;
   }
 
   /**

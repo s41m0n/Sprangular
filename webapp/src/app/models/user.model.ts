@@ -16,7 +16,7 @@ export class User {
   constructor(
     id: string = null,
     accessToken: string = null,
-    roles: string[] = null
+    roles: string[] = null,
   ) {
     this.id = id;
     this.accessToken = accessToken;

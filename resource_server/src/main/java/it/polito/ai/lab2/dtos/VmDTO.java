@@ -7,6 +7,8 @@ public class VmDTO {
 
   Long id;
 
+  String name;
+
   int vCpu;
 
   int diskStorage;

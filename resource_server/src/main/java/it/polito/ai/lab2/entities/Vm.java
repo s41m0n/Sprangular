@@ -14,6 +14,8 @@ public class Vm {
   @GeneratedValue
   Long id;
 
+  String name;
+
   @ManyToOne
   @JoinColumn(name = "vmModel_id")
   VmModel vmModel;

@@ -20,7 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -83,8 +84,8 @@ public class TeamServiceImpl implements TeamService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
-  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Timestamp deadline) {
-    if (System.currentTimeMillis() >= deadline.getTime())
+  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, LocalDate deadline) {
+    if (LocalDate.now().isBefore(deadline))
       throw new InvalidTimestampException("Timestamp before current date");
 
     if (memberIds.stream().distinct().count() != memberIds.size())
@@ -153,7 +154,8 @@ public class TeamServiceImpl implements TeamService {
           teamRepository.deleteById(t.getId());
         }
       };
-      scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
+      //scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
+      scheduler.schedule(proposalDeadline, Instant.from(deadline)); //TODO: testare!
       notificationService.notifyTeam(t, memberIds, courseId);
     }
     return t;

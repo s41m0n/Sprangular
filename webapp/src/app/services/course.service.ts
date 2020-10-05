@@ -60,7 +60,7 @@ export class CourseService {
   getEnrolledStudents(course: Course): Observable<Student[]> {
     return this.http
       .get<Student[]>(
-        `${environment.base_courses_url}/${course.id}/students?_expand=team`
+        `${environment.base_courses_url}/${course.acronym}/students?_expand=team`
       )
       .pipe(
         // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
@@ -89,7 +89,7 @@ export class CourseService {
   getCourseVMs(course: Course): Observable<VM[]> {
     return this.http
       .get<VM[]>(
-        `${environment.base_courses_url}/${course.id}/vms?_expand=team`
+        `${environment.base_courses_url}/${course.acronym}/vms?_expand=team`
       )
       .pipe(
         tap(() =>
@@ -105,7 +105,7 @@ export class CourseService {
   ): Observable<Student[]> {
     return this.http
       .get<Student[]>(
-        `${environment.base_courses_url}/${course.id}/students?teamId_like=0&email_ne=${currentUser}`
+        `${environment.base_courses_url}/${course.acronym}/students?teamId_like=0&email_ne=${currentUser}`
       )
       .pipe(
         tap(() =>
@@ -122,7 +122,7 @@ export class CourseService {
   getCourseAssignments(course: Course): Observable<Assignment[]> {
     return this.http
       .get<Assignment[]>(
-        `${environment.base_assignments_url}?courseId=${course.id}&_expand=professor`
+        `${environment.base_assignments_url}?courseId=${course.acronym}&_expand=professor`
       )
       .pipe(
         tap(() =>
@@ -138,13 +138,10 @@ export class CourseService {
 
   getCourseProfessors(course: Course): Observable<Professor[]> {
     return this.http
-      .get<Course>(
-        `${environment.base_courses_url}/${course.id}?_expand=professor`
+      .get<Professor[]>(
+        `${environment.base_courses_url}/${course.acronym}?_expand=professor`
       )
       .pipe(
-        map((mappedCourse) =>
-          mappedCourse.professor ? [mappedCourse.professor] : []
-        ),
         tap(() =>
           console.log(
             `fetched professors in course ${course.name} - getCourseProfessors()`
@@ -170,11 +167,6 @@ export class CourseService {
           );
           return of(null);
         }
-        // Faking enroll
-        // professor.courseId = course.id;
-        // Faking change professor
-        course.professorId = professor.id;
-        /** this.professorService.updateProfessor(professor) */
         return this.updateCourse(course);
       }),
       toArray()
@@ -195,11 +187,6 @@ export class CourseService {
           );
           return of(null);
         }
-        // Faking unenroll
-        // professor.courseId = course.id;
-        // Faking change professor
-        course.professorId = 0;
-        /** this.professorService.updateProfessor(professor) */
         return this.updateCourse(course);
       }),
       toArray()
@@ -209,7 +196,7 @@ export class CourseService {
   private updateCourse(course: Course): Observable<Course> {
     return this.http
       .put<Course>(
-        `${environment.base_courses_url}/${course.id}`,
+        `${environment.base_courses_url}/${course.acronym}`,
         course,
         environment.base_http_headers
       )

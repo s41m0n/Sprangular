@@ -39,19 +39,19 @@ export class StudentComponent implements OnDestroy {
       this.courseService.getCourseByPath(coursename).pipe(takeUntil(this.destroy$)).subscribe(course => {
         // Announce the current course and, if empty, signal NotFound
         this.courseService.currentCourseSubject.next(course);
-        if (!course || !course.id) {
+        if (!course || !course.acronym) {
           this.error = of(`Course ${coursename} does not exist`);
         } else {
           this.error = of(null);
           this.studentService.getStudentByEmail(this.authService.currentUserValue.id).pipe(first()).subscribe(student => {
-            if (student.team && student.team.courseId === course.id) {
+            /*if (student.team && student.team.courseId === course.acronym) {
               this.studentService.getStudentsInTeam(student.teamId).pipe(first()).subscribe(students => {
                 student.team.students = students;
                 teamService.currentTeamSubject.next(student.team);
               });
             } else {
               teamService.currentTeamSubject.next(null);
-            }
+            }*/
           });
         }
       });

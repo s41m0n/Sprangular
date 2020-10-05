@@ -3,7 +3,7 @@ package it.polito.ai.lab2.entities;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -15,7 +15,7 @@ public class StudentUpload {
 
   String imagePath;
 
-  Timestamp timestamp;
+  LocalDateTime timestamp;
 
   String comment;
 

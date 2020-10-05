@@ -1,4 +1,4 @@
-import {Team} from './team.model';
+import { Team } from './team.model';
 
 /**
  * Model for VM resource
@@ -14,42 +14,26 @@ import {Team} from './team.model';
 export class VM {
   id: number;
   name: string;
-  path: string;
-  creationDate: string;
   vCpu: number;
+  diskStorage: number;
   ram: number;
-  disk: number;
   teamId: number;
-  team?: Team;
+  active: boolean;
 
-  constructor(id: number = 0,
-              name: string = '',
-              path: string = '',
-              creationDate: string = '',
-              vCpu: number = 1,
-              ram: number = 0.5,
-              disk: number = 2,
-              teamId: number = 0) {
+  constructor(
+    id: number = 0,
+    name: string = '',
+    path: string = '',
+    vCpu: number = 1,
+    ram: number = 0.5,
+    disk: number = 2,
+    teamId: number = 0
+  ) {
     this.id = id;
     this.name = name;
-    this.path = path;
-    this.creationDate = creationDate;
     this.vCpu = vCpu;
     this.ram = ram;
-    this.disk = disk;
+    this.diskStorage = disk;
     this.teamId = teamId;
-  }
-
-  /**vm
-   * Static method to export a student like its server representation.
-   *
-   * In that case, the TEAM property is unset, to avoid that the resource in the server changes its representation
-   * (it already has the teamId, should not also set the entire object inside it)
-   *
-   * @param(vm) the vm object
-   */
-  static export(vm: VM): VM {
-    delete vm.team;
-    return vm;
   }
 }

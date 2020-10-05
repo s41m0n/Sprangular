@@ -27,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -175,7 +177,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
         assignmentSolution -> assignmentSolution.setStatus(AssignmentStatus.DELIVERED)
     );
-    scheduler.schedule(automaticDelivery, new CronTrigger(Utility.timestampToCronTrigger(assignment.getDueDate())));
+    //scheduler.schedule(automaticDelivery, new CronTrigger(Utility.timestampToCronTrigger(assignment.getDueDate())));
+    scheduler.schedule(automaticDelivery, Instant.from(assignment.getDueDate()));
     return modelMapper.map(savedAssignment, AssignmentDTO.class);
   }
 
@@ -191,7 +194,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           + ": solution status is " + assignmentSolution.getStatus().toString());
 
     StudentUpload studentUpload = new StudentUpload();
-    studentUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    studentUpload.setTimestamp(LocalDateTime.now());
     studentUpload.setComment(details.getComment());
     studentUpload.setAssignmentSolution(assignmentSolution);
     assignmentSolution.getStudentUploads().add(studentUpload);
@@ -238,7 +241,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     if (!studentUpload.getAssignmentSolution().getStatus().equals(AssignmentStatus.DELIVERED))
       throw new UploadNotAllowedException("Student assignment status is not DELIVERED");
     ProfessorUpload professorUpload = new ProfessorUpload();
-    professorUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    professorUpload.setTimestamp(LocalDateTime.now());
     professorUpload.setComment(details.getComment());
     studentUpload.setTeacherRevision(professorUpload);
     professorUpload.setRevisedSolution(studentUpload);

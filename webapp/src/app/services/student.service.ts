@@ -36,12 +36,10 @@ export class StudentService {
           );
           return of(null);
         }
-        // Faking enroll
-        student.courseId = course.id;
         return this.http
           .put<Student>(
             `${environment.base_students_url}/${student.id}`,
-            Student.export(student),
+            student,
             environment.base_http_headers
           )
           .pipe(
@@ -75,13 +73,10 @@ export class StudentService {
   unenrollStudents(students: Student[], course: Course): Observable<Student[]> {
     return from(students).pipe(
       mergeMap((student) => {
-        // Faking unenroll, remove also the team
-        student.courseId = 0;
-        student.teamId = 0;
         return this.http
           .put<Student>(
             `${environment.base_students_url}/${student.id}`,
-            Student.export(student),
+            student,
             environment.base_http_headers
           )
           .pipe(
@@ -153,7 +148,7 @@ export class StudentService {
     }
     return this.http
       .get<Student[]>(
-        `${environment.base_students_url}?surname_like=${name}&courseId=${course.id}&teamId=0`
+        `${environment.base_students_url}?surname_like=${name}&courseId=${course.acronym}&teamId=0`
       )
       .pipe(
         // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
@@ -168,17 +163,14 @@ export class StudentService {
       );
   }
 
-  public getStudentCourses(email: string): Observable<Course[]> {
+  public getStudentCourses(id: string): Observable<Course[]> {
     return this.http
-      .get<Student[]>(
-        `${environment.base_students_url}?email_like=${email}&_expand=course`
-      )
+      .get<Course[]>(`${environment.base_students_url}/${id}/courses`)
       .pipe(
-        map((students) => [students.shift().course]),
         tap(() =>
-          console.log(`fetched student ${email} courses - getUserCourses()`)
+          console.log(`fetched student ${id} courses - getUserCourses()`)
         ),
-        catchError(this.handleError<Course[]>(`getUserCourses(${email})`))
+        catchError(this.handleError<Course[]>(`getUserCourses(${id})`))
       );
   }
 
@@ -206,26 +198,6 @@ export class StudentService {
           console.log(`fetched student in team ${teamId} - getStudentInTeam()`)
         ),
         catchError(this.handleError<Student[]>(`getStudentInTeam(${teamId})`))
-      );
-  }
-
-  public setStudentTeam(teamId: number, student: Student): Observable<Student> {
-    student.teamId = teamId;
-    return this.http
-      .put<Student>(
-        `${environment.base_students_url}/${student.id}`,
-        student,
-        environment.base_http_headers
-      )
-      .pipe(
-        tap(() =>
-          console.log(
-            `updated student ${student.id} in team ${teamId} - setStudentTeam()`
-          )
-        ),
-        catchError(
-          this.handleError<Student>(`setStudentTeam(${teamId}, ${student.id})`)
-        )
       );
   }
 

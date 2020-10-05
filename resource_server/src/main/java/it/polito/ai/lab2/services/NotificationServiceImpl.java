@@ -4,6 +4,7 @@ import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.Proposal;
 import it.polito.ai.lab2.repositories.ProposalRepository;
 import it.polito.ai.lab2.utility.ProposalStatus;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class NotificationServiceImpl implements NotificationService {
       return false;
     }
 
-    if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) { //if the proposal is expired I delete all the proposals
+    if (proposal.getDeadline().isBefore(LocalDate.now())) { //if the proposal is expired I delete all the proposals
       proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
       return false;
     }
@@ -78,7 +79,7 @@ public class NotificationServiceImpl implements NotificationService {
       return false;
     }
 
-    if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) { //if the proposal is expired I delete all the proposals
+    if (proposal.getDeadline().isBefore(LocalDate.now())) { //if the proposal is expired I delete all the proposals
       proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
       return false;
     }
@@ -108,7 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Scheduled(fixedDelay = 60 * 60 * 1000)
   public void fixedTokenClear() {
     Set<Long> teamIds = new HashSet<>();
-    proposalRepository.findAllByDeadlineAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
+    proposalRepository.findAllByDeadlineAfter(LocalDate.now()).forEach(proposal -> {
       teamIds.add(proposal.getTeamId());
       proposalRepository.delete(proposal);
     });

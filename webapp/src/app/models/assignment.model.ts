@@ -1,3 +1,5 @@
+import { Course } from './course.model';
+
 /**
  * Model for Assignment resource
  *
@@ -8,11 +10,12 @@
 export class Assignment {
   id: number;
   name: string;
-  path: string;
+  course: Course;
+  releaseDate: string;
+  dueDate: string;
 
-  constructor(id: number = 0, name: string = '', path: string = '') {
+  constructor(id: number = 0, name: string = '') {
     this.id = id;
     this.name = name;
-    this.path = path;
   }
 }

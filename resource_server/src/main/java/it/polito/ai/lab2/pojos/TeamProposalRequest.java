@@ -2,7 +2,7 @@ package it.polito.ai.lab2.pojos;
 
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -12,5 +12,5 @@ public class TeamProposalRequest {
 
   List<String> studentIds;
 
-  Timestamp deadline;
+  LocalDate deadline;
 }

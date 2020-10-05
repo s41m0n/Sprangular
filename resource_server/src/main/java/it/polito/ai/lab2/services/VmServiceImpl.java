@@ -130,6 +130,7 @@ public class VmServiceImpl implements VmService {
 
     Vm vm = new Vm();
     vm.setVmModel(team.getCourse().getVmModel());
+    vm.setName(vmDTO.getName());
     vm.setActive(vmDTO.isActive());
     vm.setVCpu(vmDTO.getVCpu());
     vm.setRam(vmDTO.getRam());
