@@ -38,7 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Async
   public void sendMessage(String address, String subject, String body) {
     SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(address);
+    message.setTo("s264970@studenti.polito.it"); //TODO: cambia!
     message.setSubject(subject);
     message.setText(body);
     emailSender.send(message);

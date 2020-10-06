@@ -10,12 +10,16 @@ import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -281,6 +285,23 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
+  public Resource getVmInstance(Long vmId, Long teamId) throws FileNotFoundException {
+    Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + " does not exist"));
+    if (!vm.getTeam().getId().equals(teamId)) {
+      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
+    }
+    Resource file = null;
+    try {
+      file = new UrlResource(vm.getImagePath());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    if (file == null)
+      throw new FileNotFoundException("Vm instance " + vmId + " not found");
+    return file;
+  }
+
+  @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId) or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId)")
   public List<VmDTO> getVmsOfTeam(Long teamId) {
     return teamRepository.findById(teamId)
@@ -332,6 +353,8 @@ public class VmServiceImpl implements VmService {
   public List<VmDTO> getOwnedVmsOfStudentOfCourse(String studentId, String courseId) { //solo quelle che possiede
     courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+
 
     Team team = null;
     for (Team t : student.getTeams()) { //find the student's team of the selected course

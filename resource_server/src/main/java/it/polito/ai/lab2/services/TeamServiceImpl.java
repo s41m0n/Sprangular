@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,8 +93,8 @@ public class TeamServiceImpl implements TeamService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
-  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, LocalDate deadline) {
-    if (LocalDate.now().isBefore(deadline))
+  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Long deadline) {
+    if (LocalDate.now().isAfter(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneId.systemDefault())))
       throw new InvalidTimestampException("Timestamp before current date");
 
     if (memberIds.stream().distinct().count() != memberIds.size())
@@ -111,7 +112,7 @@ public class TeamServiceImpl implements TeamService {
 
     List<Student> members = studentRepository.findAllById(memberIds);
 
-    if (members.stream().anyMatch(User::isVerified)) {
+    if (members.stream().anyMatch(x -> !x.isVerified())) {
       throw new UserNotVerifiedException("Some student's account is not verified");
     }
 
@@ -146,7 +147,7 @@ public class TeamServiceImpl implements TeamService {
             proposal.setInvitedUserId(member.getId());
             proposal.setTeamId(t.getId());
             proposal.setCourseId(courseId);
-            proposal.setDeadline(deadline);
+            proposal.setDeadline(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneId.systemDefault()));
             proposal.setStatus(ProposalStatus.PENDING);
             proposalRepository.save(proposal);
           }
@@ -163,7 +164,7 @@ public class TeamServiceImpl implements TeamService {
         }
       };
       //scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
-      scheduler.schedule(proposalDeadline, Instant.from(deadline)); //TODO: testare!
+      //scheduler.schedule(proposalDeadline, Instant.from(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneId.systemDefault()))); //TODO: NON VA!
       notificationService.notifyTeam(t, memberIds, courseId);
     }
     return t;

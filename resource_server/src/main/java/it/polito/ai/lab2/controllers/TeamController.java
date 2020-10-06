@@ -13,10 +13,12 @@ import it.polito.ai.lab2.services.VmService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,6 +80,17 @@ public class TeamController {
     try {
       return vmService.getVm(vmId, teamId);
     } catch (VmNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (VmNotOfTeamException e) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+  }
+
+  @GetMapping("/{teamId}/vms/{vmId}/instance")
+  public Resource getVmInstance(@PathVariable Long teamId, @PathVariable Long vmId) {
+    try {
+      return vmService.getVmInstance(vmId, teamId);
+    } catch (VmNotFoundException | FileNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (VmNotOfTeamException e) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
