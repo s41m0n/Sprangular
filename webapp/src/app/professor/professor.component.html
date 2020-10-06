@@ -1,8 +1,4 @@
-<!--Display manually a PageNotFound component if the subview notifies an error (like /professor/courses/XXXX where XXXX does not exists)-->
-<app-page-not-found *ngIf="error | async as what; else elseBlock" [what]="what"></app-page-not-found>
-<ng-template #elseBlock>
-
-    <!-- Tabs for the current view (Students / Teams / VMs) -->
+<!-- Tabs for the current view (Students / Teams / VMs) -->
     <nav mat-tab-nav-bar>
         <a mat-tab-link
            *ngFor="let link of navLinks"
@@ -15,5 +11,3 @@
     <div class="tab-content">
         <router-outlet></router-outlet>
     </div>
-
-</ng-template>

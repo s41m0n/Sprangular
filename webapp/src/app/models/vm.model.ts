@@ -1,5 +1,3 @@
-import { Team } from './team.model';
-
 /**
  * Model for VM resource
  *
@@ -13,27 +11,19 @@ import { Team } from './team.model';
  */
 export class VM {
   id: number;
-  name: string;
   vCpu: number;
   diskStorage: number;
   ram: number;
-  teamId: number;
-  active: boolean;
 
   constructor(
     id: number = 0,
-    name: string = '',
-    path: string = '',
     vCpu: number = 1,
     ram: number = 0.5,
-    disk: number = 2,
-    teamId: number = 0
+    diskStorage: number = 2
   ) {
     this.id = id;
-    this.name = name;
     this.vCpu = vCpu;
     this.ram = ram;
-    this.diskStorage = disk;
-    this.teamId = teamId;
+    this.diskStorage = diskStorage;
   }
 }

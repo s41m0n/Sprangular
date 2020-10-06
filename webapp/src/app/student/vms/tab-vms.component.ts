@@ -1,5 +1,8 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
+import {EventEmitter, Component, Input, Output} from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import {MatTableDataSource} from '@angular/material/table';
+import { first } from 'rxjs/operators';
+import { VmOwnerModalComponent } from 'src/app/modals/vm-owner/vm-owner-modal.component';
 import {VM} from '../../models/vm.model';
 
 /**
@@ -11,18 +14,36 @@ import {VM} from '../../models/vm.model';
   selector: 'app-tab-student-vms',
   templateUrl: './tab-vms.component.html'
 })
-export class TabStudentVmsComponent implements AfterViewInit {
+export class TabStudentVmsComponent {
 
   dataSource = new MatTableDataSource<VM>();                     // Table datasource dynamically modified
-
-  ngAfterViewInit(): void {
-  }
 
   @Input() set vms(vms: VM[]) {
     this.dataSource.data = vms;
   }
+  @Output() turnVmEvent = new EventEmitter<number>();
+  @Output() addOwnerEvent = new EventEmitter<any>();
+  @Output() connectEvent = new EventEmitter<number>();
+  
+  constructor(public dialog : MatDialog) {
+  }
 
-  connectToVm(id: number) {
-    console.log('Method to implement');
+  triggerTurn(vmId: number) {
+    this.turnVmEvent.emit(vmId);
+  }
+
+  addOwner(vm : VM) {
+    const dialogRef = this.dialog.open(VmOwnerModalComponent);
+    dialogRef.afterClosed()
+      .pipe(first())
+      .subscribe(result => {
+        if (result) {
+          this.addOwnerEvent.emit({vmId: vm.id, studentId: result});
+        }
+      });
+  }
+
+  connectToVm(vmId: number) {
+    this.connectEvent.emit(vmId);
   }
 }

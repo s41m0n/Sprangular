@@ -89,22 +89,17 @@ export class AuthService {
   }
 
   register(
+    id: string,
     email: string,
     name: string,
     surname: string,
-    id: string,
     password: string,
-    pic: object
+    photo: object
   ) {
     return this.http
       .post(
         environment.register_url_student,
-        {
-          email,
-          password,
-          name,
-          surname,
-        },
+        { id, email, name, surname, password, photo},
         environment.base_http_headers
       )
       .pipe(

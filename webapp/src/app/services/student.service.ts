@@ -7,6 +7,7 @@ import { catchError, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { environment } from 'src/environments/environment';
+import { CourseService } from './course.service';
 
 /** StudentService service
  *
@@ -16,7 +17,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class StudentService {
-  constructor(private http: HttpClient, private toastrService: ToastrService) {}
+  constructor(private http: HttpClient, private toastrService: ToastrService, private courseService : CourseService) {}
 
   /**
    * Function to enroll students to a specific Course
@@ -25,7 +26,7 @@ export class StudentService {
    * @param(students) the list of students to be enrolled
    * @param(course) the objective course
    */
-  enrollStudents(students: Student[], course: Course): Observable<Student[]> {
+  enrollStudents(students: Student[], courseId: string): Observable<Student[]> {
     return from(students).pipe(
       mergeMap((student: Student) => {
         // Checking if ADD has been pressed without selecting a student (or modifying the selected one)
@@ -45,7 +46,7 @@ export class StudentService {
           .pipe(
             tap((s) => {
               this.toastrService.success(
-                `Enrolled ${Student.displayFn(s)} to ${course.name}`,
+                `Enrolled ${Student.displayFn(s)} to ${courseId}`,
                 'Congratulations 😃'
               );
               console.log(
@@ -54,46 +55,7 @@ export class StudentService {
             }),
             catchError(
               this.handleError<Student>(
-                `enrollStudents(${Student.displayFn(student)}, ${course.name})`
-              )
-            )
-          );
-      }),
-      toArray()
-    );
-  }
-
-  /**
-   * Function to unenroll students from a specific course.
-   * Return value is ignored, since the we reload the entire list
-   *
-   * @param(students) the list of students to be unenrolled
-   * @param(course) the objective course
-   */
-  unenrollStudents(students: Student[], course: Course): Observable<Student[]> {
-    return from(students).pipe(
-      mergeMap((student) => {
-        return this.http
-          .put<Student>(
-            `${environment.base_students_url}/${student.id}`,
-            student,
-            environment.base_http_headers
-          )
-          .pipe(
-            tap((s) => {
-              this.toastrService.success(
-                `Unenrolled ${Student.displayFn(s)} from ${course.name}`,
-                'Congratulations 😃'
-              );
-              console.log(
-                `unenrolled ${Student.displayFn(s)} - unenrollStudents()`
-              );
-            }),
-            catchError(
-              this.handleError<Student>(
-                `unenrollStudents(${Student.displayFn(student)}, ${
-                  course.name
-                })`
+                `enrollStudents(${Student.displayFn(student)}, ${courseId})`
               )
             )
           );
@@ -134,11 +96,11 @@ export class StudentService {
 
   searchStudentsInCourseAvailable(
     name: string,
-    course: Course,
+    courseId: string = this.courseService.currentCourseSubject.value,
     all: boolean = false
   ): Observable<Student[]> {
     // Checking if it is actually a string and does not have whitespaces in the middle (if it has them at beginning or end, trim)
-    if (course === undefined || (!all && typeof name !== 'string')) {
+    if (courseId === undefined || (!all && typeof name !== 'string')) {
       return of([]);
     } else {
       name = name.trim();
@@ -148,7 +110,7 @@ export class StudentService {
     }
     return this.http
       .get<Student[]>(
-        `${environment.base_students_url}?surname_like=${name}&courseId=${course.acronym}&teamId=0`
+        `${environment.base_courses_url}/${courseId}/availableStudents?surname_like=${name}`
       )
       .pipe(
         // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
@@ -189,70 +151,6 @@ export class StudentService {
         catchError(this.handleError<Student>(`getStudentByEmail(${email})`))
       );
   }
-
-  public getStudentsInTeam(teamId: number): Observable<Student[]> {
-    return this.http
-      .get<Student[]>(`${environment.base_students_url}?teamId=${teamId}`)
-      .pipe(
-        tap(() =>
-          console.log(`fetched student in team ${teamId} - getStudentInTeam()`)
-        ),
-        catchError(this.handleError<Student[]>(`getStudentInTeam(${teamId})`))
-      );
-  }
-
-  /**
-   * Function to retrieve all students (including their teams if any)
-   */
-  private getStudents(): Observable<Student[]> {
-    return this.http
-      .get<Student[]>(`${environment.base_students_url}?_expand=team`)
-      .pipe(
-        // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
-        tap((_) => console.log('fetched students - getStudents()')),
-        catchError(this.handleError<Student[]>('getStudents()'))
-      );
-  }
-  /*
-  /**
-   * Function to create students
-   *
-   * @param(students) the students to be created
-   *
-   private createStudents(students: Student[]) : Observable<Student[]> {
-    return from(students).pipe(
-      mergeMap(student => {
-        return this.http.post<Student>(`${this.baseURL}`, Student.export(student), this.httpOptions).pipe(
-          tap(s => {
-            this.toastrService.success(`Created ${Student.displayFn(s)}`, 'Congratulations 😃');
-            console.log(`created student ${Student.displayFn(s)} - createStudent()`);
-          }),
-          catchError(this.handleError<Student>(`createStudent(${Student.displayFn(student)})`))
-        )
-      }),
-      toArray()
-    );
-  }
-
-  /**
-   * Function to delete students
-   *
-   * @param(students) the students to be deleted
-   *
-   private deleteStudents(students: Student[]) {
-    return from(students).pipe(
-      mergeMap(student => {
-        return this.http.delete(`${this.baseURL}/students/${student.id}`).pipe(
-          tap(() => {
-            this.toastrService.success(`Deleted ${Student.displayFn(student)}`, 'Congratulations 😃');
-            console.log(`Deleted student ${Student.displayFn(student)} - deleteStudent()`);
-          }),
-          catchError(this.handleError<Student>(`deleteStudent(${Student.displayFn(student)})`))
-        );
-      })
-    );
-  }/
-*/
 
   /**
    * Handle Http operation that failed.

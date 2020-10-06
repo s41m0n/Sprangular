@@ -10,7 +10,7 @@ import { Student } from './student.model';
 export class Team {
   id: number;
   name: string;
-  students: Student[];
+  members: Student[];
   courseId: number;
   active: boolean;
   maxVCpu: number;
@@ -28,7 +28,8 @@ export class Team {
     maxDiskStorage: number,
     maxRam: number,
     maxActiveInstances: number,
-    maxTotalInstances: number
+    maxTotalInstances: number,
+    members: Student[]
   ) {
     this.id = id;
     this.name = name;
@@ -39,5 +40,6 @@ export class Team {
     this.maxRam = maxRam;
     this.maxActiveInstances = maxActiveInstances;
     this.maxTotalInstances = maxTotalInstances;
+    this.members = members;
   }
 }

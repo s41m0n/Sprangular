@@ -1,6 +1,3 @@
-import { Team } from './team.model';
-import { Course } from './course.model';
-
 /**
  * Model for Student resource
  *
@@ -14,13 +11,13 @@ import { Course } from './course.model';
  * @param(course)?   the resolved course object (if any)
  */
 export class Student {
-  id: number;
+  id: string;
   email: string;
   name: string;
   surname: string;
 
   constructor(
-    id: number = 0,
+    id: string = '',
     email: string = '',
     name: string = '',
     surname: string = '',

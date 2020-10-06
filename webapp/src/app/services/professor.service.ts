@@ -18,19 +18,18 @@ import { environment } from 'src/environments/environment';
 export class ProfessorService {
   constructor(private http: HttpClient, private toastrService: ToastrService) {}
 
-  public getProfessorCourses(email: string): Observable<Course[]> {
+  public getProfessorCourses(professorId: string): Observable<Course[]> {
     return this.http
-      .get<Professor[]>(
-        `${environment.base_professors_url}?email_like=${email}&_expand=course`
+      .get<Course[]>(
+        `${environment.base_professors_url}/${professorId}/courses`
       )
       .pipe(
-        map((professors) => [professors.shift().course]),
         tap(() =>
           console.log(
-            `fetched professor ${email} courses - getProfessorCourses()`
+            `fetched professor ${professorId} courses - getProfessorCourses()`
           )
         ),
-        catchError(this.handleError<Course[]>(`getProfessorCourses(${email})`))
+        catchError(this.handleError<Course[]>(`getProfessorCourses(${professorId})`))
       );
   }
 

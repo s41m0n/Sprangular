@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { TabStudentsContComponent } from './professor/students/tab-students-cont.component';
+import { TabStudentsContComponent } from './professor/students/tab-students.container';
 import { PageNotFoundComponent } from './fallback/page-not-found.component';
 import { HomeComponent } from './home/home.component';
 import { TabProfessorVmsContComponent } from './professor/vms/tab-vms.container';
@@ -10,7 +10,7 @@ import { Role } from './models/role.model';
 import { ProfessorComponent } from './professor/professor.component';
 import { TabProfessorAssignmentsContComponent } from './professor/assignments/tab-assignments.container';
 import { StudentComponent } from './student/student.component';
-import { TabTeamContComponent } from './student/team/tab-team-cont.component';
+import { TabTeamContComponent } from './student/team/tab-team.container';
 import { TabStudentVmsContComponent } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsContComponent } from './student/assignments/tab-assignments.container';
 

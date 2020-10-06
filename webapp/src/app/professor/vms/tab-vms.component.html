@@ -1,19 +1,10 @@
 <div class="container">
-    <button mat-raised-button color="primary" (click)="newVm()">New VM</button>
-    <mat-divider></mat-divider>
     <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
         <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vm of dataSource.data">
             <mat-card class="mat-elevation-z4">
-                <mat-card-header>
-                    <mat-card-title>VM{{vm.id}} {{vm.name}}</mat-card-title>
-                </mat-card-header>
-                <!--        <img mat-card-image src="./../assets/images/mountains.jpg" />-->
                 <mat-card-content>
                     VM configuration:
                     <ul>
-                        <li>
-                            <span class="badge">Path:</span> {{vm.path}}
-                        </li>
                         <li>
                             <span class="badge">vCPU:</span> {{vm.vCpu}} in use
                         </li>
@@ -21,7 +12,7 @@
                             <span class="badge">RAM:</span> {{vm.ram}}GB
                         </li>
                         <li>
-                            <span class="badge">Disk:</span> {{vm.disk}}GB
+                            <span class="badge">Disk:</span> {{vm.diskStorage}}GB
                         </li>
                     </ul>
                 </mat-card-content>
