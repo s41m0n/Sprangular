@@ -4,7 +4,6 @@ import {Student} from '../../models/student.model';
 import {StudentService} from '../../services/student.service';
 import {finalize, first, switchMap, takeUntil} from 'rxjs/operators';
 import {Observable, Subject} from 'rxjs';
-import {Course} from '../../models/course.model';
 import {CourseService} from '../../services/course.service';
 
 /**
@@ -14,11 +13,10 @@ import {CourseService} from '../../services/course.service';
  */
 @Component({
   selector: 'app-tab-students-cont',
-  templateUrl: './tab-students-cont.component.html',
+  templateUrl: './tab-students.container.html',
 })
 export class TabStudentsContComponent implements OnInit, OnDestroy {
 
-  private course: Course;                                      // The current selected course
   enrolledStudents: Student[] = [];                             // The current enrolled list
   filteredStudents: Observable<Student[]>;                     // The list of students matching a criteria
   private searchTerms = new Subject<string>();                  // The search criteria emitter
@@ -26,14 +24,10 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
 
   constructor(private studentService: StudentService,
               private courseService: CourseService) {
+    this.courseService.getEnrolledStudents().pipe(first()).subscribe(enrolled => this.enrolledStudents = enrolled);
   }
 
   ngOnInit(): void {
-    // Subscribe to the Broadcaster course selected, to update the current rendered course
-    this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
-      this.course = course;
-      this.refreshEnrolled();
-    });
     // Subscribe to the search terms emitter
     this.filteredStudents = this.searchTerms.pipe(
         takeUntil(this.destroy$),
@@ -63,7 +57,7 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
    * @param(students) the list of students to be unenrolled
    */
   unenrollStudents(students: Student[]) {
-    this.studentService.unenrollStudents(students, this.course)
+    this.courseService.unenrollStudents(students)
         .pipe(
             first(),
             finalize(() => this.refreshEnrolled())
@@ -77,7 +71,7 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
    * @param(students) the list of students to be enrolled
    */
   enrollStudents(students: Student[]) {
-    this.studentService.enrollStudents(students, this.course)
+    this.studentService.enrollStudents(students, this.courseService.currentCourseSubject.value)
         .pipe(
             first(),
             finalize(() => this.refreshEnrolled())
@@ -88,10 +82,10 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
   /** Private function to refresh the list of enrolled students */
   private refreshEnrolled() {
     // Check if already received the current course
-    if (!this.course) {
+    if (!this.courseService.currentCourseSubject.value) {
       this.enrolledStudents = [];
       return;
     }
-    this.courseService.getEnrolledStudents(this.course).pipe(first()).subscribe(students => this.enrolledStudents = students);
+    this.courseService.getEnrolledStudents(this.courseService.currentCourseSubject.value).pipe(first()).subscribe(students => this.enrolledStudents = students);
   }
 }

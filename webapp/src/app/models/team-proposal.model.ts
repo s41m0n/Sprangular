@@ -1,12 +1,18 @@
 import { Student } from './student.model';
 
 export class TeamProposal {
-  name: string;
-  students: Student[];
-  deadline: string; // ISO string to parse in Java
+  teamName: string;
+  studentIds: string[];
+  deadline: number;
 
-  constructor(name: string, students: Student[]) {
-    this.name = name;
-    this.students = students;
+  constructor(teamName: string = '', studentIds: string[] = [], deadline : number = 0) {
+    this.teamName = teamName;
+    this.studentIds = studentIds;
+    if(deadline == 0) {
+      var date = new Date();
+      date.setDate(date.getDate() + 5);
+      deadline = date.getTime();
+    }
+    this.deadline = deadline;
   }
 }

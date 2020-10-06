@@ -18,7 +18,7 @@ export class TabTeamComponent {
   name = '';
 
   @Input() set team(team: Team) {
-    this.dataSource.data = team.students;
     this.name = team.name;
+    this.dataSource.data = team.members;
   }
 }

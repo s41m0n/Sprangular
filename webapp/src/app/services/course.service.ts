@@ -2,14 +2,13 @@ import { Injectable } from '@angular/core';
 
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { catchError, mergeMap, tap, toArray } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { Assignment } from '../models/assignment.model';
 import { Student } from '../models/student.model';
 import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
-import { ProfessorService } from './professor.service';
 import { environment } from 'src/environments/environment';
 
 /**
@@ -23,14 +22,13 @@ import { environment } from 'src/environments/environment';
 })
 export class CourseService {
   // Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
-  public currentCourseSubject: BehaviorSubject<Course>;
+  public currentCourseSubject: BehaviorSubject<string>;
 
   constructor(
     private http: HttpClient,
     private toastrService: ToastrService,
-    private professorService: ProfessorService
   ) {
-    this.currentCourseSubject = new BehaviorSubject<Course>(null);
+    this.currentCourseSubject = new BehaviorSubject<string>(null);    
   }
 
   /**
@@ -38,17 +36,14 @@ export class CourseService {
    *
    * @param(path) the requested path
    */
-  getCourseByPath(path: string): Observable<Course> {
+  getCourse(acronym: string): Observable<Course> {
     return this.http
-      .get<Course[]>(
-        `${environment.base_courses_url}?path_like=${path}&_limit=1`
+      .get<Course>(
+        `${environment.base_courses_url}/${acronym}`
       )
       .pipe(
-        // If I don't know a priori which data the server sends me --> map(res => Object.assign(new Course(), res)),
-        // Take the first one (json-server does not support direct search, but we have to use _like query)
-        map((x) => x.shift()),
-        tap(() => console.log(`fetched course by path ${path} - getCourses()`)),
-        catchError(this.handleError<Course>(`getCourseByPath(${path})`))
+        tap(() => console.log(`fetched course by path ${acronym} - getCourse()`)),
+        catchError(this.handleError<Course>(`getCourse(${acronym})`))
       );
   }
 
@@ -57,20 +52,19 @@ export class CourseService {
    *
    * @param(course) the objective course
    */
-  getEnrolledStudents(course: Course): Observable<Student[]> {
+  getEnrolledStudents(courseId: string = this.currentCourseSubject.value): Observable<Student[]> {
     return this.http
       .get<Student[]>(
-        `${environment.base_courses_url}/${course.acronym}/students?_expand=team`
+        `${environment.base_courses_url}/${courseId}/students`
       )
       .pipe(
-        // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
         tap(() =>
           console.log(
-            `fetched enrolled ${course.name} students - getEnrolledStudents()`
+            `fetched enrolled ${courseId} students - getEnrolledStudents()`
           )
         ),
         catchError(
-          this.handleError<Student[]>(`getEnrolledStudents(${course.name})`)
+          this.handleError<Student[]>(`getEnrolledStudents(${courseId})`)
         )
       );
   }
@@ -86,52 +80,51 @@ export class CourseService {
     );
   }
 
-  getCourseVMs(course: Course): Observable<VM[]> {
+  getCourseVMs(courseId: string): Observable<VM[]> {
     return this.http
       .get<VM[]>(
-        `${environment.base_courses_url}/${course.acronym}/vms?_expand=team`
+        `${environment.base_courses_url}/${courseId}/vms`
       )
       .pipe(
         tap(() =>
-          console.log(`fetched course ${course.name} vms - getCourseVMs()`)
+          console.log(`fetched course ${courseId} vms - getCourseVMs()`)
         ),
-        catchError(this.handleError<VM[]>(`getCourseVMs(${course.name})`))
+        catchError(this.handleError<VM[]>(`getCourseVMs(${courseId})`))
       );
   }
 
   getAvailableStudents(
-    course: Course,
-    currentUser: string
+    courseId: string = this.currentCourseSubject.value
   ): Observable<Student[]> {
     return this.http
       .get<Student[]>(
-        `${environment.base_courses_url}/${course.acronym}/students?teamId_like=0&email_ne=${currentUser}`
+        `${environment.base_courses_url}/${courseId}/availableStudents`
       )
       .pipe(
         tap(() =>
           console.log(
-            `fetched available students in course ${course.name} - getAvailableStudents()`
+            `fetched available students in course ${courseId} - getAvailableStudents()`
           )
         ),
         catchError(
-          this.handleError<Student[]>(`getAvailableStudents(${course.name})`)
+          this.handleError<Student[]>(`getAvailableStudents(${courseId})`)
         )
       );
   }
 
-  getCourseAssignments(course: Course): Observable<Assignment[]> {
+  getCourseAssignments(courseId: string): Observable<Assignment[]> {
     return this.http
       .get<Assignment[]>(
-        `${environment.base_assignments_url}?courseId=${course.acronym}&_expand=professor`
+        `${environment.base_courses_url}/${courseId}/assignments`
       )
       .pipe(
         tap(() =>
           console.log(
-            `fetched assignments in course ${course.name} - getCourseAssignments()`
+            `fetched assignments in course ${courseId} - getCourseAssignments()`
           )
         ),
         catchError(
-          this.handleError<Assignment[]>(`getCourseAssignments(${course.name})`)
+          this.handleError<Assignment[]>(`getCourseAssignments(${courseId})`)
         )
       );
   }
@@ -139,7 +132,7 @@ export class CourseService {
   getCourseProfessors(course: Course): Observable<Professor[]> {
     return this.http
       .get<Professor[]>(
-        `${environment.base_courses_url}/${course.acronym}?_expand=professor`
+        `${environment.base_courses_url}/${course.acronym}/professors`
       )
       .pipe(
         tap(() =>
@@ -168,6 +161,45 @@ export class CourseService {
           return of(null);
         }
         return this.updateCourse(course);
+      }),
+      toArray()
+    );
+  }
+
+  /**
+   * Function to unenroll students from a specific course.
+   * Return value is ignored, since the we reload the entire list
+   *
+   * @param(students) the list of students to be unenrolled
+   * @param(course) the objective course
+   */
+  unenrollStudents(students: Student[], courseId: string = this.currentCourseSubject.value): Observable<Student[]> {
+    return from(students).pipe(
+      mergeMap((student) => {
+        return this.http
+          .put<Student>(
+            `${environment.base_courses_url}/${courseId}/removeStudent`,
+            {studentId: student.id},
+            environment.base_http_headers
+          )
+          .pipe(
+            tap((s) => {
+              this.toastrService.success(
+                `Unenrolled ${Student.displayFn(s)} from ${courseId}`,
+                'Congratulations 😃'
+              );
+              console.log(
+                `unenrolled ${Student.displayFn(s)} - unenrollStudents()`
+              );
+            }),
+            catchError(
+              this.handleError<Student>(
+                `unenrollStudents(${Student.displayFn(student)}, ${
+                  courseId
+                })`
+              )
+            )
+          );
       }),
       toArray()
     );

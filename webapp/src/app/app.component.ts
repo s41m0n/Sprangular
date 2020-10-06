@@ -50,13 +50,12 @@ export class AppComponent {
         }*/
       }
     });
-
+    
     // Subscribe to Broadcaster selected course subject
+    
     this.courseService.currentCourseSubject
       .asObservable()
-      .subscribe(
-        (course) => (this.selectedCourseName = course ? course.name : null)
-      );
+      .subscribe(course => this.selectedCourseName = course);
 
     // Subscribing to the route queryParam to check doLogin parameter
     this.route.queryParams.subscribe((queryParam) =>

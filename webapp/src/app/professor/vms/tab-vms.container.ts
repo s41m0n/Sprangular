@@ -1,9 +1,8 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {VM} from '../../models/vm.model';
-import {Course} from '../../models/course.model';
-import {CourseService} from '../../services/course.service';
-import {first, takeUntil} from 'rxjs/operators';
-import {Subject} from 'rxjs';
+import { Component } from '@angular/core';
+import { VM } from '../../models/vm.model';
+import { CourseService } from '../../services/course.service';
+import { first } from 'rxjs/operators';
+import { VmService } from 'src/app/services/vm.service';
 
 /**
  * VmsContainer
@@ -14,39 +13,24 @@ import {Subject} from 'rxjs';
   selector: 'app-tab-professor-vms-cont',
   templateUrl: './tab-vms.container.html'
 })
-export class TabProfessorVmsContComponent implements OnInit, OnDestroy {
+export class TabProfessorVmsContComponent {
 
-  private course: Course;                                      // The current selected course
   vms: VM[] = [];                             // The current vms
-  private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
-  constructor(private courseService: CourseService) {
+  constructor(private courseService: CourseService, private vmService: VmService) {
+    this.refreshVmList();
   }
 
-  ngOnInit(): void {
-    // Subscribe to the Broadcaster course selected, to update the current rendered course
-    this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
-      this.course = course;
-      this.refreshAssignments();
-    });
+  refreshVmList() {
+    this.courseService.getCourseVMs(this.courseService.currentCourseSubject.value).pipe(first()).subscribe(vms => this.vms = vms);    
   }
 
-  ngOnDestroy() {
-    /** Destroying subscription */
-    this.destroy$.next(true);
-    this.destroy$.unsubscribe();
+  wipeVm(vmId: number) {
+    this.vmService.removeVm(vmId).pipe(first()).subscribe(x => this.refreshVmList);
   }
 
-
-  /** Private function to refresh the list of enrolled students */
-  private refreshAssignments() {
-    // Check if already received the current course
-    if (!this.course) {
-      this.vms = [];
-      return;
-    }
-    this.courseService.getCourseVMs(this.course).pipe(first()).subscribe(vms => this.vms = vms);
+  connect(vmId: number) {
+    this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => console.log(instance));
   }
-
 }
 

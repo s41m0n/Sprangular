@@ -9,6 +9,7 @@ const BASE_API = '/API';
 export const environment = {
   production: false,
   base_api_url: BASE_API,
+  base_vms_url: `${BASE_API}/vms`,
   base_courses_url: `${BASE_API}/courses`,
   base_students_url: `${BASE_API}/students`,
   base_professors_url: `${BASE_API}/professors`,

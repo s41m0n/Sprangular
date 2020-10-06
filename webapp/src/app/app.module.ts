@@ -10,6 +10,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -19,7 +20,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { TabStudentsComponent } from './professor/students/tab-students.component';
-import { TabStudentsContComponent } from './professor/students/tab-students-cont.component';
+import { TabStudentsContComponent } from './professor/students/tab-students.container';
 import { TabProfessorAssignmentsComponent } from './professor/assignments/tab-assignments.component';
 import { TabProfessorAssignmentsContComponent } from './professor/assignments/tab-assignments.container';
 import { TabProfessorVmsContComponent } from './professor/vms/tab-vms.container';
@@ -41,7 +42,7 @@ import { PageNotFoundComponent } from './fallback/page-not-found.component';
 import { StudentComponent } from './student/student.component';
 import { TabTeamComponent } from './student/team/tab-team.component';
 import { TabNoTeamComponent } from './student/team/tab-no-team.component';
-import { TabTeamContComponent } from './student/team/tab-team-cont.component';
+import { TabTeamContComponent } from './student/team/tab-team.container';
 import { TabStudentVmsComponent } from './student/vms/tab-vms.component';
 import { TabStudentVmsContComponent } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsComponent } from './student/assignments/tab-assignments.component';
@@ -54,6 +55,8 @@ import { NewVmComponent } from './modals/new-vm/new-vm.component';
 import { MatSelectModule } from '@angular/material/select';
 
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
+import { MatNativeDateModule } from '@angular/material/core';
+import { VmOwnerModalComponent } from './modals/vm-owner/vm-owner-modal.component';
 
 @NgModule({
   declarations: [
@@ -79,6 +82,7 @@ import { RegisterDialogComponent } from './modals/register/register-dialog.compo
     VmOptionsModalComponent,
     NewVmComponent,
     RegisterDialogComponent,
+    VmOwnerModalComponent
   ],
   imports: [
     BrowserModule,
@@ -112,9 +116,12 @@ import { RegisterDialogComponent } from './modals/register/register-dialog.compo
     FormsModule,
     MatSliderModule,
     MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   entryComponents: [LoginDialogComponent, RegisterDialogComponent],
   providers: [
+    MatDatepickerModule,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
   ],

@@ -22,6 +22,7 @@ import {Student} from '../../models/student.model';
 })
 export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
 
+  date : string = null;
   chosenMembers: Student[] = [];
   dataSource = new MatTableDataSource<Student>();                     // Table datasource dynamically modified
   colsToDisplay = ['select', 'id', 'name', 'surname'];                // Columns to be displayed in the table
@@ -61,6 +62,10 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
     this.dataSource.sort = this.sort;
   }
 
+  selectDate(date : string) {
+    this.date = date;
+  }
+
   removeWishMember(student: Student) {
     this.chosenMembers = this.chosenMembers.filter(x => x.id !== student.id);
   }
@@ -72,8 +77,9 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   submitTeam() {
-    if (this.teamNameControl.valid && this.chosenMembers.length) {
-      this.submitTeamEvent.emit(new TeamProposal(this.teamNameControl.value, this.chosenMembers));
+    const dateToPush = new Date(this.date);
+    if (this.teamNameControl.valid && this.chosenMembers.length && dateToPush >= new Date()) {
+      this.submitTeamEvent.emit(new TeamProposal(this.teamNameControl.value, this.chosenMembers.map(x => x.id), dateToPush.getTime()));
     }
   }
 

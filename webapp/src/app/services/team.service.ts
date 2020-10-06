@@ -6,7 +6,10 @@ import { ToastrService } from 'ngx-toastr';
 import { Team } from '../models/team.model';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { Course } from '../models/course.model';
+import { TeamProposal } from '../models/team-proposal.model';
+import { CourseService } from './course.service';
+import { AuthService } from './auth.service';
+import { Student } from '../models/student.model';
 
 /** Team service
  *
@@ -16,23 +19,41 @@ import { Course } from '../models/course.model';
   providedIn: 'root',
 })
 export class TeamService {
-  // Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
   public currentTeamSubject: BehaviorSubject<Team>;
-
-  constructor(private http: HttpClient, private toastrService: ToastrService) {
+  
+  constructor(private http: HttpClient,
+    private toastrService: ToastrService,
+    private courseService : CourseService,
+    private authService : AuthService) {
     this.currentTeamSubject = new BehaviorSubject<Team>(null);
   }
 
-  public createTeam(name: string, course: Course): Observable<Team> {
+  public createTeam(proposal: TeamProposal, courseId: string = this.courseService.currentCourseSubject.value): Observable<Team> {
     return this.http
       .post<Team>(
-        environment.base_teams_url,
-        { name, courseId: course.id },
+        `${environment.base_courses_url}/${courseId}/teams`,
+        proposal,
         environment.base_http_headers
       )
       .pipe(
-        tap(() => console.log(`created team ${name} - createTeam()`)),
-        catchError(this.handleError<Team>(`createTeam(${name}`))
+        tap(() => console.log(`created team ${proposal.teamName} - createTeam()`)),
+        catchError(this.handleError<Team>(`createTeam(${proposal.teamName}`))
+      );
+  }
+
+  public getStudentTeam(courseId: string = this.courseService.currentCourseSubject.value, studentId: string = this.authService.currentUserValue.id) : Observable<Team>{
+    return this.http.get<Team>(`${environment.base_students_url}/${studentId}/teams/${courseId}`)
+      .pipe(
+        tap(() => console.log(`retrieved team of ${studentId} for course ${courseId} - getStudentTeam()`)),
+        catchError(this.handleError<Team>(`getStudentTeam(${courseId}, ${studentId})`, null, false))
+      )
+  }
+
+  public getStudentsInTeam(teamId : number = this.currentTeamSubject.value.id) {
+    return this.http.get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
+      .pipe(
+        tap(() => console.log(`retrieved members of team ${teamId} - getStudentsInTeam()`)),
+        catchError(this.handleError<Student[]>(`getStudentsInTeam(${teamId})`))
       );
   }
 
