@@ -151,8 +151,8 @@ public class CourseServiceImpl implements CourseService {
   public List<StudentDTO> getStudentsOfCourseLike(String courseId, String pattern) {
     Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
     List<StudentDTO> returnedList = new ArrayList<>();
-    for(Student s : c.getStudents()){
-      if(s.getSurname().toLowerCase().contains(pattern.toLowerCase())){
+    for (Student s : c.getStudents()) {
+      if (s.getSurname().toLowerCase().contains(pattern.toLowerCase())) {
         returnedList.add(modelMapper.map(s, StudentDTO.class));
       }
     }

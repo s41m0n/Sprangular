@@ -4,7 +4,6 @@ import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.Proposal;
 import it.polito.ai.lab2.repositories.ProposalRepository;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

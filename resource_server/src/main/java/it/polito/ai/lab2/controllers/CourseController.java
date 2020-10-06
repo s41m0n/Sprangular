@@ -101,7 +101,7 @@ public class CourseController {
   public List<StudentDTO> getAvailableStudents(@PathVariable String courseId, @RequestParam(required = false, name = "surname_like") String pattern) {
     log.info("getAvailableStudents(" + courseId + ") called");
     try {
-      if(pattern == null || pattern.isEmpty()) {
+      if (pattern == null || pattern.isEmpty()) {
         return teamService.getAvailableStudents(courseId).stream()
             .map(ModelHelper::enrich)
             .collect(Collectors.toList());

@@ -354,8 +354,6 @@ public class VmServiceImpl implements VmService {
     courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
-
-
     Team team = null;
     for (Team t : student.getTeams()) { //find the student's team of the selected course
       if (t.getCourse().getName().equals(courseId)) {
