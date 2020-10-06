@@ -6,6 +6,7 @@ import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
+import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
 import lombok.extern.java.Log;
@@ -73,12 +74,14 @@ public class TeamServiceImpl implements TeamService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
-  public TeamDTO getTeamOfStudentOfCourse(String studentId, String courseId) {
-    return modelMapper.map(studentRepository.findById(studentId)
+  public TeamDetails getTeamOfStudentOfCourse(String studentId, String courseId) {
+    Team team = studentRepository.findById(studentId)
         .map(student -> student.getTeams().stream()
             .filter(x -> x.getCourse().getAcronym().equals(courseId))
             .findFirst()
-            .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist")), TeamDTO.class);
+            .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+    return modelMapper.map(team, TeamDetails.class);
   }
 
   @Override

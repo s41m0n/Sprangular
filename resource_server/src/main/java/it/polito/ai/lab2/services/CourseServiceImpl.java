@@ -5,10 +5,13 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
+import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.Course;
 import it.polito.ai.lab2.entities.Professor;
 import it.polito.ai.lab2.entities.Student;
+import it.polito.ai.lab2.entities.Team;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
 import it.polito.ai.lab2.pojos.UpdateCourseDetails;
 import it.polito.ai.lab2.repositories.CourseRepository;
 import it.polito.ai.lab2.repositories.ProfessorRepository;
@@ -45,6 +48,9 @@ public class CourseServiceImpl implements CourseService {
   @Autowired
   ModelMapper modelMapper;
 
+  @Autowired
+  TeamService teamService;
+
   @Override
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
   public boolean addCourse(CourseDTO course) {
@@ -76,12 +82,20 @@ public class CourseServiceImpl implements CourseService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
-  public List<StudentDTO> getEnrolledStudents(String courseId) {
-    return courseRepository.findById(courseId)
+  public List<StudentWithTeamDetails> getEnrolledStudents(String courseId) {
+    List<StudentDTO> students = courseRepository.findById(courseId)
         .map(course -> course.getStudents().stream()
             .map(student -> modelMapper.map(student, StudentDTO.class))
             .collect(Collectors.toList()))
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+
+    List<StudentWithTeamDetails> returnedList = new ArrayList<>();
+
+    for (StudentDTO s : students) {
+      modelMapper.map(s, StudentWithTeamDetails.class).setTeam(modelMapper.map(teamService.getTeamOfStudentOfCourse(s.getId(), courseId), TeamDTO.class));
+    }
+
+    return returnedList;
   }
 
   @Override
@@ -139,24 +153,21 @@ public class CourseServiceImpl implements CourseService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-  public List<StudentDTO> getStudentsOfCourse(String courseId) {
-    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-    return c.getStudents().stream()
-        .map(s -> modelMapper.map(s, StudentDTO.class))
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-  public List<StudentDTO> getStudentsOfCourseLike(String courseId, String pattern) {
-    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-    List<StudentDTO> returnedList = new ArrayList<>();
-    for (Student s : c.getStudents()) {
-      if (s.getSurname().toLowerCase().contains(pattern.toLowerCase())) {
-        returnedList.add(modelMapper.map(s, StudentDTO.class));
-      }
-    }
-    return returnedList;
+  public List<StudentWithTeamDetails> getStudentsOfCourse(String courseId, String pattern) {
+    boolean applyFilter = pattern != null && !pattern.isEmpty();
+    return courseRepository.findById(courseId)
+        .map(course -> course.getStudents().stream()
+            .filter(x -> !applyFilter || x.getSurname().toLowerCase().contains(pattern.toLowerCase()))
+            .map(x -> {
+              if(applyFilter){
+                return modelMapper.map(x, StudentWithTeamDetails.class);
+              }
+              StudentWithTeamDetails ret = modelMapper.map(x, StudentWithTeamDetails.class);
+              x.getTeams().stream().filter(y -> y.getCourse().getAcronym().equals(courseId)).findAny().ifPresent(team -> ret.setTeam(modelMapper.map(team, TeamDTO.class)));
+              return ret;
+            })
+            .collect(Collectors.toList()))
+        .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
   }
 
   @Override

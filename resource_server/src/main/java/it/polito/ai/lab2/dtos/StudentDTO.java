@@ -25,7 +25,4 @@ public class StudentDTO extends RepresentationModel<StudentDTO> {
 
   @CsvBindByName
   String surname;
-
-  @CsvBindByName
-  String photoPath;
 }
