@@ -8,12 +8,10 @@ import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -73,6 +72,16 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
+  public TeamDTO getTeamOfStudentOfCourse(String studentId, String courseId) {
+    return modelMapper.map(studentRepository.findById(studentId)
+        .map(student -> student.getTeams().stream()
+            .filter(x -> x.getCourse().getAcronym().equals(courseId))
+            .findFirst()
+            .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist")), TeamDTO.class);
+  }
+
+  @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#teamId))")
   public List<StudentDTO> getTeamMembers(Long teamId) {
     return teamRepository.findById(teamId)
@@ -84,8 +93,8 @@ public class TeamServiceImpl implements TeamService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
-  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, LocalDate deadline) {
-    if (LocalDate.now().isBefore(deadline))
+  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Long deadline) {
+    if (LocalDate.now().isAfter(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneId.systemDefault())))
       throw new InvalidTimestampException("Timestamp before current date");
 
     if (memberIds.stream().distinct().count() != memberIds.size())
@@ -103,7 +112,7 @@ public class TeamServiceImpl implements TeamService {
 
     List<Student> members = studentRepository.findAllById(memberIds);
 
-    if (members.stream().anyMatch(User::isVerified)) {
+    if (members.stream().anyMatch(x -> !x.isVerified())) {
       throw new UserNotVerifiedException("Some student's account is not verified");
     }
 
@@ -138,7 +147,7 @@ public class TeamServiceImpl implements TeamService {
             proposal.setInvitedUserId(member.getId());
             proposal.setTeamId(t.getId());
             proposal.setCourseId(courseId);
-            proposal.setDeadline(deadline);
+            proposal.setDeadline(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneId.systemDefault()));
             proposal.setStatus(ProposalStatus.PENDING);
             proposalRepository.save(proposal);
           }
@@ -155,7 +164,7 @@ public class TeamServiceImpl implements TeamService {
         }
       };
       //scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
-      scheduler.schedule(proposalDeadline, Instant.from(deadline)); //TODO: testare!
+      //scheduler.schedule(proposalDeadline, Instant.from(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneId.systemDefault()))); //TODO: NON VA!
       notificationService.notifyTeam(t, memberIds, courseId);
     }
     return t;
@@ -184,6 +193,14 @@ public class TeamServiceImpl implements TeamService {
   public List<StudentDTO> getAvailableStudents(String courseId) {
     return courseRepository.getStudentsNotInTeams(courseId).stream()
         .map(student -> modelMapper.map(student, StudentDTO.class))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<StudentDTO> getAvailableStudentsLike(String courseId, String pattern) {
+    return courseRepository.getStudentsNotInTeams(courseId).stream()
+        .map(student -> modelMapper.map(student, StudentDTO.class))
+        .filter(s -> s.getSurname().toLowerCase().contains(pattern.toLowerCase()))
         .collect(Collectors.toList());
   }
 

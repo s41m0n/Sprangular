@@ -98,12 +98,18 @@ public class CourseController {
   }
 
   @GetMapping("/{courseId}/availableStudents")
-  public List<StudentDTO> getAvailableStudents(@PathVariable String courseId) {
+  public List<StudentDTO> getAvailableStudents(@PathVariable String courseId, @RequestParam(required = false, name = "surname_like") String pattern) {
     log.info("getAvailableStudents(" + courseId + ") called");
     try {
-      return teamService.getAvailableStudents(courseId).stream()
-          .map(ModelHelper::enrich)
-          .collect(Collectors.toList());
+      if (pattern == null || pattern.isEmpty()) {
+        return teamService.getAvailableStudents(courseId).stream()
+            .map(ModelHelper::enrich)
+            .collect(Collectors.toList());
+      } else {
+        return teamService.getAvailableStudentsLike(courseId, pattern).stream()
+            .map(ModelHelper::enrich)
+            .collect(Collectors.toList());
+      }
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
@@ -215,6 +221,24 @@ public class CourseController {
     }
   }
 
+  @GetMapping("/{courseId}/students")
+  public List<StudentDTO> getStudents(@PathVariable String courseId, @RequestParam(required = false, name = "surname_like") String pattern) {
+    log.info("getStudents() called");
+    try {
+      if (pattern == null || pattern.isEmpty()) {
+        return courseService.getStudentsOfCourse(courseId).stream()
+            .map(ModelHelper::enrich)
+            .collect(Collectors.toList());
+      } else {
+        return courseService.getStudentsOfCourseLike(courseId, pattern).stream()
+            .map(ModelHelper::enrich)
+            .collect(Collectors.toList());
+      }
+    } catch (CourseNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
   @PostMapping("/{courseId}/vmModel")
   public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDetails vmModelDetails) {
     try {
@@ -300,7 +324,7 @@ public class CourseController {
   }
 
   @PostMapping("/{courseId}/assignments")
-  public AssignmentDTO getSolutionsForAssignment(@PathVariable String courseId,
+  public AssignmentDTO createAssignmentForCourse(@PathVariable String courseId,
                                                  @ModelAttribute AssignmentDetails assignmentDetails) {
     try {
       return assAndUploadService.createAssignment(assignmentDetails, courseId,

@@ -4,7 +4,6 @@ import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.Proposal;
 import it.polito.ai.lab2.repositories.ProposalRepository;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -38,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Async
   public void sendMessage(String address, String subject, String body) {
     SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(address);
+    message.setTo("s264970@studenti.polito.it"); //TODO: cambia!
     message.setSubject(subject);
     message.setText(body);
     emailSender.send(message);

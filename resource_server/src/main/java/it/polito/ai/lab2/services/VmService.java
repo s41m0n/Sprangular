@@ -4,7 +4,9 @@ import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.dtos.VmModelDTO;
 import it.polito.ai.lab2.pojos.UpdateVmDetails;
 import it.polito.ai.lab2.pojos.VmModelDetails;
+import org.springframework.core.io.Resource;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 public interface VmService {
@@ -26,6 +28,8 @@ public interface VmService {
   void addVmOwner(Long vmId, Long teamId, String studentId);
 
   VmDTO getVm(Long vmId, Long teamId);
+
+  Resource getVmInstance(Long vmId, Long teamId) throws FileNotFoundException;
 
   List<VmDTO> getVmsOfTeam(Long teamId);
 

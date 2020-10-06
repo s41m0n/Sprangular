@@ -38,4 +38,8 @@ public interface CourseService {
   boolean addProfessorToCourse(String professorId, String courseId);
 
   ProfessorDTO removeProfessorFromCourse(String professorId, String courseId);
+
+  List<StudentDTO> getStudentsOfCourse(String courseId);
+
+  List<StudentDTO> getStudentsOfCourseLike(String courseId, String pattern);
 }

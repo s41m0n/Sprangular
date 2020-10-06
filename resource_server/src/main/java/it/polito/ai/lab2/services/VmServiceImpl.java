@@ -10,12 +10,16 @@ import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -278,6 +282,23 @@ public class VmServiceImpl implements VmService {
     }
 
     return modelMapper.map(vm, VmDTO.class);
+  }
+
+  @Override
+  public Resource getVmInstance(Long vmId, Long teamId) throws FileNotFoundException {
+    Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + " does not exist"));
+    if (!vm.getTeam().getId().equals(teamId)) {
+      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
+    }
+    Resource file = null;
+    try {
+      file = new UrlResource(vm.getImagePath());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    if (file == null)
+      throw new FileNotFoundException("Vm instance " + vmId + " not found");
+    return file;
   }
 
   @Override

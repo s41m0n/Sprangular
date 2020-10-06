@@ -109,4 +109,16 @@ public class StudentServiceImpl implements StudentService {
 
     return proposalsDetails;
   }
+
+  @Override
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  public List<StudentDTO> getStudentsLike(String pattern) {
+    List<StudentDTO> returnedList = new ArrayList<>();
+    for (StudentDTO s : this.getAllStudents()) {
+      if (s.getSurname().toLowerCase().contains(pattern.toLowerCase())) {
+        returnedList.add(s);
+      }
+    }
+    return returnedList;
+  }
 }
