@@ -9,10 +9,12 @@ import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
+import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -166,8 +168,7 @@ public class TeamServiceImpl implements TeamService {
           teamRepository.deleteById(t.getId());
         }
       };
-      //scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
-      //scheduler.schedule(proposalDeadline, Instant.from(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneId.systemDefault()))); //TODO: NON VA!
+      scheduler.schedule(proposalDeadline, new CronTrigger(Utility.epochMillisecondsToCronTrigger(deadline)));
       notificationService.notifyTeam(t, memberIds, courseId);
     }
     return t;
