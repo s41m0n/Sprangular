@@ -57,6 +57,9 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
   }
 
   submitTeam(proposal: TeamProposal): void {
-    this.teamService.createTeam(proposal).subscribe(_ => this.teamService.getStudentTeam().pipe(first()).subscribe(team => this.teamService.currentTeamSubject.next(team)));
+    this.teamService.createTeam(proposal).subscribe(team => {
+      if(team)
+        this.teamService.getStudentTeam().pipe(first()).subscribe(team => this.teamService.currentTeamSubject.next(team))
+    });
   }
 }

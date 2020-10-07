@@ -167,6 +167,51 @@ export class CourseService {
   }
 
   /**
+   * Function to enroll students to a specific Course
+   * Return value is ignored, since the we reload the entire list
+   *
+   * @param(students) the list of students to be enrolled
+   * @param(course) the objective course
+   */
+  enrollStudents(students: Student[], courseId: string = this.currentCourseSubject.value): Observable<Student[]> {
+    return from(students).pipe(
+      mergeMap((student: Student) => {
+        // Checking if ADD has been pressed without selecting a student (or modifying the selected one)
+        if (typeof student === 'string') {
+          this.toastrService.error(
+            `${student} is not a valid Student, please select one from the options`,
+            'Error 😅'
+          );
+          return of(null);
+        }
+        return this.http
+          .put<Student>(
+            `${environment.base_courses_url}/${courseId}/enrollOne`,
+            {studentId: student.id},
+            environment.base_http_headers
+          )
+          .pipe(
+            tap((s) => {
+              this.toastrService.success(
+                `Enrolled ${Student.displayFn(s)} to ${courseId}`,
+                'Congratulations 😃'
+              );
+              console.log(
+                `enrolled ${Student.displayFn(s)} - enrollStudents()`
+              );
+            }),
+            catchError(
+              this.handleError<Student>(
+                `enrollStudents(${Student.displayFn(student)}, ${courseId})`
+              )
+            )
+          );
+      }),
+      toArray()
+    );
+  }
+
+  /**
    * Function to unenroll students from a specific course.
    * Return value is ignored, since the we reload the entire list
    *

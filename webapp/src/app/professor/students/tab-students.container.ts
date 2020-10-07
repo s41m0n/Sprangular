@@ -71,7 +71,7 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
    * @param(students) the list of students to be enrolled
    */
   enrollStudents(students: Student[]) {
-    this.studentService.enrollStudents(students, this.courseService.currentCourseSubject.value)
+    this.courseService.enrollStudents(students)
         .pipe(
             first(),
             finalize(() => this.refreshEnrolled())
