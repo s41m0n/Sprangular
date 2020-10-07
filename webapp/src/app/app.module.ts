@@ -57,6 +57,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { MatNativeDateModule } from '@angular/material/core';
 import { VmOwnerModalComponent } from './modals/vm-owner/vm-owner-modal.component';
+import { VmViewerModalComponent } from './modals/vm-viewer/vm-viewer-modal.component';
 
 @NgModule({
   declarations: [
@@ -82,7 +83,8 @@ import { VmOwnerModalComponent } from './modals/vm-owner/vm-owner-modal.componen
     VmOptionsModalComponent,
     NewVmComponent,
     RegisterDialogComponent,
-    VmOwnerModalComponent
+    VmOwnerModalComponent,
+    VmViewerModalComponent
   ],
   imports: [
     BrowserModule,

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
@@ -130,11 +129,13 @@ export class VmService {
       );
   }
 
-  public getInstance(vmId: number): Observable<Object> {
-    return this.http.get<Object>(`${environment.base_vms_url}/${vmId}/instance`)
+  public getInstance(vmId: number): Observable<any> {
+    return this.http.get(`${environment.base_vms_url}/${vmId}/instance`, {
+                        responseType: 'blob'
+                    })
       .pipe(
         tap(() => console.log(`returned instance for vm ${vmId} - getInstance()`)),
-        catchError(this.handleError<Object>(`getInstance(${vmId})`))
+        catchError(this.handleError<any>(`getInstance(${vmId})`))
       );
   }
 
