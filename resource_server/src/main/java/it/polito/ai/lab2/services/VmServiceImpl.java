@@ -267,7 +267,7 @@ public class VmServiceImpl implements VmService {
 
     Resource file = null;
     try {
-      file = new UrlResource(vm.getImagePath());
+      file = new UrlResource(Paths.get(vm.getImagePath()).toUri());
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
