@@ -94,6 +94,10 @@ public class VmServiceImpl implements VmService {
     Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
     Student owner = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow(() -> new StudentNotFoundException("Student " + SecurityContextHolder.getContext().getAuthentication().getName() + " does not exist"));
 
+    if(!team.isActive()) {
+      throw new TeamNotActiveException("Team " + teamId + " is not active");
+    }
+
     if (!owner.getCourses().contains(team.getCourse())) { //student not enrolled in course
       throw new StudentNotInCourseException("Student " + owner.getId() + " is not enrolled in course " + team.getCourse().getAcronym());
     }
@@ -153,14 +157,10 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public VmDTO deleteVm(Long vmId, Long teamId) {
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
+  public VmDTO deleteVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId)
         .orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
-
-    if (!vm.getTeam().getId().equals(teamId)) {
-      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
-    }
 
     if (!vm.isActive()) {
       vmRepository.delete(vm);
@@ -175,16 +175,12 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public VmDTO updateVmResources(Long vmId, Long teamId, UpdateVmDetails updateVmDetails) {
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
+  public VmDTO updateVmResources(Long vmId, UpdateVmDetails updateVmDetails) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
 
     if (vm.isActive()) {
       throw new VmIsActiveException("Vm " + vmId + " is active and cannot be updated. Please turn it off");
-    }
-
-    if (!vm.getTeam().getId().equals(teamId)) {
-      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
     }
 
     Team team = vm.getTeam();
@@ -211,24 +207,19 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public VmDTO turnOnVm(Long vmId, Long teamId) {
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
+  public VmDTO turnOnVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
-    Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
-
-    if (!vm.getTeam().getId().equals(teamId)) {
-      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
-    }
 
     int numOfActiveVms = 0;
 
-    for (Vm v : team.getVms()) {
+    for (Vm v : vm.getTeam().getVms()) {
       if (v.isActive()) {
         numOfActiveVms += 1;
       }
     }
 
-    if (numOfActiveVms + 1 > team.getMaxActiveInstances()) {
+    if (numOfActiveVms + 1 > vm.getTeam().getMaxActiveInstances()) {
       throw new MaxVmResourcesException("Cannot turn on VM " + vmId + " too many active VMs");
     }
 
@@ -238,14 +229,9 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public VmDTO turnOffVm(Long vmId, Long teamId) {
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
+  public VmDTO turnOffVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
-    teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
-
-    if (!vm.getTeam().getId().equals(teamId)) {
-      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
-    }
 
     vm.setActive(false);
     vmRepository.save(vm);
@@ -253,15 +239,10 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public void addVmOwner(Long vmId, Long teamId, String studentId) {
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
+  public void addVmOwner(Long vmId, String studentId) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
     Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
-    teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
-
-    if (!vm.getTeam().getId().equals(teamId)) {
-      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
-    }
 
     if (!student.isVerified()) {
       throw new UserNotVerifiedException("Student " + studentId + " is not verified");
@@ -273,23 +254,17 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId) or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isVmOfStudentTeam(#vmId)")
-  public VmDTO getVm(Long vmId, Long teamId) {
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isVmOfStudentTeam(#vmId)")
+  public VmDTO getVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
-
-    if (!vm.getTeam().getId().equals(teamId)) {
-      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
-    }
 
     return modelMapper.map(vm, VmDTO.class);
   }
 
   @Override
-  public Resource getVmInstance(Long vmId, Long teamId) throws FileNotFoundException {
+  public Resource getVmInstance(Long vmId) throws FileNotFoundException {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + " does not exist"));
-    if (!vm.getTeam().getId().equals(teamId)) {
-      throw new VmNotOfTeamException("Vm " + vmId + " does not belong to team " + teamId);
-    }
+
     Resource file = null;
     try {
       file = new UrlResource(vm.getImagePath());

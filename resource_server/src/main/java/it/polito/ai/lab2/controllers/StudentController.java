@@ -2,6 +2,7 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.services.*;
@@ -85,9 +86,9 @@ public class StudentController {
   }
 
   @GetMapping("/{studentId}/teams/{courseId}")
-  public TeamDTO getTeamOfStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
+  public TeamDetails getTeamOfStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
     try {
-      return ModelHelper.enrich(teamService.getTeamOfStudentOfCourse(studentId, courseId));
+      return teamService.getTeamOfStudentOfCourse(studentId, courseId);
     } catch (StudentNotFoundException | TeamNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }

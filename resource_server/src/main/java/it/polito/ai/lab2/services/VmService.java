@@ -17,19 +17,19 @@ public interface VmService {
 
   VmDTO createVm(Long teamId, VmDTO vmDTO);
 
-  VmDTO deleteVm(Long vmId, Long teamId);
+  VmDTO deleteVm(Long vmId);
 
-  VmDTO updateVmResources(Long vmId, Long teamId, UpdateVmDetails updateVmDetails);
+  VmDTO updateVmResources(Long vmId, UpdateVmDetails updateVmDetails);
 
-  VmDTO turnOnVm(Long vmId, Long teamId);
+  VmDTO turnOnVm(Long vmId);
 
-  VmDTO turnOffVm(Long vmId, Long teamId);
+  VmDTO turnOffVm(Long vmId);
 
-  void addVmOwner(Long vmId, Long teamId, String studentId);
+  void addVmOwner(Long vmId, String studentId);
 
-  VmDTO getVm(Long vmId, Long teamId);
+  VmDTO getVm(Long vmId);
 
-  Resource getVmInstance(Long vmId, Long teamId) throws FileNotFoundException;
+  Resource getVmInstance(Long vmId) throws FileNotFoundException;
 
   List<VmDTO> getVmsOfTeam(Long teamId);
 

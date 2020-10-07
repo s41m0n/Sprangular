@@ -3,6 +3,7 @@ package it.polito.ai.lab2.services;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
+import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
 import it.polito.ai.lab2.pojos.UpdateCourseDetails;
 
 import java.io.Reader;
@@ -21,7 +22,7 @@ public interface CourseService {
 
   List<CourseDTO> getAllCourses();
 
-  List<StudentDTO> getEnrolledStudents(String courseId);
+  List<StudentWithTeamDetails> getEnrolledStudents(String courseId);
 
   void enableCourse(String courseId);
 
@@ -39,7 +40,5 @@ public interface CourseService {
 
   ProfessorDTO removeProfessorFromCourse(String professorId, String courseId);
 
-  List<StudentDTO> getStudentsOfCourse(String courseId);
-
-  List<StudentDTO> getStudentsOfCourseLike(String courseId, String pattern);
+  List<StudentWithTeamDetails> getStudentsOfCourse(String courseId, String pattern);
 }

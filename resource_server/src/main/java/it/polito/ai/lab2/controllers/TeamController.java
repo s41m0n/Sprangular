@@ -75,28 +75,6 @@ public class TeamController {
     }
   }
 
-  @GetMapping("/{teamId}/vms/{vmId}")
-  public VmDTO getVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-    try {
-      return vmService.getVm(vmId, teamId);
-    } catch (VmNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-    }
-  }
-
-  @GetMapping("/{teamId}/vms/{vmId}/instance")
-  public Resource getVmInstance(@PathVariable Long teamId, @PathVariable Long vmId) {
-    try {
-      return vmService.getVmInstance(vmId, teamId);
-    } catch (VmNotFoundException | FileNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-    }
-  }
-
   @PostMapping("/{id}/vms")
   public VmDTO createVm(@PathVariable Long id, @RequestBody VmDTO vmDTO) {
     try {
@@ -104,68 +82,6 @@ public class TeamController {
     } catch (VmModelNotFoundException | StudentNotFoundException | CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-  }
-
-  @DeleteMapping("/{teamId}/vms/{vmId}")
-  public VmDTO deleteVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-    try {
-      return vmService.deleteVm(vmId, teamId);
-    } catch (CannotDeleteVmException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-    }
-  }
-
-  @PutMapping("/{teamId}/vms/{vmId}")
-  public VmDTO updateVm(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody UpdateVmDetails uvd) {
-    try {
-      return vmService.updateVmResources(vmId, teamId, uvd);
-    } catch (VmNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-  }
-
-  @PutMapping("/{teamId}/vms/{vmId}/turnOnVm")
-  public VmDTO turnOnVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-    try {
-      return vmService.turnOnVm(vmId, teamId);
-    } catch (VmNotFoundException | TeamNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-    } catch (MaxVmResourcesException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-  }
-
-  @PutMapping("/{teamId}/vms/{vmId}/turnOffVm")
-  public VmDTO turnOffVm(@PathVariable Long teamId, @PathVariable Long vmId) {
-    try {
-      return vmService.turnOffVm(vmId, teamId);
-    } catch (VmNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-    }
-  }
-
-  @ResponseStatus(HttpStatus.OK)
-  @PostMapping("/{teamId}/vms/{vmId}/addOwner")
-  public void addVmOwner(@PathVariable Long teamId, @PathVariable Long vmId, @RequestBody Map<String, String> reqBody) {
-    try {
-      vmService.addVmOwner(vmId, teamId, reqBody.get("studentId"));
-    } catch (VmNotFoundException | TeamNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
-    } catch (UserNotVerifiedException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }

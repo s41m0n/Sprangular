@@ -4,6 +4,7 @@ import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
+import it.polito.ai.lab2.pojos.TeamDetails;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +13,7 @@ public interface TeamService {
 
   List<TeamDTO> getTeamsForStudent(String studentId);
 
-  TeamDTO getTeamOfStudentOfCourse(String studentId, String courseId);
+  TeamDetails getTeamOfStudentOfCourse(String studentId, String courseId);
 
   List<StudentDTO> getTeamMembers(Long teamId);
 

@@ -2,10 +2,7 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
-import it.polito.ai.lab2.pojos.AssignmentDetails;
-import it.polito.ai.lab2.pojos.TeamProposalRequest;
-import it.polito.ai.lab2.pojos.UpdateCourseDetails;
-import it.polito.ai.lab2.pojos.VmModelDetails;
+import it.polito.ai.lab2.pojos.*;
 import it.polito.ai.lab2.services.*;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
@@ -57,19 +54,6 @@ public class CourseController {
     return courseService.getCourse(courseId)
         .map(ModelHelper::enrich)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course `" + courseId + "` does not exist"));
-  }
-
-  @GetMapping("/{courseId}/enrolled")
-  public List<StudentDTO> enrolledStudents(@PathVariable String courseId) {
-    log.info("enrolledStudents(" + courseId + ") called");
-    try {
-      return courseService.getEnrolledStudents(courseId)
-          .stream()
-          .map(ModelHelper::enrich)
-          .collect(Collectors.toList());
-    } catch (CourseNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
   }
 
   @GetMapping("/{courseId}/professors")
@@ -222,18 +206,10 @@ public class CourseController {
   }
 
   @GetMapping("/{courseId}/students")
-  public List<StudentDTO> getStudents(@PathVariable String courseId, @RequestParam(required = false, name = "surname_like") String pattern) {
+  public List<StudentWithTeamDetails> getStudentsOfCourse(@PathVariable String courseId, @RequestParam(required = false, name = "surname_like") String pattern) {
     log.info("getStudents() called");
     try {
-      if (pattern == null || pattern.isEmpty()) {
-        return courseService.getStudentsOfCourse(courseId).stream()
-            .map(ModelHelper::enrich)
-            .collect(Collectors.toList());
-      } else {
-        return courseService.getStudentsOfCourseLike(courseId, pattern).stream()
-            .map(ModelHelper::enrich)
-            .collect(Collectors.toList());
-      }
+        return courseService.getStudentsOfCourse(courseId, pattern);
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
