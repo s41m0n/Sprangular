@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -220,7 +221,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
         "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     Resource file = null;
     try {
-      file = new UrlResource(assignmentSolution.getAssignment().getImagePath());
+      file = new UrlResource(Paths.get(assignmentSolution.getAssignment().getImagePath()).toUri());
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
