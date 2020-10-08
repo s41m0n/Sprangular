@@ -14,6 +14,7 @@ export class Course {
   teamMaxSize: number;
   enabled: boolean;
 
+  // TODO - questi campi in più del costruttore ci servono? Nel caso rifattorizzare togliendoli
   constructor(
     acronym: string,
     name: string = '',

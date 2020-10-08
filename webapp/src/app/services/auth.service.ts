@@ -88,6 +88,7 @@ export class AuthService {
       );
   }
 
+  // TODO - fix doppia post per register
   register(
     id: string,
     email: string,
