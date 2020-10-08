@@ -40,7 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
     message.setTo("s264970@studenti.polito.it"); //TODO: cambia!
     message.setSubject(subject);
     message.setText(body);
-    emailSender.send(message);
+    //emailSender.send(message); //TODO: decomment to send mails
   }
 
   @Override
