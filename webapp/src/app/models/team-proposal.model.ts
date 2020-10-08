@@ -5,11 +5,15 @@ export class TeamProposal {
   studentIds: string[];
   deadline: number;
 
-  constructor(teamName: string = '', studentIds: string[] = [], deadline : number = 0) {
+  constructor(
+      teamName: string = '',
+      studentIds: string[] = [],
+      deadline: number = 0)
+  {
     this.teamName = teamName;
     this.studentIds = studentIds;
-    if(deadline == 0) {
-      var date = new Date();
+    if (deadline === 0) {
+      const date = new Date();
       date.setDate(date.getDate() + 5);
       deadline = date.getTime();
     }
