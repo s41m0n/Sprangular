@@ -28,6 +28,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -181,7 +182,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
         }
     );
     scheduler.schedule(automaticDelivery,
-        new Date(assignment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+        new Date(assignment.getDueDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()));
     return modelMapper.map(savedAssignment, AssignmentDTO.class);
   }
 

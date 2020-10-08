@@ -1,10 +1,11 @@
 package it.polito.ai.lab2;
 
+import it.polito.ai.lab2.entities.Assignment;
+import it.polito.ai.lab2.entities.AssignmentSolution;
 import it.polito.ai.lab2.entities.Proposal;
 import it.polito.ai.lab2.entities.Role;
-import it.polito.ai.lab2.repositories.ProposalRepository;
-import it.polito.ai.lab2.repositories.RoleRepository;
-import it.polito.ai.lab2.repositories.TeamRepository;
+import it.polito.ai.lab2.repositories.*;
+import it.polito.ai.lab2.utility.AssignmentStatus;
 import it.polito.ai.lab2.utility.ProposalStatus;
 import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
@@ -21,11 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Log
 @SpringBootApplication
@@ -42,6 +40,9 @@ public class SprangularBackend {
 
   @Autowired
   TaskScheduler scheduler;
+
+  @Autowired
+  AssignmentSolutionRepository assignmentSolutionRepository;
 
   @Bean
   ModelMapper modelMapper() {
@@ -84,7 +85,7 @@ public class SprangularBackend {
         roleRepository.save(role);
       }
 
-      // TODO: to test!
+      // TODO: test!
       // Team proposals management
       List<Proposal> proposals = proposalRepository.findAllByStatus(ProposalStatus.PENDING);
       Set<Long> deleted = new HashSet<>();
@@ -109,7 +110,7 @@ public class SprangularBackend {
               }
             };
             scheduler.schedule(proposalDeadline,
-                new Date(proposal.getDeadline().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                new Date(proposal.getDeadline().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()));
           }
         } else {
           // Reject proposals and delete team
@@ -119,6 +120,34 @@ public class SprangularBackend {
           }
           proposal.setStatus(ProposalStatus.REJECTED);
           proposalRepository.save(proposal);
+        }
+      });
+
+      // TODO: test!
+      // Assignment delivery management
+      List<AssignmentSolution> assignmentSolutions = assignmentSolutionRepository.findAllByStatusIn(
+          Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ));
+      Set<Long> programmed = new HashSet<>();
+      assignmentSolutions.forEach(assignmentSolution -> {
+        if (assignmentSolution.getAssignment().getDueDate().isBefore(LocalDate.now())) {
+          // Deliver assignment
+          assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
+          assignmentSolutionRepository.save(assignmentSolution);
+        } else {
+          // Schedule assignment delivery
+          Long assId = assignmentSolution.getAssignment().getId();
+          if (!programmed.contains(assId)) {
+            programmed.add(assId);
+            Assignment assignment = assignmentSolution.getAssignment();
+            Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
+                solution -> {
+                  solution.setStatus(AssignmentStatus.DELIVERED);
+                  assignmentSolutionRepository.save(solution);
+                }
+            );
+            scheduler.schedule(automaticDelivery,
+                new Date(assignment.getDueDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()));
+          }
         }
       });
     };

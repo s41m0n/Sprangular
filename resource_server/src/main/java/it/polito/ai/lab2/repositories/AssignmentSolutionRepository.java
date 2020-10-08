@@ -16,4 +16,6 @@ public interface AssignmentSolutionRepository extends JpaRepository<AssignmentSo
   Optional<AssignmentSolution> findByAssignmentIdAndStudentId(Long assignmentId, String studentId);
 
   List<AssignmentSolution> findByStudentId(String studentId);
+
+  List<AssignmentSolution> findAllByStatusIn(List<AssignmentStatus> status);
 }
