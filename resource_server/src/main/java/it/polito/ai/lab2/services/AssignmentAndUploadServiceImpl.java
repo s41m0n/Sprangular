@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +29,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -175,10 +175,13 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     }
 
     Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
-        assignmentSolution -> assignmentSolution.setStatus(AssignmentStatus.DELIVERED)
+        assignmentSolution -> {
+          assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
+          assignmentSolutionRepository.save(assignmentSolution);
+        }
     );
-    scheduler.schedule(automaticDelivery, new CronTrigger(Utility.epochMillisecondsToCronTrigger(
-        assignment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())));
+    scheduler.schedule(automaticDelivery,
+        new Date(assignment.getDueDate().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()));
     return modelMapper.map(savedAssignment, AssignmentDTO.class);
   }
 

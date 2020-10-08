@@ -9,12 +9,10 @@ import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +22,7 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -164,11 +163,14 @@ public class TeamServiceImpl implements TeamService {
             .anyMatch(p -> p.getStatus().equals(ProposalStatus.REJECTED)
                 || p.getStatus().equals(ProposalStatus.PENDING));
         if (toDelete) {
-          proposals.forEach(proposal -> proposal.setStatus(ProposalStatus.REJECTED));
+          proposals.forEach(proposal -> {
+            proposal.setStatus(ProposalStatus.REJECTED);
+            proposalRepository.save(proposal);
+          });
           teamRepository.deleteById(t.getId());
         }
       };
-      scheduler.schedule(proposalDeadline, new CronTrigger(Utility.epochMillisecondsToCronTrigger(deadline)));
+      scheduler.schedule(proposalDeadline, new Date(deadline));
       notificationService.notifyTeam(t, memberIds, courseId);
     }
     return t;

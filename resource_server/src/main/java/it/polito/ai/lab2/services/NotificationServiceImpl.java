@@ -98,7 +98,7 @@ public class NotificationServiceImpl implements NotificationService {
       String email = memberId + "@studenti.polito.it";
       sendMessage(email, "[SpringExample] Someone wants to create a team with you",
           "Dear " + email + ",\n\n" +
-              "You have been requested to create the team " + dto.getName() + ".\n" +
+              "You have been requested to create the team: " + dto.getName() + "\n\n" +
               "The members would be:\n- " + members +
               "\n\nTo confirm or reject the proposal enter in your personal page at: " + url +
               "\n\nBest Regards,\nSpringExample Team");
