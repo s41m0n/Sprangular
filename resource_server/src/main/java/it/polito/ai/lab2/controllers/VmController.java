@@ -68,27 +68,16 @@ public class VmController {
     }
   }
 
-  @PutMapping("{vmId}/turnOnVm")
-  public VmDTO turnOnVm(@PathVariable Long vmId) {
+  @PutMapping("{vmId}/trigger")
+  public VmDTO triggerVm(@PathVariable Long vmId) {
     try {
-      return vmService.turnOnVm(vmId);
+      return vmService.switchVm(vmId);
     } catch (VmNotFoundException | TeamNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (VmNotOfTeamException e) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     } catch (MaxVmResourcesException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-  }
-
-  @PutMapping("/{vmId}/turnOffVm")
-  public VmDTO turnOffVm(@PathVariable Long vmId) {
-    try {
-      return vmService.turnOffVm(vmId);
-    } catch (VmNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmNotOfTeamException e) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     }
   }
 

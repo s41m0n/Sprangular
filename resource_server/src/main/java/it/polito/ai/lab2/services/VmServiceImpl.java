@@ -156,6 +156,7 @@ public class VmServiceImpl implements VmService {
     return modelMapper.map(savedVm, VmDTO.class);
   }
 
+  // TODO: teamId does not exist: what did we mean here?
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
   public VmDTO deleteVm(Long vmId) {
@@ -208,33 +209,16 @@ public class VmServiceImpl implements VmService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public VmDTO turnOnVm(Long vmId) {
+  public VmDTO switchVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
-
-    int numOfActiveVms = 0;
-
-    for (Vm v : vm.getTeam().getVms()) {
-      if (v.isActive()) {
-        numOfActiveVms += 1;
+    if (vm.isActive()){
+      vm.setActive(false);
+    } else {
+      if (vm.getTeam().getVms().stream().filter(Vm::isActive).count() == vm.getTeam().getMaxActiveInstances()) {
+        throw new MaxVmResourcesException("Cannot turn on VM " + vmId + " too many active VMs");
       }
+      vm.setActive(true);
     }
-
-    if (numOfActiveVms + 1 > vm.getTeam().getMaxActiveInstances()) {
-      throw new MaxVmResourcesException("Cannot turn on VM " + vmId + " too many active VMs");
-    }
-
-    vm.setActive(true);
-    vmRepository.save(vm);
-    return modelMapper.map(vm, VmDTO.class);
-  }
-
-  @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public VmDTO turnOffVm(Long vmId) {
-    Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
-
-    vm.setActive(false);
-    vmRepository.save(vm);
     return modelMapper.map(vm, VmDTO.class);
   }
 
