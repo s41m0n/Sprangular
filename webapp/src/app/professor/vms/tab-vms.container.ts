@@ -45,7 +45,7 @@ export class TabProfessorVmsContComponent {
         data: {id : vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
       });
       dialogRef.afterClosed().subscribe(() => {
-        URL.revokeObjectURL(url)
+        URL.revokeObjectURL(url);
       });
     });
   }

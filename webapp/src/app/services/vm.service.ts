@@ -115,7 +115,7 @@ export class VmService {
   }
 
   public triggerVm(vmId: number): Observable<VM> {
-    return this.http.post<VM>(`${environment.base_vms_url}/${vmId}`, environment.base_http_headers).pipe(
+    return this.http.post<VM>(`${environment.base_vms_url}/${vmId}/trigger`, environment.base_http_headers).pipe(
       tap(() => console.log(`triggered vm ${vmId} - triggerVm()`)),
       catchError(this.handleError<VM>(`triggerVm(${vmId})`))
     );
@@ -139,14 +139,14 @@ export class VmService {
       );
   }
 
-  public removeVm(vmId : number) {
+  public removeVm(vmId: number) {
     return this.http.delete(`${environment.base_vms_url}/${vmId}`)
       .pipe(
         tap(() => console.log(`removed vm ${vmId} - removeVm()`)),
         catchError(this.handleError(`removeVm(${vmId})`))
-      )
+      );
   }
-  
+
   /**
    * Handle Http operation that failed.
    * Let the app continue.

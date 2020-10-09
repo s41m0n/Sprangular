@@ -41,6 +41,8 @@ public class VmController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (VmNotOfTeamException e) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+    } catch (InactiveVmException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 
@@ -68,7 +70,7 @@ public class VmController {
     }
   }
 
-  @PutMapping("{vmId}/trigger")
+  @PostMapping("{vmId}/trigger")
   public VmDTO triggerVm(@PathVariable Long vmId) {
     try {
       return vmService.switchVm(vmId);

@@ -6,6 +6,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewVmComponent } from 'src/app/modals/new-vm/new-vm.component';
 import { VmService } from 'src/app/services/vm.service';
 import { Subject } from 'rxjs';
+import {VmViewerModalComponent} from '../../modals/vm-viewer/vm-viewer-modal.component';
+import {DomSanitizer} from '@angular/platform-browser';
 
 /**
  * VmsContainer
@@ -20,10 +22,11 @@ export class TabStudentVmsContComponent implements OnInit {
 
   vms: VM[] = null;                     // The current vms
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
-  
+
   constructor(public dialog: MatDialog,
-    private teamService: TeamService,
-    private vmService: VmService) {
+              private teamService: TeamService,
+              private vmService: VmService,
+              private sanitizer: DomSanitizer) {
   }
 
   ngOnInit(): void {
@@ -44,12 +47,22 @@ export class TabStudentVmsContComponent implements OnInit {
     this.vmService.triggerVm(vmId).pipe(first()).subscribe(_ => this.refreshVMs());
   }
 
-  addOwner(object : any) {
+  addOwner(object: any) {
     this.vmService.addOwner(object.vmId, object.studentId).pipe(first()).subscribe(_ => this.refreshVMs());
   }
 
-  connect(vmId : number) {
-    this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => console.log(instance));
+  connect(vmId: number) {
+    this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => {
+      if (instance) {
+        const url = URL.createObjectURL(instance);
+        const dialogRef = this.dialog.open(VmViewerModalComponent, {
+          data: {id: vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
+        });
+        dialogRef.afterClosed().subscribe(() => {
+          URL.revokeObjectURL(url);
+        });
+      }
+    });
   }
 
   newVm() {
