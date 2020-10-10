@@ -53,15 +53,14 @@ export class TabStudentVmsContComponent implements OnInit {
 
   connect(vmId: number) {
     this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => {
-      if (instance) {
-        const url = URL.createObjectURL(instance);
-        const dialogRef = this.dialog.open(VmViewerModalComponent, {
-          data: {id: vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
-        });
-        dialogRef.afterClosed().subscribe(() => {
-          URL.revokeObjectURL(url);
-        });
-      }
+      if(!instance) return;
+      const url = URL.createObjectURL(instance);
+      const dialogRef = this.dialog.open(VmViewerModalComponent, {
+        data: {id : vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
+      });
+      dialogRef.afterClosed().subscribe(() => {
+        URL.revokeObjectURL(url);
+      });
     });
   }
 

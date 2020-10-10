@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { environment } from 'src/environments/environment';
 import { CourseService } from './course.service';
+import {handleError} from '../helpers/handle.error';
 
 /** StudentService service
  *
@@ -44,7 +45,7 @@ export class StudentService {
           )
         ),
         catchError(
-          this.handleError<Student[]>(`searchStudents(${name})`, [], false)
+          handleError<Student[]>(this.toastrService, `searchStudents(${name})`, [], false)
         )
       );
   }
@@ -75,7 +76,7 @@ export class StudentService {
           )
         ),
         catchError(
-          this.handleError<Student[]>(`searchStudents(${name})`, [], false)
+          handleError<Student[]>(this.toastrService, `searchStudents(${name})`, [], false)
         )
       );
   }
@@ -87,7 +88,7 @@ export class StudentService {
         tap(() =>
           console.log(`fetched student ${id} courses - getUserCourses()`)
         ),
-        catchError(this.handleError<Course[]>(`getUserCourses(${id})`))
+        catchError(handleError<Course[]>(this.toastrService, `getUserCourses(${id})`))
       );
   }
 
@@ -103,34 +104,7 @@ export class StudentService {
             `fetched student with email ${email} - getStudentByEmail()`
           )
         ),
-        catchError(this.handleError<Student>(`getStudentByEmail(${email})`))
+        catchError(handleError<Student>(this.toastrService, `getStudentByEmail(${email})`))
       );
-  }
-
-  /**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   * @param show - is it visible
-   * @param message - error message
-   */
-  private handleError<T>(
-    operation = 'operation',
-    result?: T,
-    show: boolean = true,
-    message: string = 'An error occurred while performing'
-  ) {
-    return (error: any): Observable<T> => {
-      const why = `${message} ${operation}: ${error}`;
-
-      if (show) {
-        this.toastrService.error(why, 'Error 😅');
-      }
-      console.log(why);
-
-      // Let the app keep running by returning an empty result.
-      return of(result as T);
-    };
   }
 }

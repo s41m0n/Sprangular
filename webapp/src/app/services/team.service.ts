@@ -10,6 +10,7 @@ import { TeamProposal } from '../models/team-proposal.model';
 import { CourseService } from './course.service';
 import { AuthService } from './auth.service';
 import { Student } from '../models/student.model';
+import {handleError} from '../helpers/handle.error';
 
 /** Team service
  *
@@ -37,7 +38,7 @@ export class TeamService {
       )
       .pipe(
         tap(() => console.log(`created team ${proposal.teamName} - createTeam()`)),
-        catchError(this.handleError<Team>(`createTeam(${proposal.teamName}`))
+        catchError(handleError<Team>(this.toastrService, `createTeam(${proposal.teamName}`))
       );
   }
 
@@ -45,7 +46,7 @@ export class TeamService {
     return this.http.get<Team>(`${environment.base_students_url}/${studentId}/teams/${courseId}`)
       .pipe(
         tap(() => console.log(`retrieved team of ${studentId} for course ${courseId} - getStudentTeam()`)),
-        catchError(this.handleError<Team>(`getStudentTeam(${courseId}, ${studentId})`, null, false))
+        catchError(handleError<Team>(this.toastrService, `getStudentTeam(${courseId}, ${studentId})`, null, false))
       )
   }
 
@@ -53,34 +54,7 @@ export class TeamService {
     return this.http.get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
       .pipe(
         tap(() => console.log(`retrieved members of team ${teamId} - getStudentsInTeam()`)),
-        catchError(this.handleError<Student[]>(`getStudentsInTeam(${teamId})`))
+        catchError(handleError<Student[]>(this.toastrService, `getStudentsInTeam(${teamId})`))
       );
-  }
-
-  /**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   * @param show - is it visible
-   * @param message - error message
-   */
-  private handleError<T>(
-    operation = 'operation',
-    result?: T,
-    show: boolean = true,
-    message: string = 'An error occurred while performing'
-  ) {
-    return (error: any): Observable<T> => {
-      const why = `${message} ${operation}: ${error}`;
-
-      if (show) {
-        this.toastrService.error(why, 'Error 😅');
-      }
-      console.log(why);
-
-      // Let the app keep running by returning an empty result.
-      return of(result as T);
-    };
   }
 }

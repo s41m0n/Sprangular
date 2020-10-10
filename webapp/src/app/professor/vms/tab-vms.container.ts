@@ -40,6 +40,7 @@ export class TabProfessorVmsContComponent {
 
   connect(vmId: number) {
     this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => {
+      if(!instance) return;
       const url = URL.createObjectURL(instance);
       const dialogRef = this.dialog.open(VmViewerModalComponent, {
         data: {id : vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}

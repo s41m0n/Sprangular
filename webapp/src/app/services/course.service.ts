@@ -10,6 +10,7 @@ import { Student } from '../models/student.model';
 import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
+import {handleError} from '../helpers/handle.error';
 
 /**
  * CourseService service
@@ -43,7 +44,7 @@ export class CourseService {
       )
       .pipe(
         tap(() => console.log(`fetched course by path ${acronym} - getCourse()`)),
-        catchError(this.handleError<Course>(`getCourse(${acronym})`))
+        catchError(handleError<Course>(this.toastrService, `getCourse(${acronym})`))
       );
   }
 
@@ -64,7 +65,7 @@ export class CourseService {
           )
         ),
         catchError(
-          this.handleError<Student[]>(`getEnrolledStudents(${courseId})`)
+          handleError<Student[]>(this.toastrService, `getEnrolledStudents(${courseId})`)
         )
       );
   }
@@ -76,7 +77,7 @@ export class CourseService {
     return this.http.get<Course[]>(environment.base_courses_url).pipe(
       // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Course(), r))),
       tap(() => console.log(`fetched courses - getCourses()`)),
-      catchError(this.handleError<Course[]>(`getCourses()`))
+      catchError(handleError<Course[]>(this.toastrService, `getCourses()`))
     );
   }
 
@@ -89,7 +90,7 @@ export class CourseService {
         tap(() =>
           console.log(`fetched course ${courseId} vms - getCourseVMs()`)
         ),
-        catchError(this.handleError<VM[]>(`getCourseVMs(${courseId})`))
+        catchError(handleError<VM[]>(this.toastrService, `getCourseVMs(${courseId})`))
       );
   }
 
@@ -107,7 +108,7 @@ export class CourseService {
           )
         ),
         catchError(
-          this.handleError<Student[]>(`getAvailableStudents(${courseId})`)
+          handleError<Student[]>(this.toastrService, `getAvailableStudents(${courseId})`)
         )
       );
   }
@@ -124,7 +125,7 @@ export class CourseService {
           )
         ),
         catchError(
-          this.handleError<Assignment[]>(`getCourseAssignments(${courseId})`)
+          handleError<Assignment[]>(this.toastrService, `getCourseAssignments(${courseId})`)
         )
       );
   }
@@ -141,7 +142,7 @@ export class CourseService {
           )
         ),
         catchError(
-          this.handleError<Professor[]>(`getCourseProfessors(${course.name})`)
+          handleError<Professor[]>(this.toastrService, `getCourseProfessors(${course.name})`)
         )
       );
   }
@@ -201,7 +202,7 @@ export class CourseService {
               );
             }),
             catchError(
-              this.handleError<Student>(
+              handleError<Student>(this.toastrService, 
                 `enrollStudents(${Student.displayFn(student)}, ${courseId})`
               )
             )
@@ -238,7 +239,7 @@ export class CourseService {
               );
             }),
             catchError(
-              this.handleError<Student>(
+              handleError<Student>(this.toastrService, 
                 `unenrollStudents(${Student.displayFn(student)}, ${
                   courseId
                 })`
@@ -281,34 +282,7 @@ export class CourseService {
         tap(() =>
           console.log(`updated course ${course.name} - updateCourse()`)
         ),
-        catchError(this.handleError<Course>(`updateCourse(${course.name})`))
+        catchError(handleError<Course>(this.toastrService, `updateCourse(${course.name})`))
       );
-  }
-
-  /**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   * @param show - is it visible or not
-   * @param message - error message
-   */
-  private handleError<T>(
-    operation = 'operation',
-    result?: T,
-    show: boolean = true,
-    message: string = 'An error occurred while performing'
-  ) {
-    return (error: any): Observable<T> => {
-      const why = `${message} ${operation}: ${error}`;
-
-      if (show) {
-        this.toastrService.error(why, 'Error 😅');
-      }
-      console.log(why);
-
-      // Let the app keep running by returning an empty result.
-      return of(result as T);
-    };
   }
 }

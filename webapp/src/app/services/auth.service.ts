@@ -6,6 +6,7 @@ import { User } from '../models/user.model';
 import { ToastrService } from 'ngx-toastr';
 import * as moment from 'moment';
 import { environment } from 'src/environments/environment';
+import {handleError} from '../helpers/handle.error';
 
 /**
  * AuthService service
@@ -81,10 +82,7 @@ export class AuthService {
           this.toastrService.success(`Hi ${id}`, 'Awesome 😃');
           console.log(`logged ${id}`);
         }),
-        catchError((err) => {
-          this.toastrService.error(`Error: ${err}`, 'Authentication failed');
-          return throwError(err);
-        })
+        catchError(handleError<any>(this.toastrService, `login`))
       );
   }
 
@@ -110,10 +108,7 @@ export class AuthService {
             'Awesome 😃'
           )
         ),
-        catchError((err) => {
-          this.toastrService.error('Registration failed', 'Error 😅');
-          return throwError(err);
-        })
+        catchError(handleError<any>(this.toastrService, `register`))
       );
   }
 
