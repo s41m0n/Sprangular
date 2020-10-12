@@ -156,9 +156,8 @@ public class VmServiceImpl implements VmService {
     return modelMapper.map(savedVm, VmDTO.class);
   }
 
-  // TODO: teamId does not exist: what did we mean here?
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentInTeam(#teamId) and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
   public VmDTO deleteVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId)
         .orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
@@ -208,7 +207,7 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
   public VmDTO switchVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
     if (vm.isActive()){
@@ -246,6 +245,7 @@ public class VmServiceImpl implements VmService {
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isVmOfStudentTeam(#vmId)")
   public Resource getVmInstance(Long vmId) throws FileNotFoundException {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
     if (!vm.isActive()) {
