@@ -87,19 +87,10 @@ export class AuthService {
   }
 
   // TODO - fix doppia post per register
-  register(
-    id: string,
-    email: string,
-    name: string,
-    surname: string,
-    password: string,
-    photo: object
-  ) {
+  register(formData: FormData) {
     return this.http
       .post(
-        environment.register_url_student,
-        { id, email, name, surname, password, photo},
-        environment.base_http_headers
+        environment.register_url, formData
       )
       .pipe(
         tap((_) =>

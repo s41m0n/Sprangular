@@ -17,7 +17,8 @@ import { TabStudentAssignmentsContComponent } from './student/assignments/tab-as
 // Supported and admitted routes by now
 // Could do multiple and sub-forRoot, but since we have few routes there's no need now
 const routes = [
-  { path: '', component: HomeComponent },
+  { path: 'home', component: HomeComponent },
+  {path: '',   redirectTo: '/home', pathMatch: 'full' },
   {
     path: 'professor/course/:coursename',
     component: ProfessorComponent,

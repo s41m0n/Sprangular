@@ -31,7 +31,7 @@ export class LoginDialogComponent implements OnInit {
    */
   ngOnInit(): void {
     this.form = this.fb.group({
-      email: [''],
+      id: [''],
       password: ['']
     });
   }
@@ -46,7 +46,7 @@ export class LoginDialogComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    const email = this.form.get('email').value;
+    const email = this.form.get('id').value;
     const password = this.form.get('password').value;
     this.authService.login(email, password)
         .pipe(first())

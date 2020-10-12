@@ -11,6 +11,7 @@ import { Observable, of } from 'rxjs';
 import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
+import {register} from 'ts-node';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,7 @@ export class AppComponent {
   currentUser: User; // Variable to keep track of the current user
   courseList: Observable<Course[]>; // Variable to keep track (asynchronously) of the courses
   selectedCourseName: string; // Variable to store the current selected course name (notified by sub routes via Broadcaster service)
+  inModal: boolean; // Variable to check if a modal is already open
 
   // Unsubscribes are not performed here since alive till this root component is always alive and must be updated
   constructor(
@@ -50,9 +52,11 @@ export class AppComponent {
         }*/
       }
     });
-    
+
+    this.inModal = false;
+
     // Subscribe to Broadcaster selected course subject
-    
+
     this.courseService.currentCourseSubject
       .asObservable()
       .subscribe(course => this.selectedCourseName = course);
@@ -60,6 +64,10 @@ export class AppComponent {
     // Subscribing to the route queryParam to check doLogin parameter
     this.route.queryParams.subscribe((queryParam) =>
       queryParam && queryParam.doLogin ? this.openLogin() : null
+    );
+
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.doRegister ? this.openRegister() : null
     );
   }
 
@@ -72,34 +80,38 @@ export class AppComponent {
    *  or not.
    */
   openLogin() {
-    const dialogRef = this.dialog.open(LoginDialogComponent);
+    this.inModal = true;
+    const dialogRef = this.dialog.open(LoginDialogComponent, {width: '600px'});
     dialogRef
       .afterClosed()
       .pipe(first())
       .subscribe((result) => {
         if (result) {
           this.router.navigate([
-            this.route.snapshot.queryParams.returnUrl || '/',
+            this.route.snapshot.queryParams.returnUrl || '/home',
           ]);
         } else {
-          this.router.navigate(['/']);
+          this.router.navigate(['/home']);
         }
+        this.inModal = false;
       });
   }
 
   openRegister() {
-    const dialogRef = this.dialog.open(RegisterDialogComponent);
+    this.inModal = true;
+    const dialogRef = this.dialog.open(RegisterDialogComponent, {width: '600px'});
     dialogRef
       .afterClosed()
       .pipe(first())
       .subscribe((result) => {
         if (result) {
           this.router.navigate([
-            this.route.snapshot.queryParams.returnUrl || '/',
+            this.route.snapshot.queryParams.returnUrl || '/home',
           ]);
         } else {
-          this.router.navigate(['/']);
+          this.router.navigate(['/home']);
         }
+        this.inModal = false;
       });
   }
 
@@ -111,6 +123,6 @@ export class AppComponent {
   logout() {
     this.authService.logout();
     this.selectedCourseName = null;
-    this.router.navigate(['/']);
+    this.router.navigate(['/home']);
   }
 }

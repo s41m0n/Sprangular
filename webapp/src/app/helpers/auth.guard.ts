@@ -30,7 +30,7 @@ export class AuthGuard implements CanActivate {
     if (!currentUser) {
       // not logged in so redirect to login page with the return url
       console.log('This route requires login!');
-      this.router.navigate(['/'], {
+      this.router.navigate(['/home'], {
         queryParams: { returnUrl: state.url, doLogin: true },
       });
       return false;
@@ -43,7 +43,7 @@ export class AuthGuard implements CanActivate {
         'Sorry 😰'
       );
       this.authService.logout(false);
-      this.router.navigate(['/'], {
+      this.router.navigate(['/home'], {
         queryParams: { returnUrl: state.url, doLogin: true },
       });
       return false;
@@ -57,7 +57,7 @@ export class AuthGuard implements CanActivate {
       console.log(
         `Unprivileged user (${currentUser.id} is a ${currentUser.id}) for the route ${state.url}!`
       );
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
       return false;
     }
     // authorized so return true

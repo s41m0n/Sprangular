@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Register into VirtualLabs</h1>
+<h1 mat-dialog-title>Register to VirtualLabs</h1>
 
 <div mat-dialog-content>
 
@@ -31,13 +31,13 @@
         </mat-form-field>
 
         <mat-form-field>
-            <ngx-mat-file-input formControlName="pic" placeholder="Basic Input"
-                                accept=".png, .pdf, .jpg, .jpeg"></ngx-mat-file-input>
+            <ngx-mat-file-input formControlName="pic" placeholder="Profile Picture"
+                                accept=".png, .pdf, .jpg, .jpeg" required></ngx-mat-file-input>
             <mat-icon matSuffix>folder</mat-icon>
         </mat-form-field>
 
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" (click)="onSubmit()">Register</button>
+        <div mat-dialog-actions>
+            <button mat-raised-button color="primary">Register</button>
             <button mat-button mat-dialog-close color="warn">Cancel</button>
         </div>
     </form>

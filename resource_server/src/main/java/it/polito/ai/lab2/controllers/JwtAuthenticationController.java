@@ -61,21 +61,17 @@ public class JwtAuthenticationController {
     return ResponseEntity.ok(new AbstractMap.SimpleEntry<>("id_token", token));
   }
 
-  @PostMapping("/register/student")
-  public ResponseEntity<?> registerStudent(@ModelAttribute RegistrationDetails registrationDetails) {
-    log.info("Registration attempt for student " + registrationDetails.getId());
+  @PostMapping("/register")
+  public ResponseEntity<?> registerUser(@ModelAttribute RegistrationDetails registrationDetails) {
+    log.info("Registration attempt for student " + registrationDetails.toString());
     try {
-      return ResponseEntity.ok(userService.registerStudent(registrationDetails));
-    } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-  }
-
-  @PostMapping("register/professor")
-  public ResponseEntity<?> registerProfessor(@ModelAttribute RegistrationDetails registrationDetails) {
-    log.info("Registration attempt for student " + registrationDetails.getId());
-    try {
-      return ResponseEntity.ok(userService.registerProfessor(registrationDetails));
+      if (registrationDetails.getId().startsWith("d")) {
+        return ResponseEntity.ok(userService.registerProfessor(registrationDetails));
+      } else if (registrationDetails.getId().startsWith("s")) {
+        return ResponseEntity.ok(userService.registerStudent(registrationDetails));
+      } else {
+        throw new InvalidIdEmailException("ID and email must start either with 'd' or 's'");
+      }
     } catch (InvalidIdEmailException | UserAlreadyRegisteredException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }

@@ -3,6 +3,7 @@ import {MatDialogRef} from '@angular/material/dialog';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {AuthService} from 'src/app/services/auth.service';
 import {first} from 'rxjs/operators';
+import {FileInput} from 'ngx-material-file-input';
 
 @Component({
   selector: 'app-register-dialog',
@@ -26,7 +27,7 @@ export class RegisterDialogComponent implements OnInit {
       email: ['', Validators.email],
       id: ['', Validators.pattern('^(a|s|d)[0-9]+$')],
       pic: [''],
-      password: ['', Validators.pattern('^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,15}$')]
+      password: ['', Validators.pattern('^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$')]
     });
   }
 
@@ -34,8 +35,16 @@ export class RegisterDialogComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.authService.register(this.form.get('email').value, this.form.get('name').value, this.form.get('surname').value,
-        this.form.get('id').value, this.form.get('password').value, this.form.get('pic').value)
+    const formData = new FormData();
+    formData.append('id', this.form.get('id').value);
+    formData.append('email', this.form.get('email').value);
+    formData.append('name', this.form.get('name').value);
+    formData.append('surname', this.form.get('surname').value);
+    formData.append('password', this.form.get('password').value);
+    const fileInput: FileInput = this.form.get('pic').value;
+    formData.append('photo', fileInput.files[0]);
+
+    this.authService.register(formData)
         .pipe(first())
         .subscribe(
             () => this.dialogRef.close(true),

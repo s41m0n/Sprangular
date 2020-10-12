@@ -6,3 +6,12 @@
     display: block;
     margin: auto;
 }
+
+.mat-dialog-actions {
+    display: flex;
+    justify-content: center;
+}
+
+form {
+    height: 181px;
+}

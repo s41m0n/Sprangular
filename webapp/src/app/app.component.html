@@ -1,15 +1,15 @@
 <!-- First toolbar with menu icon and app name -->
 <mat-toolbar color="primary" class="header">
-  <button mat-icon-button aria-label="Menu icon" (click)="sidebar.toggle()">
+  <button mat-icon-button aria-label="Menu icon" [disabled]="inModal" (click)="sidebar.toggle()">
     <mat-icon>menu</mat-icon>
   </button>
-  <a mat-button [routerLink]="['/']"><h2>VirtualLabs</h2></a>
+  <a mat-button [disabled]="inModal" [routerLink]="['/home']"><h2>VirtualLabs</h2></a>
 
   <span class="example-fill-remaining-space"></span>
   <span *ngIf="currentUser">Welcome back, {{ currentUser.id }}</span>
   <div *ngIf="!currentUser; else elseBlock">
-    <button mat-button (click)="openLogin()">Login</button>
-    <button mat-button (click)="openRegister()">Register</button>
+    <button mat-button routerLink="/home" [disabled]="inModal" [queryParams]="{ doLogin: true }">Login</button>
+    <button mat-button routerLink="/home" [disabled]="inModal" [queryParams]="{ doRegister: true }">Register</button>
   </div>
   <ng-template #elseBlock>
     <button mat-button (click)="logout()" *ngIf="currentUser">Logout</button>

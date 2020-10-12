@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean registerStudent(RegistrationDetails sDetails) {
-    if (!sDetails.getEmail().substring(0, 7).equals(sDetails.getId())
+    if (!sDetails.getEmail().substring(0, sDetails.getEmail().indexOf("@")).equals(sDetails.getId())
         || !sDetails.getEmail().matches("^s[1-9][0-9]*@studenti.polito.it$"))
       throw new InvalidIdEmailException("Student format: id -> s<numbers>, email -> <id>@studenti.polito.it");
     if (userRepository.existsById(sDetails.getId()))
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean registerProfessor(RegistrationDetails pDetails) {
-    if (!pDetails.getEmail().substring(0, 7).equals(pDetails.getId())
+    if (!pDetails.getEmail().substring(0, pDetails.getEmail().indexOf("@")).equals(pDetails.getId())
         || !pDetails.getEmail().matches("^d[1-9][0-9]*@polito.it$"))
       throw new InvalidIdEmailException("Professor format: id -> d<numbers>, email -> <id>@polito.it");
     if (userRepository.existsById(pDetails.getId()))
