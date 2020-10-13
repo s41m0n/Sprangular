@@ -14,14 +14,15 @@ export class Course {
   teamMaxSize: number;
   enabled: boolean;
 
-  // TODO - questi campi in più del costruttore ci servono? Nel caso rifattorizzare togliendoli
   constructor(
     acronym: string,
     name: string = '',
-    path: string = '',
-    professorId: number = 0
+    teamMinSize: number,
+    teamMaxSize: number
   ) {
     this.acronym = acronym;
     this.name = name;
+    this.teamMaxSize = teamMaxSize;
+    this.teamMaxSize = teamMinSize;
   }
 }

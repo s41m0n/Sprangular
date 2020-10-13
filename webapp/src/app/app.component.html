@@ -1,15 +1,36 @@
 <!-- First toolbar with menu icon and app name -->
 <mat-toolbar color="primary" class="header">
-  <button mat-icon-button aria-label="Menu icon" [disabled]="inModal" (click)="sidebar.toggle()">
+  <button
+    mat-icon-button
+    aria-label="Menu icon"
+    [disabled]="inModal"
+    (click)="sidebar.toggle()"
+  >
     <mat-icon>menu</mat-icon>
   </button>
-  <a mat-button [disabled]="inModal" [routerLink]="['/home']"><h2>VirtualLabs</h2></a>
+  <a mat-button [disabled]="inModal" [routerLink]="['/home']"
+    ><h2>VirtualLabs</h2></a
+  >
 
   <span class="example-fill-remaining-space"></span>
   <span *ngIf="currentUser">Welcome back, {{ currentUser.id }}</span>
   <div *ngIf="!currentUser; else elseBlock">
-    <button mat-button routerLink="/home" [disabled]="inModal" [queryParams]="{ doLogin: true }">Login</button>
-    <button mat-button routerLink="/home" [disabled]="inModal" [queryParams]="{ doRegister: true }">Register</button>
+    <button
+      mat-button
+      routerLink="/home"
+      [disabled]="inModal"
+      [queryParams]="{ doLogin: true }"
+    >
+      Login
+    </button>
+    <button
+      mat-button
+      routerLink="/home"
+      [disabled]="inModal"
+      [queryParams]="{ doRegister: true }"
+    >
+      Register
+    </button>
   </div>
   <ng-template #elseBlock>
     <button mat-button (click)="logout()" *ngIf="currentUser">Logout</button>
@@ -33,7 +54,9 @@
   >
     <div class="container">
       <mat-nav-list>
-        <h3 matSubheader>Your available courses &nbsp;</h3>
+        <h3 matSubheader style="margin: auto">
+          Your available courses: &nbsp;
+        </h3>
         <mat-divider></mat-divider>
         <mat-list-item
           *ngFor="let course of courseList | async"
@@ -45,6 +68,20 @@
         >
           {{ course.name }}
         </mat-list-item>
+        <div
+          *ngIf="currentUser && currentUser.roles[0] === 'ROLE_PROFESSOR'"
+          class="plus-button-container"
+        >
+          <button
+            mat-fab
+            color="primary"
+            aria-label="Example icon button with a + icon"
+            style="font-size: 25px"
+            (click)="newCourse()"
+          >
+            +
+          </button>
+        </div>
       </mat-nav-list>
     </div>
   </mat-sidenav>

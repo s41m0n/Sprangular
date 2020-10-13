@@ -11,7 +11,7 @@ import { Observable, of } from 'rxjs';
 import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
-import {register} from 'ts-node';
+import { NewCourseComponent } from './modals/new-course/new-course-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -59,7 +59,7 @@ export class AppComponent {
 
     this.courseService.currentCourseSubject
       .asObservable()
-      .subscribe(course => this.selectedCourseName = course);
+      .subscribe((course) => (this.selectedCourseName = course));
 
     // Subscribing to the route queryParam to check doLogin parameter
     this.route.queryParams.subscribe((queryParam) =>
@@ -67,7 +67,7 @@ export class AppComponent {
     );
 
     this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.doRegister ? this.openRegister() : null
+      queryParam && queryParam.doRegister ? this.openRegister() : null
     );
   }
 
@@ -81,7 +81,9 @@ export class AppComponent {
    */
   openLogin() {
     this.inModal = true;
-    const dialogRef = this.dialog.open(LoginDialogComponent, {width: '600px'});
+    const dialogRef = this.dialog.open(LoginDialogComponent, {
+      width: '600px',
+    });
     dialogRef
       .afterClosed()
       .pipe(first())
@@ -99,7 +101,9 @@ export class AppComponent {
 
   openRegister() {
     this.inModal = true;
-    const dialogRef = this.dialog.open(RegisterDialogComponent, {width: '600px'});
+    const dialogRef = this.dialog.open(RegisterDialogComponent, {
+      width: '600px',
+    });
     dialogRef
       .afterClosed()
       .pipe(first())
@@ -113,6 +117,23 @@ export class AppComponent {
         }
         this.inModal = false;
       });
+  }
+
+  newCourse() {
+    const dialogRef = this.dialog.open(NewCourseComponent);
+    dialogRef
+      .afterClosed()
+      .pipe(first())
+      .subscribe((result) => {
+        if (result) {
+          this.refreshCourses();
+        }
+      });
+  }
+
+  /** Private function to refresh the list of courses */
+  private refreshCourses() {
+    this.courseList = this.courseService.getCourses().pipe(first());
   }
 
   /** Logout function

@@ -6,7 +6,7 @@ import { User } from '../models/user.model';
 import { ToastrService } from 'ngx-toastr';
 import * as moment from 'moment';
 import { environment } from 'src/environments/environment';
-import {handleError} from '../helpers/handle.error';
+import { handleError } from '../helpers/handle.error';
 
 /**
  * AuthService service
@@ -86,21 +86,16 @@ export class AuthService {
       );
   }
 
-  // TODO - fix doppia post per register
   register(formData: FormData) {
-    return this.http
-      .post(
-        environment.register_url, formData
-      )
-      .pipe(
-        tap((_) =>
-          this.toastrService.success(
-            `Successfully registered! Check your email`,
-            'Awesome 😃'
-          )
-        ),
-        catchError(handleError<any>(this.toastrService, `register`))
-      );
+    return this.http.post(environment.register_url, formData).pipe(
+      tap(() =>
+        this.toastrService.success(
+          `Successfully registered! Check your email`,
+          'Awesome 😃'
+        )
+      ),
+      catchError(handleError<any>(this.toastrService, `register`))
+    );
   }
 
   /**

@@ -37,7 +37,6 @@ public class JwtAuthenticationController {
 
   @PostMapping("/login")
   public ResponseEntity<?> createAuthenticationToken(@RequestBody UserDTO authenticationRequest) {
-    log.info("createAuthenticationToken(" + authenticationRequest + ")");
     try {
       authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getId(), authenticationRequest.getPassword()));
     } catch (DisabledException e) {

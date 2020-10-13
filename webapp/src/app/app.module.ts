@@ -58,6 +58,7 @@ import { RegisterDialogComponent } from './modals/register/register-dialog.compo
 import { MatNativeDateModule } from '@angular/material/core';
 import { VmOwnerModalComponent } from './modals/vm-owner/vm-owner-modal.component';
 import { VmViewerModalComponent } from './modals/vm-viewer/vm-viewer-modal.component';
+import { NewCourseComponent } from './modals/new-course/new-course-dialog.component';
 
 @NgModule({
   declarations: [
@@ -84,7 +85,8 @@ import { VmViewerModalComponent } from './modals/vm-viewer/vm-viewer-modal.compo
     NewVmComponent,
     RegisterDialogComponent,
     VmOwnerModalComponent,
-    VmViewerModalComponent
+    VmViewerModalComponent,
+    NewCourseComponent,
   ],
   imports: [
     BrowserModule,
@@ -119,7 +121,7 @@ import { VmViewerModalComponent } from './modals/vm-viewer/vm-viewer-modal.compo
     MatSliderModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
   ],
   entryComponents: [LoginDialogComponent, RegisterDialogComponent],
   providers: [

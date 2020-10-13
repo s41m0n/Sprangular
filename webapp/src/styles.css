@@ -1,68 +1,74 @@
-html, body {
-    height: 100%;
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 .example-fill-remaining-space {
-    flex: 1 1 auto;
+  flex: 1 1 auto;
 }
 
 .tab-content {
-    padding: 20px;
+  padding: 20px;
 }
 
 .header {
-    width: 100%;
-    height: auto;
-    position: sticky;
-    top: 0;
-    z-index: 9999;
+  width: 100%;
+  height: auto;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
 }
 
 mat-sidenav-container {
-    height: 90%;
-    margin: 20px
+  height: 100%;
 }
 
 mat-form-field {
-    width: 30%;
+  width: 30%;
 }
 
 .mat-column-select {
-    width: 5%;
+  width: 5%;
 }
 
 .mat-column-id {
-    width: 10%;
+  width: 10%;
 }
 
 table {
-    width: 100%;
+  width: 100%;
 }
 
 mat-card-content {
-    padding: 16px;
+  padding: 16px;
 }
 
 mat-divider {
-    margin-top: 10px !important;
-    margin-bottom: 10px !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
 }
 
 .mat-slider-thumb-label {
-    transform: rotate(45deg) !important;
-    border-radius: 50% 50% 0 !important;
+  transform: rotate(45deg) !important;
+  border-radius: 50% 50% 0 !important;
 }
 
 .mat-slider-thumb {
-    transform: scale(0) !important;
+  transform: scale(0) !important;
 }
 
 .mat-slider-thumb-label-text {
-    opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+.plus-button-container {
+  margin-top: 10px;
+  text-align: center;
 }
