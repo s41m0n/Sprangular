@@ -1,22 +1,54 @@
 <h1 mat-dialog-title>Create a new Course</h1>
 
 <div mat-dialog-content>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <mat-error *ngIf="vmInvalid">Error while creating VM</mat-error>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-error *ngIf="courseInvalid">Error while creating Course</mat-error>
 
-        <label>CPUs:</label>
-        <mat-slider formControlName="vCpu" [thumbLabel]="true" min="1" max="6" step="1"></mat-slider>
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        placeholder="Course Acronym"
+        type="text"
+        formControlName="acronym"
+        required
+      />
+      <mat-error>Please provide a valid Acronym</mat-error>
+    </mat-form-field>
 
-        <label>RAM (GB):</label>
-        <mat-slider formControlName="ram" [thumbLabel]="true" min="1" max="6" step="0.5"></mat-slider>
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        placeholder="Course Name"
+        type="text"
+        formControlName="name"
+        required
+      />
+      <mat-error>Please provide a valid Name</mat-error>
+    </mat-form-field>
 
-        <label>Disk (GB):</label>
-        <mat-slider formControlName="diskStorage" [thumbLabel]="true" min="1" max="15" step="1"></mat-slider>
+    <label>Team Min Size:</label><br />
+    <mat-slider
+      formControlName="teamMinSize"
+      [thumbLabel]="true"
+      (valueChange)="adaptMin($event)"
+      min="1"
+      max="10"
+      step="1"
+    ></mat-slider>
 
-    </form>
+    <label>Team Max Size:</label>
+    <mat-slider
+      formControlName="teamMaxSize"
+      [thumbLabel]="true"
+      (valueChange)="adaptMax($event)"
+      min="1"
+      max="10"
+      step="1"
+    ></mat-slider>
+  </form>
 </div>
 
 <div mat-dialog-actions align="end">
-    <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
-    <button mat-button color="primary" (click)="onSubmit()">Create</button>
+  <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
+  <button mat-button color="primary" (click)="onSubmit()">Create</button>
 </div>

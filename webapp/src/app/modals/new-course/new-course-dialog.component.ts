@@ -3,6 +3,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { CourseService } from 'src/app/services/course.service';
+import { Course } from 'src/app/models/course.model';
 
 @Component({
   selector: 'app-new-course',
@@ -11,7 +12,7 @@ import { CourseService } from 'src/app/services/course.service';
 })
 export class NewCourseComponent implements OnInit {
   form: FormGroup;
-  vmInvalid = false;
+  courseInvalid = false;
 
   constructor(
     private fb: FormBuilder,
@@ -21,20 +22,48 @@ export class NewCourseComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      vCpu: [2, [Validators.min(1), Validators.max(6)]],
-      ram: [2, [Validators.min(1), Validators.max(4)]],
-      diskStorage: [5, [Validators.min(1), Validators.max(5)]],
+      acronym: [''],
+      name: [''],
+      teamMinSize: [1, [Validators.min(1), Validators.max(10)]],
+      teamMaxSize: [1, [Validators.min(1), Validators.max(10)]],
     });
-  }
-
-  pickle(name: string, value: number): void {
-    this.form[name].value = value;
-    alert(value);
   }
 
   onSubmit() {
     if (this.form.invalid) {
       return;
+    }
+    const course = new Course(
+      this.form.get('acronym').value.toLowerCase(),
+      this.form.get('name').value,
+      this.form.get('teamMinSize').value,
+      this.form.get('teamMaxSize').value
+    );
+    this.courseService
+      .createCourse(course)
+      .pipe(first())
+      .subscribe((res) => {
+        if (res) {
+          this.dialogRef.close(true);
+        } else {
+          this.courseInvalid = true;
+        }
+      });
+  }
+
+  adaptMin(value: number) {
+    if (
+      this.form.get('teamMinSize').value > this.form.get('teamMaxSize').value
+    ) {
+      this.form.get('teamMaxSize').setValue(value);
+    }
+  }
+
+  adaptMax(value: number) {
+    if (
+      this.form.get('teamMaxSize').value < this.form.get('teamMinSize').value
+    ) {
+      this.form.get('teamMinSize').setValue(value);
     }
   }
 }
