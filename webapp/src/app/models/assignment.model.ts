@@ -13,9 +13,12 @@ export class Assignment {
   course: Course;
   releaseDate: string;
   dueDate: string;
+  path: string;
 
   constructor(id: number = 0, name: string = '') {
     this.id = id;
     this.name = name;
+    this.path = '';
   }
+
 }
