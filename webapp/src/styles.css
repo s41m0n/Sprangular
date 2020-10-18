@@ -1,7 +1,6 @@
 html,
 body {
   height: 100%;
-  overflow: hidden;
 }
 
 body {
@@ -96,4 +95,8 @@ mat-divider {
 .plus-button-container {
   margin-top: 10px;
   text-align: center;
+}
+
+mat-sidenav {
+  width: 250px;
 }

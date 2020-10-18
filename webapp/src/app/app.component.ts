@@ -36,21 +36,7 @@ export class AppComponent {
     // Subscrive to current user and, if logged, refresh course list
     this.authService.getUserObservable().subscribe((user: User) => {
       this.currentUser = user;
-      if (!user) {
-        this.courseList = of([]);
-      } else {
-        if (user.roles.includes('ROLE_STUDENT')) {
-          this.courseList = this.studentService
-            .getStudentCourses(user.id)
-            .pipe(first());
-        } else if (user.roles.includes('ROLE_PROFESSOR')) {
-          this.courseList = this.professorService
-            .getProfessorCourses(user.id)
-            .pipe(first());
-        } /*else { //TODO: ADMIN features missing
-          this.courseList = this.courseService.getCourses().pipe(first());
-        }*/
-      }
+      this.refreshCourses();
     });
 
     this.inModal = false;
@@ -133,7 +119,19 @@ export class AppComponent {
 
   /** Private function to refresh the list of courses */
   private refreshCourses() {
-    this.courseList = this.courseService.getCourses().pipe(first());
+    if (!this.currentUser) {
+      this.courseList = of([]);
+    } else {
+      if (this.currentUser.roles.includes('ROLE_STUDENT')) {
+        this.courseList = this.studentService
+          .getStudentCourses(this.currentUser.id)
+          .pipe(first());
+      } else if (this.currentUser.roles.includes('ROLE_PROFESSOR')) {
+        this.courseList = this.professorService
+          .getProfessorCourses(this.currentUser.id)
+          .pipe(first());
+      }
+    }
   }
 
   /** Logout function

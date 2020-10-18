@@ -12,17 +12,16 @@ export class Course {
   name: string;
   teamMinSize: number;
   teamMaxSize: number;
-  enabled: boolean;
 
   constructor(
     acronym: string,
-    name: string = '',
+    name: string,
     teamMinSize: number,
     teamMaxSize: number
   ) {
     this.acronym = acronym;
     this.name = name;
+    this.teamMinSize = teamMinSize;
     this.teamMaxSize = teamMaxSize;
-    this.teamMaxSize = teamMinSize;
   }
 }

@@ -195,6 +195,13 @@ WHERE NOT EXISTS (
         SELECT * FROM course WHERE acronym = 'dp1'
     ) LIMIT 1;
 
+/*Inserting Course*/
+INSERT INTO course (acronym, name, team_min_size, team_max_size, enabled)
+SELECT * FROM (SELECT 'sn', 'Software Networking', 2, 5, true) AS tmp
+WHERE NOT EXISTS (
+        SELECT * FROM course WHERE acronym = 'sn'
+    ) LIMIT 1;
+
 /*Associating professor to course*/
 INSERT INTO professor_course(course_acronym, professor_id)
 SELECT * FROM (SELECT 'dp1', 'd264970') AS tmp
