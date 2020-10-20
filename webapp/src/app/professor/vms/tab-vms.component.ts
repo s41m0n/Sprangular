@@ -36,13 +36,13 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     const index = this.dataSource.data.findIndex(vm => vm === selectedVm);
     const dialogRef = this.dialog.open(VmOptionsModalComponent, {
       width: '300px',
-      data: {vCpu: selectedVm.vCpu, ram: selectedVm.ram, disk: selectedVm.diskStorage}
+      data: {vCpu: selectedVm.vcpu, ram: selectedVm.ram, disk: selectedVm.diskStorage}
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('The dialog was closed', result);
-        selectedVm.vCpu = Number(result.vCpu);
+        selectedVm.vcpu = Number(result.vCpu);
         selectedVm.ram = Number(result.ram);
         selectedVm.diskStorage = Number(result.disk);
         this.dataSource.data[index] = selectedVm;

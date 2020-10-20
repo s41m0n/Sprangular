@@ -11,15 +11,17 @@ import { TeamService } from 'src/app/services/team.service';
 })
 export class VmOwnerModalComponent implements OnDestroy{
 
-  members : Student[];
+  members: Student[];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
-  
+
   constructor(
       public dialogRef: MatDialogRef<VmOwnerModalComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any,
       private teamService: TeamService) {
-        console.log(this.teamService.currentTeamSubject.value)
-        this.teamService.currentTeamSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(x => this.members = x.members);
+        console.log(this.teamService.currentTeamSubject.value);
+        this.teamService.currentTeamSubject.asObservable()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(x => this.members = x.members);
   }
 
   onNoClick(): void {

@@ -22,7 +22,8 @@ import {Student} from '../../models/student.model';
 })
 export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
 
-  date : string = null;
+  currentUser: Student;
+  date: string = null;
   chosenMembers: Student[] = [];
   dataSource = new MatTableDataSource<Student>();                     // Table datasource dynamically modified
   colsToDisplay = ['select', 'id', 'name', 'surname'];                // Columns to be displayed in the table
@@ -35,7 +36,9 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;                   // Mat paginator for the table
   @Input() filteredStudents: Observable<Student[]>;                  // List of students matching search criteria
   @Input() set availableStudents(students: Student[]) {              // Enrolled students to be displayed in the table
-    this.dataSource.data = students;
+    const userInfo = JSON.parse(localStorage.getItem('currentUser'));
+    this.currentUser = students.find(s => s.id === userInfo.id);
+    this.dataSource.data = students.filter(s => s.id !== userInfo.id);
   }
 
   ngOnInit() {
@@ -62,7 +65,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
     this.dataSource.sort = this.sort;
   }
 
-  selectDate(date : string) {
+  selectDate(date: string) {
     this.date = date;
   }
 
@@ -77,6 +80,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   submitTeam() {
+    this.chosenMembers.push(this.currentUser);
     const dateToPush = new Date(this.date);
     if (this.teamNameControl.valid && this.chosenMembers.length && dateToPush >= new Date()) {
       this.submitTeamEvent.emit(new TeamProposal(this.teamNameControl.value, this.chosenMembers.map(x => x.id), dateToPush.getTime()));

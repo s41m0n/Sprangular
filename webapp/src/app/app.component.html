@@ -40,6 +40,11 @@
 <!-- Second toolbar with current selected course name -->
 <mat-toolbar class="subheader">
   Course: {{ selectedCourseName || '❓' }}
+  <span class="example-fill-remaining-space"></span>
+  <mat-button-toggle-group *ngIf="selectedCourseName" appearance="legacy" name="fontStyle" aria-label="Font Style">
+    <mat-button-toggle value="enabled">Enabled</mat-button-toggle>
+    <mat-button-toggle value="disabled">Disabled</mat-button-toggle>
+  </mat-button-toggle-group>
 </mat-toolbar>
 
 <!-- Application views area -->

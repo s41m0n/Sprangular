@@ -22,6 +22,7 @@ export class NewVmComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
+      name: ['', Validators.min(1)],
       vCpu: [2, [Validators.min(1), Validators.max(6)]],
       ram: [2, [Validators.min(1), Validators.max(4)]],
       diskStorage: [5, [Validators.min(1), Validators.max(5)]],
@@ -34,6 +35,7 @@ export class NewVmComponent implements OnInit {
     }
     const vm = new VM(
       0,
+      this.form.get('name').value,
       this.form.get('vCpu').value,
       this.form.get('ram').value,
       this.form.get('diskStorage').value

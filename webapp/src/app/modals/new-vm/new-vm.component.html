@@ -4,6 +4,16 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <mat-error *ngIf="vmInvalid">Error while creating VM</mat-error>
 
+        <mat-form-field>
+            <input matInput
+                   placeholder="VM Name"
+                   type="text"
+                   formControlName="name"
+                   required
+            />
+            <mat-error>Cannot be empty</mat-error>
+        </mat-form-field>
+
         <label>CPUs:</label>
         <mat-slider formControlName="vCpu" [thumbLabel]="true" min="1" max="6" step="1"></mat-slider>
 

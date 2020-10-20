@@ -24,15 +24,15 @@ export class TabStudentVmsComponent {
   @Output() turnVmEvent = new EventEmitter<number>();
   @Output() addOwnerEvent = new EventEmitter<any>();
   @Output() connectEvent = new EventEmitter<number>();
-  
-  constructor(public dialog : MatDialog) {
+
+  constructor(public dialog: MatDialog) {
   }
 
   triggerTurn(vmId: number) {
     this.turnVmEvent.emit(vmId);
   }
 
-  addOwner(vm : VM) {
+  addOwner(vm: VM) {
     const dialogRef = this.dialog.open(VmOwnerModalComponent);
     dialogRef.afterClosed()
       .pipe(first())

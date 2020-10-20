@@ -59,6 +59,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { VmOwnerModalComponent } from './modals/vm-owner/vm-owner-modal.component';
 import { VmViewerModalComponent } from './modals/vm-viewer/vm-viewer-modal.component';
 import { NewCourseComponent } from './modals/new-course/new-course-dialog.component';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 @NgModule({
   declarations: [
@@ -122,6 +123,7 @@ import { NewCourseComponent } from './modals/new-course/new-course-dialog.compon
     MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatButtonToggleModule,
   ],
   entryComponents: [LoginDialogComponent, RegisterDialogComponent],
   providers: [

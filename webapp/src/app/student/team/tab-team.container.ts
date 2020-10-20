@@ -19,7 +19,7 @@ import { Team } from 'src/app/models/team.model';
 })
 export class TabTeamContComponent implements OnInit, OnDestroy {
 
-  team : Team;
+  team: Team;
   availableStudents: Student[] = [];                             // The current enrolled list
   filteredStudents: Observable<Student[]>;                     // The list of students matching a criteria
   private searchTerms = new Subject<string>();                  // The search criteria emitter
@@ -32,7 +32,7 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.courseService.getAvailableStudents().pipe(first()).subscribe(students => this.availableStudents = students);
-    this.teamService.currentTeamSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(team => this.team = team)
+    this.teamService.currentTeamSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(team => this.team = team);
     // Subscribe to the search terms emitter
     this.filteredStudents = this.searchTerms.pipe(
       takeUntil(this.destroy$),
@@ -58,8 +58,9 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
 
   submitTeam(proposal: TeamProposal): void {
     this.teamService.createTeam(proposal).subscribe(team => {
-      if(team)
-        this.teamService.getStudentTeam().pipe(first()).subscribe(team => this.teamService.currentTeamSubject.next(team))
+      if (team) {
+        this.teamService.getStudentTeam().pipe(first()).subscribe(t => this.teamService.currentTeamSubject.next(t));
+      }
     });
   }
 }

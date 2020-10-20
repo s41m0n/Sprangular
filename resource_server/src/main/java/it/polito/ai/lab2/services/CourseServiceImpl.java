@@ -66,7 +66,7 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
   public Optional<CourseDTO> getCourse(String courseId) {
     return courseRepository.findById(courseId)
         .map(course -> modelMapper.map(course, CourseDTO.class));

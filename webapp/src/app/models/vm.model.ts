@@ -11,20 +11,25 @@
  */
 export class VM {
   id: number;
-  vCpu: number;
+  name: string;
+  vcpu: number;
   diskStorage: number;
   ram: number;
   active: boolean;
 
   constructor(
     id: number = 0,
+    name: string = '',
     vCpu: number = 1,
     ram: number = 0.5,
-    diskStorage: number = 2
+    diskStorage: number = 2,
+    active: boolean = false
   ) {
     this.id = id;
-    this.vCpu = vCpu;
+    this.name = name;
+    this.vcpu = vCpu;
     this.ram = ram;
     this.diskStorage = diskStorage;
+    this.active = active;
   }
 }

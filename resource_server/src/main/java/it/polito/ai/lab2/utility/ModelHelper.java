@@ -4,10 +4,7 @@ import it.polito.ai.lab2.controllers.CourseController;
 import it.polito.ai.lab2.controllers.ProfessorController;
 import it.polito.ai.lab2.controllers.StudentController;
 import it.polito.ai.lab2.controllers.TeamController;
-import it.polito.ai.lab2.dtos.CourseDTO;
-import it.polito.ai.lab2.dtos.ProfessorDTO;
-import it.polito.ai.lab2.dtos.StudentDTO;
-import it.polito.ai.lab2.dtos.TeamDTO;
+import it.polito.ai.lab2.dtos.*;
 
 import java.util.Arrays;
 

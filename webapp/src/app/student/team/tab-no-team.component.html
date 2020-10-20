@@ -12,9 +12,11 @@
                    [formControl]="addStudentControl"
                    [matAutocomplete]="auto">
             <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-                <mat-option *ngFor="let option of filteredStudents | async" [value]="option">
-                    {{displayFn(option)}}
-                </mat-option>
+                <ng-container *ngFor="let option of filteredStudents | async">
+                    <mat-option *ngIf="option.id !== currentUser.id" [value]="option">
+                        {{displayFn(option)}}
+                    </mat-option>
+                </ng-container>
             </mat-autocomplete>
         </mat-form-field>
         <button mat-button (click)="addWishMember(addStudentControl.value)">Add</button>
@@ -68,7 +70,7 @@
         </mat-form-field>
         <mat-form-field appearance="fill">
             <mat-label>Choose a date</mat-label>
-            <input matInput [matDatepicker]="picker" (dateChange)="selectDate($event.value)">
+            <input matInput [matDatepicker]="picker" (dateChange)="selectDate($event.value.toString())">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
