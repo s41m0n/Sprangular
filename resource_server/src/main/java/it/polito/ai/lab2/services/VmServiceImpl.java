@@ -208,16 +208,16 @@ public class VmServiceImpl implements VmService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentOwnerOfVm(#vmId)")
-  public VmDTO switchVm(Long vmId) {
+  public VmDTO switchVm(Long vmId, boolean active) {
     Vm vm = vmRepository.findById(vmId).orElseThrow(() -> new VmNotFoundException("Vm " + vmId + " does not exist"));
-    if (vm.isActive()){
-      vm.setActive(false);
-    } else {
+    if (active && vm.isActive()) {
+      return modelMapper.map(vm, VmDTO.class);
+    } else if (active) {
       if (vm.getTeam().getVms().stream().filter(Vm::isActive).count() == vm.getTeam().getMaxActiveInstances()) {
         throw new MaxVmResourcesException("Cannot turn on VM " + vmId + " too many active VMs");
       }
-      vm.setActive(true);
     }
+    vm.setActive(active);
     return modelMapper.map(vm, VmDTO.class);
   }
 

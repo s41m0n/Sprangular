@@ -51,7 +51,7 @@ export class TabStudentVmsContComponent implements OnInit {
 
   turnVm(vmId: number) {
     this.vmService
-      .triggerVm(vmId)
+      .triggerVm(vmId, this.vms.find(vm => vm.id === vmId).active)
       .pipe(first())
       .subscribe((_) => this.refreshVMs());
   }
@@ -68,7 +68,7 @@ export class TabStudentVmsContComponent implements OnInit {
       .getInstance(vmId)
       .pipe(first())
       .subscribe((instance) => {
-        if (!instance) return;
+        if (!instance) { return; }
         const url = URL.createObjectURL(instance);
         const dialogRef = this.dialog.open(VmViewerModalComponent, {
           data: {

@@ -70,10 +70,14 @@ public class VmController {
     }
   }
 
-  @PostMapping("{vmId}/trigger")
-  public VmDTO triggerVm(@PathVariable Long vmId) {
+  @PutMapping("{vmId}/trigger")
+  public VmDTO triggerVm(@PathVariable Long vmId, @RequestBody Map<String, String> reqBody) {
+    log.info("enableDisable(" + vmId + ", " + reqBody + ") called");
+    String active = reqBody.get("active");
+    if (!active.equals("true") && !active.equals("false"))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "active {true,false} required");
     try {
-      return vmService.switchVm(vmId);
+      return vmService.switchVm(vmId, Boolean.parseBoolean(active));
     } catch (VmNotFoundException | TeamNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (VmNotOfTeamException e) {

@@ -21,7 +21,7 @@ public interface VmService {
 
   VmDTO updateVmResources(Long vmId, UpdateVmDetails updateVmDetails);
 
-  VmDTO switchVm(Long vmId);
+  VmDTO switchVm(Long vmId, boolean active);
 
   void addVmOwner(Long vmId, String studentId);
 

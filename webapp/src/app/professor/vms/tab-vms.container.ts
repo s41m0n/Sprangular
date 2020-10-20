@@ -22,25 +22,28 @@ export class TabProfessorVmsContComponent {
   mySrc = null;
   vms: VM[] = [];                             // The current vms
 
-  constructor(public dialog: MatDialog, private courseService: CourseService, private vmService: VmService, private sanitizer : DomSanitizer) {
+  constructor(public dialog: MatDialog,
+              private courseService: CourseService,
+              private vmService: VmService,
+              private sanitizer: DomSanitizer) {
     this.refreshVmList();
   }
 
   refreshVmList() {
-    this.courseService.getCourseVMs(this.courseService.currentCourseSubject.value).pipe(first()).subscribe(vms => this.vms = vms);    
+    this.courseService.getCourseVMs(this.courseService.currentCourseSubject.value).pipe(first()).subscribe(vms => this.vms = vms);
   }
 
   wipeVm(vmId: number) {
     this.vmService.removeVm(vmId).pipe(first()).subscribe(x => this.refreshVmList());
   }
- 
+
   triggerVm(id: number) {
-    this.vmService.triggerVm(id).pipe(first()).subscribe(x => this.refreshVmList());
+    this.vmService.triggerVm(id, this.vms.find(vm => vm.id === id).active).pipe(first()).subscribe(x => this.refreshVmList());
   }
 
   connect(vmId: number) {
     this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => {
-      if(!instance) return;
+      if (!instance) { return; }
       const url = URL.createObjectURL(instance);
       const dialogRef = this.dialog.open(VmViewerModalComponent, {
         data: {id : vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}

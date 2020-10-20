@@ -14,6 +14,7 @@ export class VM {
   vCpu: number;
   diskStorage: number;
   ram: number;
+  active: boolean;
 
   constructor(
     id: number = 0,

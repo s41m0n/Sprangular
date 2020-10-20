@@ -54,7 +54,7 @@ export class VmService {
         )
       ),
       catchError(
-        handleError<VmModel>(this.toastrService, 
+        handleError<VmModel>(this.toastrService,
           `getModelsForCourse(${course.acronym})`,
           null,
           false
@@ -81,7 +81,7 @@ export class VmService {
           )
         ),
         catchError(
-          handleError<VmModel>(this.toastrService, 
+          handleError<VmModel>(this.toastrService,
             `assignVmModelToCourse(${course.acronym})`,
             null,
             false
@@ -115,8 +115,10 @@ export class VmService {
       );
   }
 
-  public triggerVm(vmId: number): Observable<VM> {
-    return this.http.post<VM>(`${environment.base_vms_url}/${vmId}/trigger`, environment.base_http_headers).pipe(
+  public triggerVm(vmId: number, vmActive: boolean): Observable<VM> {
+    // If the vm is active, request the turn off, request the turn on otherwise
+    const active = vmActive ? 'false' : 'true';
+    return this.http.put<VM>(`${environment.base_vms_url}/${vmId}/trigger`, { active }, environment.base_http_headers).pipe(
       tap(() => console.log(`triggered vm ${vmId} - triggerVm()`)),
       catchError(handleError<VM>(this.toastrService, `triggerVm(${vmId})`))
     );
@@ -145,7 +147,6 @@ export class VmService {
       .pipe(
         tap(() => console.log(`removed vm ${vmId} - removeVm()`)),
         catchError(handleError(this.toastrService, `removeVm(${vmId})`))
-      )
+      );
   }
-  
 }

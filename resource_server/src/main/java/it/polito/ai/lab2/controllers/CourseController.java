@@ -131,7 +131,7 @@ public class CourseController {
     }
   }
 
-  @PutMapping("/{courseId}/enabled")
+  @PutMapping("/{courseId}/toggle")
   public void enableDisable(@PathVariable String courseId, @RequestBody Map<String, Boolean> reqBody) {
     log.info("enableDisable(" + courseId + ", " + reqBody + ") called");
     Boolean enable = reqBody.get("enabled");
