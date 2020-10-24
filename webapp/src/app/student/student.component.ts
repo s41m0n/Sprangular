@@ -1,8 +1,7 @@
-import {Component, OnDestroy} from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
-import { AuthService } from '../services/auth.service';
 import { CourseService } from '../services/course.service';
 import { TeamService } from '../services/team.service';
 
@@ -13,14 +12,14 @@ import { TeamService } from '../services/team.service';
  */
 @Component({
   selector: 'app-student',
-  templateUrl: './student.component.html'
+  templateUrl: './student.component.html',
 })
-export class StudentComponent implements OnDestroy{
-
-  navLinks = [                                                  // All available navigation links (tabs)
-    {label: 'Team', path: 'teams'},
-    {label: 'Vms', path: 'vms'},
-    {label: 'Assignments', path: 'assignments'}
+export class StudentComponent implements OnDestroy {
+  navLinks = [
+    // All available navigation links (tabs)
+    { label: 'Team', path: 'teams' },
+    { label: 'Vms', path: 'vms' },
+    { label: 'Assignments', path: 'assignments' },
   ];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
@@ -32,7 +31,7 @@ export class StudentComponent implements OnDestroy{
       this.teamService.getStudentTeam().pipe(first()).subscribe(team => this.teamService.currentTeamSubject.next(team));
     });
   }
-  
+
   ngOnDestroy(): void {
     this.courseService.currentCourseSubject.next(null);
     this.teamService.currentTeamSubject.next(null);
@@ -40,4 +39,3 @@ export class StudentComponent implements OnDestroy{
     this.destroy$.unsubscribe();
   }
 }
-

@@ -24,8 +24,8 @@ export class NewVmComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', Validators.min(1)],
       vCpu: [2, [Validators.min(1), Validators.max(6)]],
-      ram: [2, [Validators.min(1), Validators.max(4)]],
-      diskStorage: [5, [Validators.min(1), Validators.max(5)]],
+      ram: [2, [Validators.min(1), Validators.max(6)]],
+      diskStorage: [5, [Validators.min(1), Validators.max(20)]],
     });
   }
 
@@ -43,9 +43,10 @@ export class NewVmComponent implements OnInit {
     this.vmService
       .createVmForTeam(vm)
       .pipe(first())
-      .subscribe(
-        () => this.dialogRef.close(true),
-        () => (this.vmInvalid = true)
-      );
+      .subscribe((res) => {
+        if (res) {
+          this.dialogRef.close(true);
+        }
+      });
   }
 }

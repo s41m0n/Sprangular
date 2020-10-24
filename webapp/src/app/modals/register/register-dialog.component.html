@@ -2,8 +2,6 @@
 
 <div mat-dialog-content>
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <mat-error *ngIf="registerInvalid">Error while registering</mat-error>
-
     <mat-form-field class="full-width-input">
       <input
         matInput
@@ -65,11 +63,9 @@
         type="password"
         placeholder="Repeat Password"
         formControlName="passwordConfirm"
-        [errorStateMatcher]="matcher"
+        required
       />
-      <mat-error *ngIf="form.hasError('notSame')">
-          The two password must match
-        </mat-error>
+      <mat-error> The two password must match </mat-error>
     </mat-form-field>
 
     <mat-form-field>
