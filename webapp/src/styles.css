@@ -100,3 +100,13 @@ mat-divider {
 mat-sidenav {
   width: 250px;
 }
+
+.centered {
+  display: block;
+  margin: auto;
+}
+
+mat-slider {
+  width: 100%;
+  margin-top: 12px;
+}

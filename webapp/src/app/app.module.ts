@@ -47,12 +47,14 @@ import { TabStudentVmsComponent } from './student/vms/tab-vms.component';
 import { TabStudentVmsContComponent } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsComponent } from './student/assignments/tab-assignments.component';
 import { TabStudentAssignmentsContComponent } from './student/assignments/tab-assignments.container';
+import { TabExpandendAssignmentComponent } from './student/assignments/tab-expandend-assignment.component';
 
 import { MatMenuModule } from '@angular/material/menu';
 import { VmOptionsModalComponent } from './modals/vm-options-modal/vm-options-modal.component';
 import { MatSliderModule } from '@angular/material/slider';
 import { NewVmComponent } from './modals/new-vm/new-vm.component';
 import { MatSelectModule } from '@angular/material/select';
+import { NewAssignmentUploadComponent } from "./modals/new-assignment-upload/new-assignment-upload.component";
 
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -84,10 +86,12 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
     TabProfessorVmsContComponent,
     VmOptionsModalComponent,
     NewVmComponent,
+    NewAssignmentUploadComponent,
     RegisterDialogComponent,
     VmOwnerModalComponent,
     VmViewerModalComponent,
     NewCourseComponent,
+    TabExpandendAssignmentComponent,
   ],
   imports: [
     BrowserModule,

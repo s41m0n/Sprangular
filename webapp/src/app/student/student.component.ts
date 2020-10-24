@@ -5,6 +5,8 @@ import { first, takeUntil } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { CourseService } from '../services/course.service';
 import { TeamService } from '../services/team.service';
+import {StudentService} from '../services/student.service';
+import {Student} from '../models/student.model';
 
 /** StudentComponent
  *
@@ -24,15 +26,15 @@ export class StudentComponent implements OnDestroy{
   ];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
-  constructor(private courseService : CourseService,
-    private teamService : TeamService,
-    private route : ActivatedRoute){
+  constructor(private courseService: CourseService,
+              private teamService: TeamService,
+              private route: ActivatedRoute){
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      this.courseService.currentCourseSubject.next(params.coursename)
+      this.courseService.currentCourseSubject.next(params.coursename);
       this.teamService.getStudentTeam().pipe(first()).subscribe(team => this.teamService.currentTeamSubject.next(team));
     });
   }
-  
+
   ngOnDestroy(): void {
     this.courseService.currentCourseSubject.next(null);
     this.teamService.currentTeamSubject.next(null);
