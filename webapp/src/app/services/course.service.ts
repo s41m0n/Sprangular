@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { catchError, mergeMap, tap, toArray } from 'rxjs/operators';
+import { catchError, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { Assignment } from '../models/assignment.model';
@@ -24,9 +24,16 @@ import { handleError } from '../helpers/handle.error';
 export class CourseService {
   // Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
   public currentCourseSubject: BehaviorSubject<string>;
+  public course: BehaviorSubject<Course>;
 
   constructor(private http: HttpClient, private toastrService: ToastrService) {
     this.currentCourseSubject = new BehaviorSubject<string>(null);
+    this.course = new BehaviorSubject<Course>(null);
+  }
+
+  setNext(acronym: string) {
+    this.currentCourseSubject.next(acronym);
+    this.getCourse(acronym).pipe(first()).subscribe(x => this.course.next(x));
   }
 
   /**

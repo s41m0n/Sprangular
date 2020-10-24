@@ -10,7 +10,7 @@ import { TeamProposal } from '../models/team-proposal.model';
 import { CourseService } from './course.service';
 import { AuthService } from './auth.service';
 import { Student } from '../models/student.model';
-import {handleError} from '../helpers/handle.error';
+import { handleError } from '../helpers/handle.error';
 
 /** Team service
  *
@@ -29,7 +29,10 @@ export class TeamService {
     this.currentTeamSubject = new BehaviorSubject<Team>(null);
   }
 
-  public createTeam(proposal: TeamProposal, courseId: string = this.courseService.currentCourseSubject.value): Observable<Team> {
+  public createTeam(
+    proposal: TeamProposal,
+    courseId: string = this.courseService.currentCourseSubject.value
+  ): Observable<Team> {
     return this.http
       .post<Team>(
         `${environment.base_courses_url}/${courseId}/teams`,
@@ -37,8 +40,15 @@ export class TeamService {
         environment.base_http_headers
       )
       .pipe(
-        tap(() => console.log(`created team ${proposal.teamName} - createTeam()`)),
-        catchError(handleError<Team>(this.toastrService, `createTeam(${proposal.teamName}`))
+        tap(() =>
+          console.log(`created team ${proposal.teamName} - createTeam()`)
+        ),
+        catchError(
+          handleError<Team>(
+            this.toastrService,
+            `createTeam(${proposal.teamName}`
+          )
+        )
       );
   }
 
@@ -53,8 +63,17 @@ export class TeamService {
   public getStudentsInTeam(teamId: number = this.currentTeamSubject.value.id) {
     return this.http.get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
       .pipe(
-        tap(() => console.log(`retrieved members of team ${teamId} - getStudentsInTeam()`)),
-        catchError(handleError<Student[]>(this.toastrService, `getStudentsInTeam(${teamId})`))
+        tap(() =>
+          console.log(
+            `retrieved members of team ${teamId} - getStudentsInTeam()`
+          )
+        ),
+        catchError(
+          handleError<Student[]>(
+            this.toastrService,
+            `getStudentsInTeam(${teamId})`
+          )
+        )
       );
   }
 }

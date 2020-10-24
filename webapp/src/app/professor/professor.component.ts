@@ -25,7 +25,7 @@ export class ProfessorComponent {
   constructor(private courseService : CourseService,
     private route : ActivatedRoute){
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      this.courseService.currentCourseSubject.next(params.coursename)
+      this.courseService.setNext(params.coursename);
     });
   }
 

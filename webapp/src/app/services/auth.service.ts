@@ -94,7 +94,7 @@ export class AuthService {
           'Awesome 😃'
         )
       ),
-      catchError(handleError<any>(this.toastrService, `register`))
+      catchError(handleError<any>(this.toastrService, `Registration Failed`))
     );
   }
 

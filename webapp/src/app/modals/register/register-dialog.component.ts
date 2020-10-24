@@ -1,35 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import {
-  FormControl,
-  FormGroupDirective,
-  NgForm,
-  Validators,
-  FormGroup,
-  FormBuilder,
-  AbstractControl,
-} from '@angular/forms';
+import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { first } from 'rxjs/operators';
 import { FileInput } from 'ngx-material-file-input';
-import { ErrorStateMatcher } from '@angular/material/core';
-
-export class MyErrorStateMatcher implements ErrorStateMatcher {
-  isErrorState(
-    control: FormControl | null,
-    form: FormGroupDirective | NgForm | null
-  ): boolean {
-    const invalidCtrl = !!(control && control.invalid && control.parent.dirty);
-    const invalidParent = !!(
-      control &&
-      control.parent &&
-      control.parent.invalid &&
-      control.parent.dirty
-    );
-
-    return invalidCtrl || invalidParent;
-  }
-}
 
 @Component({
   selector: 'app-register-dialog',
@@ -38,8 +12,6 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
 })
 export class RegisterDialogComponent implements OnInit {
   public form: FormGroup;
-  public registerInvalid = false;
-  matcher = new MyErrorStateMatcher();
 
   constructor(
     private fb: FormBuilder,
@@ -53,7 +25,7 @@ export class RegisterDialogComponent implements OnInit {
         name: ['', Validators.pattern('^[A-Za-z]{1,32}$')],
         surname: ['', Validators.pattern('^[A-Za-z]{1,32}$')],
         email: ['', Validators.email],
-        id: ['', Validators.pattern('^(a|s|d)[0-9]+$')],
+        id: ['', Validators.pattern('^(s|d)[0-9]+$')],
         pic: [''],
         password: [
           '',
@@ -63,7 +35,9 @@ export class RegisterDialogComponent implements OnInit {
         ],
         passwordConfirm: [''],
       },
-      { validator: this.checkPasswords }
+      {
+        validator: this.checkIfMatchingPasswords('password', 'passwordConfirm'),
+      }
     );
   }
 
@@ -83,16 +57,25 @@ export class RegisterDialogComponent implements OnInit {
     this.authService
       .register(formData)
       .pipe(first())
-      .subscribe(
-        () => this.dialogRef.close(true),
-        () => (this.registerInvalid = true)
-      );
+      .subscribe((res) => {
+        if (res) {
+          this.dialogRef.close(true);
+        }
+      });
   }
 
-  checkPasswords(group: FormGroup) {
-    const pass = group.controls.password.value;
-    const confirmPass = group.controls.passwordConfirm.value;
-
-    return pass === confirmPass ? null : { notSame: true };
+  checkIfMatchingPasswords(
+    passwordKey: string,
+    passwordConfirmationKey: string
+  ) {
+    return (group: FormGroup) => {
+      const passwordInput = group.controls[passwordKey];
+      const passwordConfirmationInput = group.controls[passwordConfirmationKey];
+      if (passwordInput.value !== passwordConfirmationInput.value) {
+        return passwordConfirmationInput.setErrors({ notEquivalent: true });
+      } else {
+        return passwordConfirmationInput.setErrors(null);
+      }
+    };
   }
 }

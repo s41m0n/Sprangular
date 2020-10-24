@@ -12,7 +12,6 @@ import { Course } from 'src/app/models/course.model';
 })
 export class NewCourseComponent implements OnInit {
   form: FormGroup;
-  courseInvalid = false;
 
   constructor(
     private fb: FormBuilder,
@@ -37,7 +36,7 @@ export class NewCourseComponent implements OnInit {
       this.form.get('acronym').value.toLowerCase(),
       this.form.get('name').value,
       this.form.get('teamMinSize').value,
-      this.form.get('teamMaxSize').value
+      this.form.get('teamMaxSize').value, false
     );
     this.courseService
       .createCourse(course)
@@ -45,8 +44,6 @@ export class NewCourseComponent implements OnInit {
       .subscribe((res) => {
         if (res) {
           this.dialogRef.close(true);
-        } else {
-          this.courseInvalid = true;
         }
       });
   }
