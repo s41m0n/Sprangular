@@ -10,7 +10,7 @@ import { TeamProposal } from '../models/team-proposal.model';
 import { CourseService } from './course.service';
 import { AuthService } from './auth.service';
 import { Student } from '../models/student.model';
-import {handleError} from '../helpers/handle.error';
+import { handleError } from '../helpers/handle.error';
 
 /** Team service
  *
@@ -21,15 +21,20 @@ import {handleError} from '../helpers/handle.error';
 })
 export class TeamService {
   public currentTeamSubject: BehaviorSubject<Team>;
-  
-  constructor(private http: HttpClient,
+
+  constructor(
+    private http: HttpClient,
     private toastrService: ToastrService,
-    private courseService : CourseService,
-    private authService : AuthService) {
+    private courseService: CourseService,
+    private authService: AuthService
+  ) {
     this.currentTeamSubject = new BehaviorSubject<Team>(null);
   }
 
-  public createTeam(proposal: TeamProposal, courseId: string = this.courseService.currentCourseSubject.value): Observable<Team> {
+  public createTeam(
+    proposal: TeamProposal,
+    courseId: string = this.courseService.currentCourseSubject.value
+  ): Observable<Team> {
     return this.http
       .post<Team>(
         `${environment.base_courses_url}/${courseId}/teams`,
@@ -37,24 +42,58 @@ export class TeamService {
         environment.base_http_headers
       )
       .pipe(
-        tap(() => console.log(`created team ${proposal.teamName} - createTeam()`)),
-        catchError(handleError<Team>(this.toastrService, `createTeam(${proposal.teamName}`))
+        tap(() =>
+          console.log(`created team ${proposal.teamName} - createTeam()`)
+        ),
+        catchError(
+          handleError<Team>(
+            this.toastrService,
+            `createTeam(${proposal.teamName}`
+          )
+        )
       );
   }
 
-  public getStudentTeam(courseId: string = this.courseService.currentCourseSubject.value, studentId: string = this.authService.currentUserValue.id) : Observable<Team>{
-    return this.http.get<Team>(`${environment.base_students_url}/${studentId}/teams/${courseId}`)
-      .pipe(
-        tap(() => console.log(`retrieved team of ${studentId} for course ${courseId} - getStudentTeam()`)),
-        catchError(handleError<Team>(this.toastrService, `getStudentTeam(${courseId}, ${studentId})`, null, false))
+  public getStudentTeam(
+    courseId: string = this.courseService.currentCourseSubject.value,
+    studentId: string = this.authService.currentUserValue.id
+  ): Observable<Team> {
+    return this.http
+      .get<Team>(
+        `${environment.base_students_url}/${studentId}/teams/${courseId}`
       )
+      .pipe(
+        tap(() =>
+          console.log(
+            `retrieved team of ${studentId} for course ${courseId} - getStudentTeam()`
+          )
+        ),
+        catchError(
+          handleError<Team>(
+            this.toastrService,
+            `getStudentTeam(${courseId}, ${studentId})`,
+            null,
+            false
+          )
+        )
+      );
   }
 
-  public getStudentsInTeam(teamId : number = this.currentTeamSubject.value.id) {
-    return this.http.get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
+  public getStudentsInTeam(teamId: number = this.currentTeamSubject.value.id) {
+    return this.http
+      .get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
       .pipe(
-        tap(() => console.log(`retrieved members of team ${teamId} - getStudentsInTeam()`)),
-        catchError(handleError<Student[]>(this.toastrService, `getStudentsInTeam(${teamId})`))
+        tap(() =>
+          console.log(
+            `retrieved members of team ${teamId} - getStudentsInTeam()`
+          )
+        ),
+        catchError(
+          handleError<Student[]>(
+            this.toastrService,
+            `getStudentsInTeam(${teamId})`
+          )
+        )
       );
   }
 }

@@ -15,7 +15,6 @@ import { MatDialogRef } from '@angular/material/dialog';
 })
 export class LoginDialogComponent implements OnInit {
   form: FormGroup;
-  loginInvalid = false; // Variable to let the forum know there are errors
 
   constructor(
     private fb: FormBuilder,
@@ -52,9 +51,10 @@ export class LoginDialogComponent implements OnInit {
     this.authService
       .login(email, password)
       .pipe(first())
-      .subscribe(
-        () => this.dialogRef.close(true),
-        () => (this.loginInvalid = true)
-      );
+      .subscribe((res) => {
+        if (res) {
+          this.dialogRef.close(true);
+        }
+      });
   }
 }
