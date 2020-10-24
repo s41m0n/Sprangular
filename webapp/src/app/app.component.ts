@@ -22,6 +22,7 @@ export class AppComponent {
   courseList: Observable<Course[]>; // Variable to keep track (asynchronously) of the courses
   selectedCourseName: string; // Variable to store the current selected course name (notified by sub routes via Broadcaster service)
   inModal: boolean; // Variable to check if a modal is already open
+  course : Course;
 
   // Unsubscribes are not performed here since alive till this root component is always alive and must be updated
   constructor(
@@ -42,6 +43,8 @@ export class AppComponent {
     this.inModal = false;
 
     // Subscribe to Broadcaster selected course subject
+
+    this.courseService.course.asObservable().subscribe(x => this.course = x)
 
     this.courseService.currentCourseSubject
       .asObservable()

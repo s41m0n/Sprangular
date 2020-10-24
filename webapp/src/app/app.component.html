@@ -42,8 +42,8 @@
   Course: {{ selectedCourseName || '❓' }}
   <span class="example-fill-remaining-space"></span>
   <mat-button-toggle-group *ngIf="selectedCourseName" appearance="legacy" name="fontStyle" aria-label="Font Style">
-    <mat-button-toggle value="enabled">Enabled</mat-button-toggle>
-    <mat-button-toggle value="disabled">Disabled</mat-button-toggle>
+    <mat-button-toggle [disabled]="course && !course.enabled">Enabled</mat-button-toggle>
+    <mat-button-toggle [disabled]="course && course.enabled">Disabled</mat-button-toggle>
   </mat-button-toggle-group>
 </mat-toolbar>
 

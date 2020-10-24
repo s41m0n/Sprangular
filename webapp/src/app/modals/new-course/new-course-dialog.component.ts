@@ -37,7 +37,7 @@ export class NewCourseComponent implements OnInit {
       this.form.get('acronym').value.toLowerCase(),
       this.form.get('name').value,
       this.form.get('teamMinSize').value,
-      this.form.get('teamMaxSize').value
+      this.form.get('teamMaxSize').value, false
     );
     this.courseService
       .createCourse(course)
