@@ -1,9 +1,9 @@
 <div class="container">
     <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
         <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vm of dataSource.data">
-            <mat-card class="mat-elevation-z4">
+            <mat-card class="mat-elevation-z4" [ngClass]="vm.active ? 'active' : 'inactive'">
                 <mat-card-content>
-                    VM {{vm.name}} configuration:
+                    VM "{{vm.id}} - {{vm.name}}" configuration:
                     <ul>
                         <li>
                             <span class="badge">vCPU:</span> {{vm.vcpu}} in use

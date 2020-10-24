@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { VM } from '../../models/vm.model';
-import { first, takeUntil } from 'rxjs/operators';
+import {first, map, takeUntil} from 'rxjs/operators';
 import { TeamService } from 'src/app/services/team.service';
 import { MatDialog } from '@angular/material/dialog';
 import { NewVmComponent } from 'src/app/modals/new-vm/new-vm.component';
 import { VmService } from 'src/app/services/vm.service';
-import { Subject } from 'rxjs';
+import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
 import { VmViewerModalComponent } from '../../modals/vm-viewer/vm-viewer-modal.component';
 import { DomSanitizer } from '@angular/platform-browser';
+import {Team} from '../../models/team.model';
 
 /**
  * VmsContainer
@@ -17,10 +18,12 @@ import { DomSanitizer } from '@angular/platform-browser';
 @Component({
   selector: 'app-tab-student-vms-cont',
   templateUrl: './tab-vms.container.html',
+  styleUrls: ['./tab-vms.container.css']
 })
 export class TabStudentVmsContComponent implements OnInit {
   vms: VM[] = null; // The current vms
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
+  inTeam$: boolean;
 
   constructor(
     public dialog: MatDialog,
@@ -33,7 +36,12 @@ export class TabStudentVmsContComponent implements OnInit {
     this.teamService.currentTeamSubject
       .asObservable()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((x) => this.refreshVMs());
+      .subscribe((t) => {
+        this.inTeam$ = t !== null;
+        if (this.inTeam$) {
+          this.refreshVMs();
+        }
+      });
   }
 
   /** Private function to refresh the list of vms */

@@ -12,7 +12,8 @@ import {VM} from '../../models/vm.model';
  */
 @Component({
   selector: 'app-tab-student-vms',
-  templateUrl: './tab-vms.component.html'
+  templateUrl: './tab-vms.component.html',
+  styleUrls: ['./tab-vms.component.css']
 })
 export class TabStudentVmsComponent {
 

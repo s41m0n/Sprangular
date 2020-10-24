@@ -29,7 +29,7 @@ export class StudentComponent implements OnDestroy {
               private teamService: TeamService,
               private route: ActivatedRoute){
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      this.courseService.currentCourseSubject.next(params.coursename);
+      this.courseService.setNext(params.coursename);
       this.teamService.getStudentTeam().pipe(first()).subscribe(team => this.teamService.currentTeamSubject.next(team));
     });
   }

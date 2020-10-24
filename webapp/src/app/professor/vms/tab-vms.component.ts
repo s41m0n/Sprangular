@@ -13,7 +13,8 @@ import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
  */
 @Component({
   selector: 'app-tab-professor-vms',
-  templateUrl: './tab-vms.component.html'
+  templateUrl: './tab-vms.component.html',
+  styleUrls: ['./tab-vms.component.css']
 })
 export class TabProfessorVmsComponent implements AfterViewInit {
 
