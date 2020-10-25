@@ -130,12 +130,12 @@ public class UserServiceImpl implements UserService {
   }
 
   private String getPredefinedRegisterMessage(String id, ConfirmEmailToken confirmEmailToken) {
-    String url = "http://localhost:8080/API/authentication/" + id + "/confirmEmail/" + confirmEmailToken.getToken();
+    String url = "https://localhost:4200/user/" + id + "/confirmEmail/" + confirmEmailToken.getToken();
 
     return "Welcome to SpringExample app!\n\n" +
         "Your username to access the system is: " + id +
         "\n\nConfirm your email address clicking this link:\n" + url +
-        "\n\nAuthenticate through:\nhttp://localhost:8080/API/authentication/login" +
+        "\n\nAuthenticate through:\nhttps://localhost:4200/home?doLogin=true" +
         "\n\nBest Regards,\nSpringExample Team";
   }
 }

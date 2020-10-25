@@ -13,12 +13,13 @@ import { StudentComponent } from './student/student.component';
 import { TabTeamContComponent } from './student/team/tab-team.container';
 import { TabStudentVmsContComponent } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsContComponent } from './student/assignments/tab-assignments.container';
+import { UserConfirmComponent } from './user/user-confirm.component';
 
 // Supported and admitted routes by now
 // Could do multiple and sub-forRoot, but since we have few routes there's no need now
 const routes = [
   { path: 'home', component: HomeComponent },
-  {path: '',   redirectTo: '/home', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   {
     path: 'professor/course/:coursename',
     component: ProfessorComponent,
@@ -42,6 +43,10 @@ const routes = [
       { path: 'vms', component: TabStudentVmsContComponent },
       { path: 'assignments', component: TabStudentAssignmentsContComponent },
     ],
+  },
+  {
+    path: 'user/:userId/confirmEmail/:confirmToken',
+    component: UserConfirmComponent,
   },
   { path: '**', component: PageNotFoundComponent },
 ];

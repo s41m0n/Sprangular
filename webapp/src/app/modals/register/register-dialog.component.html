@@ -21,7 +21,7 @@
         formControlName="name"
         required
       />
-      <mat-error>Please provide a valid name address</mat-error>
+      <mat-error>Please provide a valid name</mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width-input">
@@ -32,7 +32,7 @@
         formControlName="surname"
         required
       />
-      <mat-error>Please provide a valid surname address</mat-error>
+      <mat-error>Please provide a valid surname</mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width-input">
@@ -43,7 +43,7 @@
         formControlName="id"
         required
       />
-      <mat-error>Please provide a valid id address</mat-error>
+      <mat-error>Please provide a valid id (sXXXXXX or dXXXXXX)</mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width-input">
@@ -54,7 +54,10 @@
         formControlName="password"
         required
       />
-      <mat-error>Please provide a valid password</mat-error>
+      <mat-error
+        >Please provide a valid password (minLength: 8, 1 capital letter, 1
+        symbol)</mat-error
+      >
     </mat-form-field>
 
     <mat-form-field class="full-width-input">
@@ -65,7 +68,7 @@
         formControlName="passwordConfirm"
         required
       />
-      <mat-error> The two password must match </mat-error>
+      <mat-error>The two password must match</mat-error>
     </mat-form-field>
 
     <mat-form-field>

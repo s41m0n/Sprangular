@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,7 +13,7 @@ import { CourseService } from '../services/course.service';
   selector: 'app-professor',
   templateUrl: './professor.component.html',
 })
-export class ProfessorComponent {
+export class ProfessorComponent implements OnDestroy {
   navLinks = [
     // All available navigation links (tabs)
     { label: 'Students', path: 'students' },
@@ -22,9 +22,11 @@ export class ProfessorComponent {
   ];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
-  constructor(private courseService : CourseService,
-    private route : ActivatedRoute){
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+  constructor(
+    private courseService: CourseService,
+    private route: ActivatedRoute
+  ) {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.courseService.setNext(params.coursename);
     });
   }

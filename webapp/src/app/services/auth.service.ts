@@ -112,6 +112,21 @@ export class AuthService {
     console.log(`logged out`);
   }
 
+  confirmEmail(id: string, token: string) {
+    return this.http
+      .get(`${environment.confirm_url}/${id}/confirmEmail/${token}`)
+      .pipe(
+        tap(() => {
+          this.toastrService.success(
+            `Hi ${id}`,
+            'You have successfully confirmed your email address 😃'
+          );
+          console.log(`confirmed ${id}`);
+        }),
+        catchError(handleError<any>(this.toastrService, `confirm`))
+      );
+  }
+
   parseJwt(token: string) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');

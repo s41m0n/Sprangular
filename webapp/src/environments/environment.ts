@@ -17,6 +17,7 @@ export const environment = {
   base_assignments_url: `${BASE_API}/uploads`,
   login_url: `${BASE_API}/authentication/login`,
   register_url: `${BASE_API}/authentication/register`,
+  confirm_url: `${BASE_API}/authentication/`,
   base_http_headers: {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
   }, // Header to be used in POST/PUT

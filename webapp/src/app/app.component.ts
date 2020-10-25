@@ -44,7 +44,9 @@ export class AppComponent {
 
     // Subscribe to Broadcaster selected course subject
 
-    this.courseService.course.asObservable().subscribe(x => this.course = x);
+    this.courseService.course
+      .asObservable()
+      .subscribe((x) => (this.course = x));
 
     this.courseService.currentCourseSubject
       .asObservable()

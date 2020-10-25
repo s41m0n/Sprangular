@@ -54,14 +54,15 @@ import { VmOptionsModalComponent } from './modals/vm-options-modal/vm-options-mo
 import { MatSliderModule } from '@angular/material/slider';
 import { NewVmComponent } from './modals/new-vm/new-vm.component';
 import { MatSelectModule } from '@angular/material/select';
-import { NewAssignmentUploadComponent } from "./modals/new-assignment-upload/new-assignment-upload.component";
+import { NewAssignmentUploadComponent } from './modals/new-assignment-upload/new-assignment-upload.component';
 
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { MatNativeDateModule } from '@angular/material/core';
 import { VmOwnerModalComponent } from './modals/vm-owner/vm-owner-modal.component';
 import { VmViewerModalComponent } from './modals/vm-viewer/vm-viewer-modal.component';
 import { NewCourseComponent } from './modals/new-course/new-course-dialog.component';
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { UserConfirmComponent } from './user/user-confirm.component';
 
 @NgModule({
   declarations: [
@@ -92,6 +93,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
     VmViewerModalComponent,
     NewCourseComponent,
     TabExpandendAssignmentComponent,
+    UserConfirmComponent,
   ],
   imports: [
     BrowserModule,
