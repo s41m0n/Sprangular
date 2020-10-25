@@ -24,9 +24,9 @@ public interface CourseService {
 
   List<StudentWithTeamDetails> getEnrolledStudents(String courseId);
 
-  void enableCourse(String courseId);
+  boolean enableCourse(String courseId);
 
-  void disableCourse(String courseId);
+  boolean disableCourse(String courseId);
 
   boolean addStudentToCourse(String studentId, String courseId);
 

@@ -132,13 +132,14 @@ public class CourseController {
   }
 
   @PutMapping("/{courseId}/toggle")
-  public void enableDisable(@PathVariable String courseId, @RequestBody Map<String, Boolean> reqBody) {
+  public boolean enableDisable(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
     log.info("enableDisable(" + courseId + ", " + reqBody + ") called");
-    Boolean enable = reqBody.get("enabled");
-    if (enable == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "enabled {true,false} required");
+    String enable = reqBody.get("enabled");
+    if (!enable.equals("true") && !enable.equals("false"))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "enabled {true,false} required");
     try {
-      if (enable) courseService.enableCourse(courseId);
-      else courseService.disableCourse(courseId);
+      if (Boolean.parseBoolean(enable)) return courseService.enableCourse(courseId);
+      else return courseService.disableCourse(courseId);
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (CourseProfessorNotAssigned e) {

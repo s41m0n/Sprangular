@@ -100,7 +100,7 @@ public class CourseServiceImpl implements CourseService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-  public void enableCourse(String courseId) {
+  public boolean enableCourse(String courseId) {
     courseRepository.findById(courseId)
         .ifPresentOrElse(course -> {
           if (course.getProfessors().isEmpty())
@@ -109,15 +109,17 @@ public class CourseServiceImpl implements CourseService {
         }, () -> {
           throw new CourseNotFoundException("Course " + courseId + " does not exist");
         });
+    return true;
   }
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-  public void disableCourse(String courseId) {
+  public boolean disableCourse(String courseId) {
     courseRepository.findById(courseId)
         .ifPresentOrElse(course -> course.setEnabled(false), () -> {
           throw new CourseNotFoundException("Course " + courseId + " does not exist");
         });
+    return false;
   }
 
   @Override

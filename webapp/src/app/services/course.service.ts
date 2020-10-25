@@ -337,4 +337,23 @@ export class CourseService {
         )
       );
   }
+
+  changeCourseStatus(statusRequested: boolean): Observable<boolean> {
+    const enabled = statusRequested ? 'true' : 'false';
+    return this.http.put<any>(
+        `${environment.base_courses_url}/${this.currentCourseSubject.value}/toggle`,
+        { enabled },
+        environment.base_http_headers
+    )
+    .pipe(
+      tap(() => console.log(`set course to ${statusRequested} - changeCourseStatus()`)
+      ),
+      catchError(
+        handleError<Course>(
+          this.toastrService,
+          `changeCourseStatus(${statusRequested})`
+        )
+      )
+    );
+  }
 }

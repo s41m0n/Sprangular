@@ -16,6 +16,7 @@ import { NewCourseComponent } from './modals/new-course/new-course-dialog.compon
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   currentUser: User; // Variable to keep track of the current user
@@ -148,5 +149,15 @@ export class AppComponent {
     this.authService.logout();
     this.selectedCourseName = null;
     this.router.navigate(['/home']);
+  }
+
+  courseStatusChanged(status: boolean) {
+    if (status === this.course.enabled) {
+      return;
+    }
+    this.courseService.changeCourseStatus(status).subscribe(x => {
+      this.course.enabled = x;
+      this.refreshCourses();
+    });
   }
 }

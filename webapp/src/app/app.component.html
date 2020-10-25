@@ -41,9 +41,14 @@
 <mat-toolbar class="subheader">
   Course: {{ selectedCourseName || '❓' }}
   <span class="example-fill-remaining-space"></span>
-  <mat-button-toggle-group *ngIf="selectedCourseName" appearance="legacy" name="fontStyle" aria-label="Font Style">
-    <mat-button-toggle [disabled]="course && !course.enabled">Enabled</mat-button-toggle>
-    <mat-button-toggle [disabled]="course && course.enabled">Disabled</mat-button-toggle>
+  <mat-button-toggle-group *ngIf="selectedCourseName && this.currentUser.roles.includes('ROLE_PROFESSOR')"
+                           appearance="legacy" name="fontStyle" aria-label="Font Style">
+    <mat-button-toggle (click)="courseStatusChanged(true)"
+                       [checked]="course && course.enabled"
+                       [disabled]="course && course.enabled">Enabled</mat-button-toggle>
+    <mat-button-toggle (click)="courseStatusChanged(false)"
+                       [checked]="course && !course.enabled"
+                       [disabled]="course && !course.enabled">Disabled</mat-button-toggle>
   </mat-button-toggle-group>
 </mat-toolbar>
 
@@ -65,6 +70,7 @@
         <mat-divider></mat-divider>
         <mat-list-item
           *ngFor="let course of courseList | async"
+          [ngClass]="course.enabled ? 'enabled' : 'disabled'"
           [routerLink]="[
             currentUser.roles[0].toLowerCase().replace('role_', '') +
               '/course/' +

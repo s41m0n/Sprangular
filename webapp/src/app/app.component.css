@@ -1,0 +1,7 @@
+.disabled {
+    background: darkgrey;
+}
+
+.enabled {
+    background: white;
+}
