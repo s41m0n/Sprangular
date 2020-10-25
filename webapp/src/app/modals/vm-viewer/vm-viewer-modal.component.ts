@@ -1,20 +1,20 @@
-import {Component, Inject, Input} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject, Input } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-vm-options-modal',
-  templateUrl: './vm-viewer-modal.component.html'
+  templateUrl: './vm-viewer-modal.component.html',
 })
-export class VmViewerModalComponent{
-
+export class VmViewerModalComponent {
   id = '';
   imageSrc = '';
-  
+
   constructor(
-      public dialogRef: MatDialogRef<VmViewerModalComponent>,
-      @Inject(MAT_DIALOG_DATA) public data: any) {
-        this.imageSrc = data.imageSrc;
-        this.id = data.id;
+    public dialogRef: MatDialogRef<VmViewerModalComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+    this.imageSrc = data.imageSrc;
+    this.id = data.id;
   }
 
   onNoClick(): void {
@@ -22,10 +22,10 @@ export class VmViewerModalComponent{
   }
 
   save() {
-    alert("saved");
+    alert('saved');
   }
 
   modify() {
-    alert("modified");
+    alert('modified');
   }
 }
