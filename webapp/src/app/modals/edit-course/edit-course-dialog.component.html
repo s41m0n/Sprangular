@@ -1,0 +1,45 @@
+<h1 mat-dialog-title>Edit Course</h1>
+
+<div mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label>Team Min Size:</label><br />
+    <mat-slider
+      formControlName="teamMinSize"
+      [thumbLabel]="true"
+      (valueChange)="adaptMin($event)"
+      min="1"
+      max="10"
+      step="1"
+    ></mat-slider>
+
+    <label>Team Max Size:</label>
+    <mat-slider
+      formControlName="teamMaxSize"
+      [thumbLabel]="true"
+      (valueChange)="adaptMax($event)"
+      min="1"
+      max="10"
+      step="1"
+    ></mat-slider>
+    <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
+      <mat-button-toggle
+        [checked]="course && course.enabled"
+        (click)="courseStatusChanged(true)"
+        >Enable</mat-button-toggle
+      >
+      <mat-button-toggle
+        [checked]="course && !course.enabled"
+        (click)="courseStatusChanged(false)"
+        >Disable</mat-button-toggle
+      >
+    </mat-button-toggle-group>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button color="warn" (click)="deleteCourse()">
+    Delete Course
+  </button>
+  <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+  <button mat-button color="primary" (click)="onSubmit()">Edit</button>
+</div>

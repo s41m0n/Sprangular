@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-vm-options-modal',
+  selector: 'app-vm-options',
   templateUrl: './vm-options-dialog.component.html',
   styleUrls: ['./vm-options-dialog.component.css'],
 })

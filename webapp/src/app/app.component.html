@@ -4,25 +4,43 @@
     mat-icon-button
     aria-label="Menu icon"
     [disabled]="inModal"
-    (click)="sidebar.toggle()">
+    (click)="sidebar.toggle()"
+  >
     <mat-icon>menu</mat-icon>
   </button>
-  <button mat-button [disabled]="inModal" [routerLink]="['/home']"><h2>VirtualLabs</h2></button>
+  <button mat-button [disabled]="inModal" [routerLink]="['/home']">
+    <h2>VirtualLabs</h2>
+  </button>
 
   <span class="example-fill-remaining-space"></span>
   <span *ngIf="currentUser">Welcome back, {{ currentUser.id }}</span>
   <div *ngIf="!currentUser; else elseBlock">
-    <button mat-button
-            routerLink="/home"
-            [disabled]="inModal"
-            [queryParams]="{ doLogin: true }">Login</button>
-    <button mat-button
-            routerLink="/home"
-            [disabled]="inModal"
-            [queryParams]="{ doRegister: true }">Register</button>
+    <button
+      mat-button
+      routerLink="/home"
+      [disabled]="inModal"
+      [queryParams]="{ doLogin: true }"
+    >
+      Login
+    </button>
+    <button
+      mat-button
+      routerLink="/home"
+      [disabled]="inModal"
+      [queryParams]="{ doRegister: true }"
+    >
+      Register
+    </button>
   </div>
   <ng-template #elseBlock>
-    <button mat-button [disabled]="inModal" (click)="logout()" *ngIf="currentUser">Logout</button>
+    <button
+      mat-button
+      [disabled]="inModal"
+      (click)="logout()"
+      *ngIf="currentUser"
+    >
+      Logout
+    </button>
   </ng-template>
 </mat-toolbar>
 
@@ -30,15 +48,18 @@
 <mat-toolbar class="subheader">
   Course: {{ selectedCourseName || '❓' }}
   <span class="example-fill-remaining-space"></span>
-  <mat-button-toggle-group *ngIf="selectedCourseName && this.currentUser.roles.includes('ROLE_PROFESSOR')"
-                           appearance="legacy" name="fontStyle" aria-label="Font Style">
-    <mat-button-toggle (click)="courseStatusChanged(true)"
-                       [checked]="course && course.enabled"
-                       [disabled]="course && course.enabled">Enabled</mat-button-toggle>
-    <mat-button-toggle (click)="courseStatusChanged(false)"
-                       [checked]="course && !course.enabled"
-                       [disabled]="course && !course.enabled">Disabled</mat-button-toggle>
-  </mat-button-toggle-group>
+  <button
+    mat-icon-button
+    [disabled]="inModal"
+    aria-label="Example icon button with a gear icon"
+    *ngIf="
+      selectedCourseName && this.currentUser.roles.includes('ROLE_PROFESSOR')
+    "
+    [routerLink]="routerUrl"
+    [queryParams]="{ editCourse: true }"
+  >
+    <mat-icon>settings</mat-icon>
+  </button>
 </mat-toolbar>
 
 <!-- Application views area -->
@@ -62,11 +83,15 @@
           [ngClass]="course.enabled ? 'enabled' : 'disabled'"
           [routerLink]="[
             currentUser.roles[0].toLowerCase().replace('role_', '') +
-              '/courses/' + course.acronym]">{{ course.name }}
+              '/courses/' +
+              course.acronym
+          ]"
+          >{{ course.name }}
         </mat-list-item>
         <div
           *ngIf="currentUser && currentUser.roles[0] === 'ROLE_PROFESSOR'"
-          class="plus-button-container">
+          class="plus-button-container"
+        >
           <button
             mat-fab
             color="primary"
@@ -74,7 +99,9 @@
             style="font-size: 25px"
             [routerLink]=""
             [disabled]="inModal"
-            [queryParams]="{ addCourse: true }">+
+            [queryParams]="{ addCourse: true }"
+          >
+            +
           </button>
         </div>
       </mat-nav-list>

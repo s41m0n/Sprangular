@@ -12,12 +12,13 @@ import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
-import {NewAssignmentDialogComponent} from './modals/new-assignment/new-assignment-dialog.component';
+import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
+import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   currentUser: User; // Variable to keep track of the current user
@@ -25,6 +26,7 @@ export class AppComponent {
   selectedCourseName: string; // Variable to store the current selected course name (notified by sub routes via Broadcaster service)
   inModal: boolean; // Variable to check if a modal is already open
   course: Course;
+  routerUrl: string;
 
   // Unsubscribes are not performed here since alive till this root component is always alive and must be updated
   constructor(
@@ -52,7 +54,11 @@ export class AppComponent {
 
     this.courseService.currentCourseSubject
       .asObservable()
-      .subscribe((course) => (this.selectedCourseName = course));
+      .subscribe((course) => {
+        this.selectedCourseName = course;
+        this.routerUrl =
+          '/professor/courses/' + this.selectedCourseName + '/students';
+      });
 
     // Subscribing to the route queryParam to check doLogin parameter
     this.route.queryParams.subscribe((queryParam) =>
@@ -69,6 +75,10 @@ export class AppComponent {
 
     this.route.queryParams.subscribe((queryParam) =>
       queryParam && queryParam.addAssignment ? this.newAssignment() : null
+    );
+
+    this.route.queryParams.subscribe((queryParam) =>
+      queryParam && queryParam.editCourse ? this.editCourse() : null
     );
   }
 
@@ -142,17 +152,36 @@ export class AppComponent {
     const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
       width: '400px',
     });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.router.navigate(
+          [`/professor/courses/${this.selectedCourseName}/assignments`],
+          { queryParams: { refreshAssignments: true } }
+        );
+      } else {
+        this.router.navigate([
+          `/professor/courses/${this.selectedCourseName}/assignments`,
+        ]);
+      }
+      this.inModal = false;
+    });
+  }
+
+  editCourse() {
+    this.inModal = true;
+    const dialogRef = this.dialog.open(EditCourseDialogComponent);
     dialogRef
-        .afterClosed()
-        .subscribe((result) => {
-          if (result) {
-            this.router.navigate([`/professor/courses/${this.selectedCourseName}/assignments`],
-                {queryParams: {refreshAssignments: true}});
-          } else {
-            this.router.navigate([`/professor/courses/${this.selectedCourseName}/assignments`]);
-          }
-          this.inModal = false;
-        });
+      .afterClosed()
+      .pipe(first())
+      .subscribe((result) => {
+        if (result) {
+          this.refreshCourses();
+          this.router.navigate([this.router.url.split('?')[0]]);
+        } else {
+          this.router.navigate([this.router.url.split('?')[0]]);
+        }
+        this.inModal = false;
+      });
   }
 
   /** Private function to refresh the list of courses */
@@ -187,7 +216,7 @@ export class AppComponent {
     if (status === this.course.enabled) {
       return;
     }
-    this.courseService.changeCourseStatus(status).subscribe(x => {
+    this.courseService.changeCourseStatus(status).subscribe((x) => {
       this.course.enabled = x;
       this.refreshCourses();
     });

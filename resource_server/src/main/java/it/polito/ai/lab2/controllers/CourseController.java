@@ -279,7 +279,7 @@ public class CourseController {
   }
 
   @PutMapping("/{courseId}")
-  public CourseDTO updateCourse(@PathVariable String courseId, @RequestBody UpdateCourseDetails updateCourseDetails) {
+  public CourseDTO updateCourse(@PathVariable String courseId, @RequestBody CourseDTO updateCourseDetails) {
     try {
       CourseDTO c = courseService.updateCourse(courseId, updateCourseDetails);
       if (c == null) {
@@ -288,6 +288,8 @@ public class CourseController {
       return c;
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (CannotUpdateCourseException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 

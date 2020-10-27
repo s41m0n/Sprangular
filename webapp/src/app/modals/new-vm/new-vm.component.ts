@@ -24,7 +24,7 @@ export class NewVmDialogComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', Validators.min(1)],
       vCpu: [2, [Validators.min(1), Validators.max(6)]],
-      ram: [2, [Validators.min(1), Validators.max(6)]],
+      ram: [2, [Validators.min(1), Validators.max(8)]],
       diskStorage: [5, [Validators.min(1), Validators.max(20)]],
     });
   }

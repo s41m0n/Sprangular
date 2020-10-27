@@ -1,17 +1,17 @@
 .full-width-input {
-    width: 100%;
+  width: 100%;
 }
 
 .centered {
-    display: block;
-    margin: auto;
+  display: block;
+  margin: auto;
 }
 
 .mat-dialog-actions {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 form {
-    height: 181px;
+  height: 181px;
 }

@@ -12,7 +12,6 @@ import it.polito.ai.lab2.entities.Student;
 import it.polito.ai.lab2.entities.Team;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
-import it.polito.ai.lab2.pojos.UpdateCourseDetails;
 import it.polito.ai.lab2.repositories.CourseRepository;
 import it.polito.ai.lab2.repositories.ProfessorRepository;
 import it.polito.ai.lab2.repositories.StudentRepository;
@@ -186,11 +185,18 @@ public class CourseServiceImpl implements CourseService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-  public CourseDTO updateCourse(String courseId, UpdateCourseDetails updateCourseDetails) {
+  public CourseDTO updateCourse(String courseId, CourseDTO updateCourseDetails) {
     if (updateCourseDetails.getTeamMaxSize() < updateCourseDetails.getTeamMinSize()) {
       return null;
     }
     Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+
+    for(Team t : c.getTeams()){
+      if(t.getMembers().size() < updateCourseDetails.getTeamMinSize() || t.getMembers().size() > updateCourseDetails.getTeamMaxSize()){
+        throw new CannotUpdateCourseException("Course " + courseId + " cannot be updated: some teams are not compliant with new restrictions");
+      }
+    }
+
     c.setTeamMaxSize(updateCourseDetails.getTeamMaxSize());
     c.setTeamMinSize(updateCourseDetails.getTeamMinSize());
     c.setEnabled(updateCourseDetails.isEnabled());

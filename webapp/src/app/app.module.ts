@@ -50,7 +50,7 @@ import { TabStudentAssignmentsContComponent } from './student/assignments/tab-as
 import { TabExpandendAssignmentComponent } from './student/assignments/tab-expandend-assignment.component';
 
 import { MatMenuModule } from '@angular/material/menu';
-import { VmOptionsDialogComponent } from './modals/vm-options-modal/vm-options-dialog.component';
+import { VmOptionsDialogComponent } from './modals/vm-options/vm-options-dialog.component';
 import { MatSliderModule } from '@angular/material/slider';
 import { NewVmDialogComponent } from './modals/new-vm/new-vm.component';
 import { MatSelectModule } from '@angular/material/select';
@@ -64,6 +64,8 @@ import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UserConfirmComponent } from './user/user-confirm.component';
 import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
+import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 
 @NgModule({
   declarations: [
@@ -95,7 +97,8 @@ import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assign
     NewCourseDialogComponent,
     TabExpandendAssignmentComponent,
     UserConfirmComponent,
-    NewAssignmentDialogComponent
+    NewAssignmentDialogComponent,
+    EditCourseDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -133,7 +136,8 @@ import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assign
     MatNativeDateModule,
     MatButtonToggleModule,
   ],
-  entryComponents: [LoginDialogComponent,
+  entryComponents: [
+    LoginDialogComponent,
     RegisterDialogComponent,
     NewCourseDialogComponent,
     NewAssignmentDialogComponent,
@@ -141,7 +145,9 @@ import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assign
     NewVmDialogComponent,
     VmOptionsDialogComponent,
     VmOwnerDialogComponent,
-    VmViewerDialogComponent],
+    VmViewerDialogComponent,
+    EditCourseDialogComponent,
+  ],
   providers: [
     MatDatepickerModule,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

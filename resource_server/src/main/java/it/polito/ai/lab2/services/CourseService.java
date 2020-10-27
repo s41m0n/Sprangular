@@ -4,7 +4,6 @@ import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
-import it.polito.ai.lab2.pojos.UpdateCourseDetails;
 
 import java.io.Reader;
 import java.util.List;
@@ -16,7 +15,7 @@ public interface CourseService {
 
   CourseDTO removeCourse(String courseId);
 
-  CourseDTO updateCourse(String courseId, UpdateCourseDetails updateCourseDetails);
+  CourseDTO updateCourse(String courseId, CourseDTO updateCourseDetails);
 
   Optional<CourseDTO> getCourse(String courseId);
 

@@ -6,25 +6,32 @@ import { CourseService } from 'src/app/services/course.service';
 import { Course } from 'src/app/models/course.model';
 
 @Component({
-  selector: 'app-new-course',
-  templateUrl: './new-course-dialog.component.html',
-  styleUrls: ['./new-course-dialog.component.css'],
+  selector: 'app-edit-course-dialog',
+  templateUrl: './edit-course-dialog.component.html',
+  styleUrls: ['./edit-course-dialog.component.css'],
 })
-export class NewCourseDialogComponent implements OnInit {
+export class EditCourseDialogComponent implements OnInit {
   form: FormGroup;
+  course: Course;
+  checked: boolean;
 
   constructor(
     private fb: FormBuilder,
     private courseService: CourseService,
-    public dialogRef: MatDialogRef<NewCourseDialogComponent>
+    public dialogRef: MatDialogRef<EditCourseDialogComponent>
   ) {}
 
   ngOnInit(): void {
+    this.course = this.courseService.course.getValue();
     this.form = this.fb.group({
-      acronym: [''],
-      name: [''],
-      teamMinSize: [1, [Validators.min(1), Validators.max(10)]],
-      teamMaxSize: [1, [Validators.min(1), Validators.max(10)]],
+      teamMinSize: [
+        this.course.teamMinSize,
+        [Validators.min(1), Validators.max(10)],
+      ],
+      teamMaxSize: [
+        this.course.teamMaxSize,
+        [Validators.min(1), Validators.max(10)],
+      ],
     });
   }
 
@@ -33,18 +40,30 @@ export class NewCourseDialogComponent implements OnInit {
       return;
     }
     const course = new Course(
-      this.form.get('acronym').value.toLowerCase(),
-      this.form.get('name').value,
+      this.course.acronym,
+      this.course.name,
       this.form.get('teamMinSize').value,
       this.form.get('teamMaxSize').value,
-      true
+      this.checked
     );
+
     this.courseService
-      .createCourse(course)
+      .updateCourse(course)
       .pipe(first())
       .subscribe((res) => {
         if (res) {
-          this.dialogRef.close(course);
+          this.dialogRef.close();
+        }
+      });
+  }
+
+  deleteCourse() {
+    this.courseService
+      .deleteCourse()
+      .pipe(first())
+      .subscribe((res) => {
+        if (res) {
+          this.dialogRef.close();
         }
       });
   }
@@ -63,5 +82,9 @@ export class NewCourseDialogComponent implements OnInit {
     ) {
       this.form.get('teamMinSize').setValue(value);
     }
+  }
+
+  courseStatusChanged(value: boolean) {
+    this.checked = value;
   }
 }

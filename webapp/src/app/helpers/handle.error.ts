@@ -29,9 +29,7 @@ export function handleError<T>(
         };
         myReader.readAsText(error.error);
       } else {
-        const why = `${
-          error.error.message ? error.error.message : message
-        } ${operation}: ${error.statusText}`;
+        const why = `${error.error.message ? error.error.message : message}`;
         service.error(why, 'Error 😅', {
           timeOut: 5000,
         });

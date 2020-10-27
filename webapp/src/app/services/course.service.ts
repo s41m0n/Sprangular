@@ -33,7 +33,9 @@ export class CourseService {
 
   setNext(acronym: string) {
     this.currentCourseSubject.next(acronym);
-    this.getCourse(acronym).pipe(first()).subscribe(x => this.course.next(x));
+    this.getCourse(acronym)
+      .pipe(first())
+      .subscribe((x) => this.course.next(x));
   }
 
   /**
@@ -318,7 +320,7 @@ export class CourseService {
       );
   }
 
-  private updateCourse(course: Course): Observable<Course> {
+  updateCourse(course: Course): Observable<Course> {
     return this.http
       .put<Course>(
         `${environment.base_courses_url}/${course.acronym}`,
@@ -327,7 +329,10 @@ export class CourseService {
       )
       .pipe(
         tap(() =>
-          console.log(`updated course ${course.name} - updateCourse()`)
+          this.toastrService.success(
+            `Course ${course.name} successfully updated!`,
+            'Awesome 😃'
+          )
         ),
         catchError(
           handleError<Course>(
@@ -340,33 +345,54 @@ export class CourseService {
 
   changeCourseStatus(statusRequested: boolean): Observable<boolean> {
     const enabled = statusRequested ? 'true' : 'false';
-    return this.http.put<any>(
+    return this.http
+      .put<any>(
         `${environment.base_courses_url}/${this.currentCourseSubject.value}/toggle`,
         { enabled },
         environment.base_http_headers
-    )
-    .pipe(
-      tap(() => console.log(`set course to ${statusRequested} - changeCourseStatus()`)
-      ),
-      catchError(
-        handleError<Course>(
-          this.toastrService,
-          `changeCourseStatus(${statusRequested})`
-        )
       )
-    );
+      .pipe(
+        tap(() =>
+          console.log(`set course to ${statusRequested} - changeCourseStatus()`)
+        ),
+        catchError(
+          handleError<Course>(
+            this.toastrService,
+            `changeCourseStatus(${statusRequested})`
+          )
+        )
+      );
+  }
+
+  deleteCourse(courseAcronym: string = this.currentCourseSubject.value) {
+    return this.http
+      .delete<Course>(`${environment.base_courses_url}/${courseAcronym}`)
+      .pipe(
+        tap(() => console.log(`Course ${courseAcronym} deleted`)),
+        catchError(handleError<Course>(this.toastrService))
+      );
   }
 
   createAssignment(formData: FormData): Observable<Assignment> {
-    return this.http.post<Assignment>(
+    return this.http
+      .post<Assignment>(
         `${environment.base_courses_url}/${this.currentCourseSubject.value}/assignments`,
         formData
-    ).pipe(
-        tap(() => this.toastrService.success(
-            `Assignment successfully created`,
-            `Awesome 😃`
+      )
+      .pipe(
+        tap(
+          () =>
+            this.toastrService.success(
+              `Assignment successfully created`,
+              `Awesome 😃`
             ),
-        catchError(handleError<Assignment>(this.toastrService, `Assignment Creation Failed`)))
-    );
+          catchError(
+            handleError<Assignment>(
+              this.toastrService,
+              `Assignment Creation Failed`
+            )
+          )
+        )
+      );
   }
 }
