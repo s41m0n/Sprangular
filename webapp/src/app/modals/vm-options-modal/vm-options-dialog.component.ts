@@ -3,12 +3,12 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-vm-options-modal',
-  templateUrl: './vm-options-modal.component.html',
-  styleUrls: ['./vm-options-modal.component.css'],
+  templateUrl: './vm-options-dialog.component.html',
+  styleUrls: ['./vm-options-dialog.component.css'],
 })
-export class VmOptionsModalComponent implements OnInit {
+export class VmOptionsDialogComponent implements OnInit {
   constructor(
-    public dialogRef: MatDialogRef<VmOptionsModalComponent>,
+    public dialogRef: MatDialogRef<VmOptionsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 

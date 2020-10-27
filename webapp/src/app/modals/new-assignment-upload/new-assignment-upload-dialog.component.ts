@@ -8,10 +8,10 @@ import {FileInput} from 'ngx-material-file-input';
 
 @Component({
     selector: 'app-new-assignment-upload',
-    templateUrl: './new-assignment-upload.component.html',
-    styleUrls: ['./new-assignment-upload.component.css'],
+    templateUrl: './new-assignment-upload-dialog.component.html',
+    styleUrls: ['./new-assignment-upload-dialog.component.css'],
 })
-export class NewAssignmentUploadComponent implements OnInit {
+export class NewAssignmentUploadDialogComponent implements OnInit {
     form: FormGroup;
     assignmentInvalid = false;
     assignmentId: number;
@@ -19,7 +19,7 @@ export class NewAssignmentUploadComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private studentService: StudentService,
-        public dialogRef: MatDialogRef<NewAssignmentUploadComponent>,
+        public dialogRef: MatDialogRef<NewAssignmentUploadDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: any) {
         this.assignmentId = data.assignmentId;
     }

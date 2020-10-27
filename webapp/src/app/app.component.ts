@@ -11,7 +11,8 @@ import { Observable, of } from 'rxjs';
 import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
-import { NewCourseComponent } from './modals/new-course/new-course-dialog.component';
+import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
+import {NewAssignmentDialogComponent} from './modals/new-assignment/new-assignment-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -60,6 +61,14 @@ export class AppComponent {
 
     this.route.queryParams.subscribe((queryParam) =>
       queryParam && queryParam.doRegister ? this.openRegister() : null
+    );
+
+    this.route.queryParams.subscribe((queryParam) =>
+      queryParam && queryParam.addCourse ? this.newCourse() : null
+    );
+
+    this.route.queryParams.subscribe((queryParam) =>
+      queryParam && queryParam.addAssignment ? this.newAssignment() : null
     );
   }
 
@@ -112,15 +121,38 @@ export class AppComponent {
   }
 
   newCourse() {
-    const dialogRef = this.dialog.open(NewCourseComponent);
+    this.inModal = true;
+    const dialogRef = this.dialog.open(NewCourseDialogComponent);
     dialogRef
       .afterClosed()
       .pipe(first())
       .subscribe((result) => {
         if (result) {
           this.refreshCourses();
+          this.router.navigate([`/professor/courses/${result.acronym}`]);
+        } else {
+          this.router.navigate([this.router.url.split('?')[0]]);
         }
+        this.inModal = false;
       });
+  }
+
+  newAssignment() {
+    this.inModal = true;
+    const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
+      width: '400px',
+    });
+    dialogRef
+        .afterClosed()
+        .subscribe((result) => {
+          if (result) {
+            this.router.navigate([`/professor/courses/${this.selectedCourseName}/assignments`],
+                {queryParams: {refreshAssignments: true}});
+          } else {
+            this.router.navigate([`/professor/courses/${this.selectedCourseName}/assignments`]);
+          }
+          this.inModal = false;
+        });
   }
 
   /** Private function to refresh the list of courses */

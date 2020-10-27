@@ -10,15 +10,16 @@ import { Course } from './course.model';
 export class Assignment {
   id: number;
   name: string;
-  course: Course;
+  path: string;
   releaseDate: string;
   dueDate: string;
-  path: string;
 
-  constructor(id: number = 0, name: string = '') {
+  constructor(id: number = 0, name: string = '', dueDate: string) {
     this.id = id;
     this.name = name;
     this.path = '';
+    this.releaseDate = '';
+    this.dueDate = dueDate;
   }
 
 }

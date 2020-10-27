@@ -26,9 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -154,8 +152,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
         .orElseThrow(() -> new ProfessorNotFoundException("Professor " + professorId + " does not exist"));
     Assignment assignment = new Assignment();
     assignment.setName(details.getName());
-    assignment.setReleaseDate(details.getReleaseDate());
-    assignment.setDueDate(details.getDueDate());
+    assignment.setReleaseDate(LocalDate.now());
+    assignment.setDueDate(LocalDate.ofInstant(Instant.ofEpochMilli(details.getDueDate()), ZoneOffset.UTC));
     assignment.setCourse(course);
     assignment.setProfessor(professor);
     course.getStudents().forEach(student -> {

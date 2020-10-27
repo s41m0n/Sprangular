@@ -7,14 +7,14 @@ import { TeamService } from 'src/app/services/team.service';
 
 @Component({
   selector: 'app-vm-options-modal',
-  templateUrl: './vm-owner-modal.component.html',
+  templateUrl: './vm-owner-dialog.component.html',
 })
-export class VmOwnerModalComponent implements OnDestroy {
+export class VmOwnerDialogComponent implements OnDestroy {
   members: Student[];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
   constructor(
-    public dialogRef: MatDialogRef<VmOwnerModalComponent>,
+    public dialogRef: MatDialogRef<VmOwnerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private teamService: TeamService
   ) {

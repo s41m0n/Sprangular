@@ -3,11 +3,10 @@ import {Assignment} from '../../models/assignment.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {Upload} from '../../models/upload.model';
 import {AssignmentSolution, AssignmentStatus} from '../../models/assignment-solution.model';
-import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
 import {first} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {StudentService} from '../../services/student.service';
-import {NewAssignmentUploadComponent} from '../../modals/new-assignment-upload/new-assignment-upload.component';
+import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
 
 @Component({
   selector: 'app-tab-expandend-assignment',
@@ -57,7 +56,7 @@ export class TabExpandendAssignmentComponent {
   }
 
   newAssignmentSolution() {
-    const dialogRef = this.dialog.open(NewAssignmentUploadComponent,
+    const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
         {
           data: { assignmentId: this.expandedElement.id }
         });

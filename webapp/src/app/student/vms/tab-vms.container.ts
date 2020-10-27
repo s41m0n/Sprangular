@@ -3,10 +3,10 @@ import { VM } from '../../models/vm.model';
 import {first, map, takeUntil} from 'rxjs/operators';
 import { TeamService } from 'src/app/services/team.service';
 import { MatDialog } from '@angular/material/dialog';
-import { NewVmComponent } from 'src/app/modals/new-vm/new-vm.component';
+import { NewVmDialogComponent } from 'src/app/modals/new-vm/new-vm.component';
 import { VmService } from 'src/app/services/vm.service';
 import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
-import { VmViewerModalComponent } from '../../modals/vm-viewer/vm-viewer-modal.component';
+import { VmViewerDialogComponent } from '../../modals/vm-viewer/vm-viewer-dialog.component';
 import { DomSanitizer } from '@angular/platform-browser';
 import {Team} from '../../models/team.model';
 
@@ -78,7 +78,7 @@ export class TabStudentVmsContComponent implements OnInit {
       .subscribe((instance) => {
         if (!instance) { return; }
         const url = URL.createObjectURL(instance);
-        const dialogRef = this.dialog.open(VmViewerModalComponent, {
+        const dialogRef = this.dialog.open(VmViewerDialogComponent, {
           data: {
             id: vmId,
             imageSrc: this.sanitizer.bypassSecurityTrustUrl(url),
@@ -91,7 +91,7 @@ export class TabStudentVmsContComponent implements OnInit {
   }
 
   newVm() {
-    const dialogRef = this.dialog.open(NewVmComponent);
+    const dialogRef = this.dialog.open(NewVmDialogComponent);
     dialogRef
       .afterClosed()
       .pipe(first())

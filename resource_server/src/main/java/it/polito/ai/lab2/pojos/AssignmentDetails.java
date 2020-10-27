@@ -10,9 +10,7 @@ public class AssignmentDetails {
 
   String name;
 
-  LocalDate releaseDate;
-
-  LocalDate dueDate;
+  Long dueDate;
 
   MultipartFile document;
 }

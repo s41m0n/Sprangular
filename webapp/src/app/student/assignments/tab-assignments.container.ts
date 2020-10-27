@@ -20,7 +20,8 @@ export class TabStudentAssignmentsContComponent {
   assignments: Assignment[] = [];                             // The current assignments
   student: User;
 
-  constructor(private courseService: CourseService, private authService: AuthService) {
+  constructor(private courseService: CourseService,
+              private authService: AuthService) {
     this.courseService.getCourseAssignments(
         this.courseService.currentCourseSubject.value
     ).pipe(

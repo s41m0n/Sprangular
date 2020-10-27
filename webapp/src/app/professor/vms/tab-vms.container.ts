@@ -5,7 +5,7 @@ import { CourseService } from '../../services/course.service';
 import { first } from 'rxjs/operators';
 import { VmService } from 'src/app/services/vm.service';
 import { MatDialog } from '@angular/material/dialog';
-import { VmViewerModalComponent } from 'src/app/modals/vm-viewer/vm-viewer-modal.component';
+import { VmViewerDialogComponent } from 'src/app/modals/vm-viewer/vm-viewer-dialog.component';
 import { createUrlResolverWithoutPackagePrefix } from '@angular/compiler';
 import { UrlHandlingStrategy } from '@angular/router';
 
@@ -45,7 +45,7 @@ export class TabProfessorVmsContComponent {
     this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => {
       if (!instance) { return; }
       const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(VmViewerModalComponent, {
+      const dialogRef = this.dialog.open(VmViewerDialogComponent, {
         data: {id : vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
       });
       dialogRef.afterClosed().subscribe(() => {

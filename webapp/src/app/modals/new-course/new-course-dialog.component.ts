@@ -10,13 +10,13 @@ import { Course } from 'src/app/models/course.model';
   templateUrl: './new-course-dialog.component.html',
   styleUrls: ['./new-course-dialog.component.css'],
 })
-export class NewCourseComponent implements OnInit {
+export class NewCourseDialogComponent implements OnInit {
   form: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private courseService: CourseService,
-    public dialogRef: MatDialogRef<NewCourseComponent>
+    public dialogRef: MatDialogRef<NewCourseDialogComponent>
   ) {}
 
   ngOnInit(): void {
@@ -44,7 +44,7 @@ export class NewCourseComponent implements OnInit {
       .pipe(first())
       .subscribe((res) => {
         if (res) {
-          this.dialogRef.close(true);
+          this.dialogRef.close(course);
         }
       });
   }

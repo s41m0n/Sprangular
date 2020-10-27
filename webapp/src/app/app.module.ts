@@ -50,19 +50,20 @@ import { TabStudentAssignmentsContComponent } from './student/assignments/tab-as
 import { TabExpandendAssignmentComponent } from './student/assignments/tab-expandend-assignment.component';
 
 import { MatMenuModule } from '@angular/material/menu';
-import { VmOptionsModalComponent } from './modals/vm-options-modal/vm-options-modal.component';
+import { VmOptionsDialogComponent } from './modals/vm-options-modal/vm-options-dialog.component';
 import { MatSliderModule } from '@angular/material/slider';
-import { NewVmComponent } from './modals/new-vm/new-vm.component';
+import { NewVmDialogComponent } from './modals/new-vm/new-vm.component';
 import { MatSelectModule } from '@angular/material/select';
-import { NewAssignmentUploadComponent } from './modals/new-assignment-upload/new-assignment-upload.component';
+import { NewAssignmentUploadDialogComponent } from './modals/new-assignment-upload/new-assignment-upload-dialog.component';
 
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { MatNativeDateModule } from '@angular/material/core';
-import { VmOwnerModalComponent } from './modals/vm-owner/vm-owner-modal.component';
-import { VmViewerModalComponent } from './modals/vm-viewer/vm-viewer-modal.component';
-import { NewCourseComponent } from './modals/new-course/new-course-dialog.component';
+import { VmOwnerDialogComponent } from './modals/vm-owner/vm-owner-dialog.component';
+import { VmViewerDialogComponent } from './modals/vm-viewer/vm-viewer-dialog.component';
+import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UserConfirmComponent } from './user/user-confirm.component';
+import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 
 @NgModule({
   declarations: [
@@ -85,15 +86,16 @@ import { UserConfirmComponent } from './user/user-confirm.component';
     TabProfessorAssignmentsContComponent,
     TabProfessorVmsComponent,
     TabProfessorVmsContComponent,
-    VmOptionsModalComponent,
-    NewVmComponent,
-    NewAssignmentUploadComponent,
+    VmOptionsDialogComponent,
+    NewVmDialogComponent,
+    NewAssignmentUploadDialogComponent,
     RegisterDialogComponent,
-    VmOwnerModalComponent,
-    VmViewerModalComponent,
-    NewCourseComponent,
+    VmOwnerDialogComponent,
+    VmViewerDialogComponent,
+    NewCourseDialogComponent,
     TabExpandendAssignmentComponent,
     UserConfirmComponent,
+    NewAssignmentDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -131,7 +133,15 @@ import { UserConfirmComponent } from './user/user-confirm.component';
     MatNativeDateModule,
     MatButtonToggleModule,
   ],
-  entryComponents: [LoginDialogComponent, RegisterDialogComponent],
+  entryComponents: [LoginDialogComponent,
+    RegisterDialogComponent,
+    NewCourseDialogComponent,
+    NewAssignmentDialogComponent,
+    NewAssignmentUploadDialogComponent,
+    NewVmDialogComponent,
+    VmOptionsDialogComponent,
+    VmOwnerDialogComponent,
+    VmViewerDialogComponent],
   providers: [
     MatDatepickerModule,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

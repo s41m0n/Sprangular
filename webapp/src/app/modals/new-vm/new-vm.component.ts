@@ -10,14 +10,14 @@ import { first } from 'rxjs/operators';
   templateUrl: './new-vm.component.html',
   styleUrls: ['./new-vm.component.css'],
 })
-export class NewVmComponent implements OnInit {
+export class NewVmDialogComponent implements OnInit {
   form: FormGroup;
   vmInvalid = false;
 
   constructor(
     private fb: FormBuilder,
     private vmService: VmService,
-    public dialogRef: MatDialogRef<NewVmComponent>
+    public dialogRef: MatDialogRef<NewVmDialogComponent>
   ) {}
 
   ngOnInit(): void {

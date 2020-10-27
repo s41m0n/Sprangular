@@ -8,6 +8,7 @@ import {Observable, Subject} from 'rxjs';
 import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
 
 import {Student} from '../../models/student.model';
+import {NavigationEnd, Router} from '@angular/router';
 
 /**
  * StudentsComponent

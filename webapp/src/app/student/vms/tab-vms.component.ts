@@ -2,7 +2,7 @@ import {EventEmitter, Component, Input, Output} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {MatTableDataSource} from '@angular/material/table';
 import { first } from 'rxjs/operators';
-import { VmOwnerModalComponent } from 'src/app/modals/vm-owner/vm-owner-modal.component';
+import { VmOwnerDialogComponent } from 'src/app/modals/vm-owner/vm-owner-dialog.component';
 import {VM} from '../../models/vm.model';
 
 /**
@@ -34,7 +34,7 @@ export class TabStudentVmsComponent {
   }
 
   addOwner(vm: VM) {
-    const dialogRef = this.dialog.open(VmOwnerModalComponent);
+    const dialogRef = this.dialog.open(VmOwnerDialogComponent);
     dialogRef.afterClosed()
       .pipe(first())
       .subscribe(result => {

@@ -21,7 +21,7 @@ const routes = [
   { path: 'home', component: HomeComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   {
-    path: 'professor/course/:coursename',
+    path: 'professor/courses/:coursename',
     component: ProfessorComponent,
     canActivate: [AuthGuard],
     data: { roles: [Role.Admin, Role.Professor] },
@@ -33,7 +33,7 @@ const routes = [
     ],
   },
   {
-    path: 'student/course/:coursename',
+    path: 'student/courses/:coursename',
     component: StudentComponent,
     canActivate: [AuthGuard],
     data: { roles: [Role.Student] },

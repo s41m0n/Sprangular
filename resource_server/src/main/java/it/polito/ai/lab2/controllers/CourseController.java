@@ -303,6 +303,7 @@ public class CourseController {
   @PostMapping("/{courseId}/assignments")
   public AssignmentDTO createAssignmentForCourse(@PathVariable String courseId,
                                                  @ModelAttribute AssignmentDetails assignmentDetails) {
+    log.info("createAssignmentForCourse() called");
     try {
       return assAndUploadService.createAssignment(assignmentDetails, courseId,
           SecurityContextHolder.getContext().getAuthentication().getName());

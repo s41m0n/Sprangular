@@ -2,9 +2,10 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {Student} from '../../models/student.model';
 import {StudentService} from '../../services/student.service';
-import {finalize, first, switchMap, takeUntil} from 'rxjs/operators';
+import {filter, finalize, first, switchMap, takeUntil} from 'rxjs/operators';
 import {Observable, Subject} from 'rxjs';
 import {CourseService} from '../../services/course.service';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 
 /**
  * StudentsContainer class
@@ -21,10 +22,20 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
   filteredStudents: Observable<Student[]>;                     // The list of students matching a criteria
   private searchTerms = new Subject<string>();                  // The search criteria emitter
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
+  private previousUrl = '';
+  navSub;
 
   constructor(private studentService: StudentService,
-              private courseService: CourseService) {
-    this.courseService.getEnrolledStudents().pipe(first()).subscribe(enrolled => this.enrolledStudents = enrolled);
+              private courseService: CourseService,
+              private router: Router) {
+    this.navSub = this.router.events
+        .pipe(filter(event => event instanceof NavigationEnd))
+        .subscribe((event: NavigationEnd) => {
+          if (!this.previousUrl.includes(this.courseService.currentCourseSubject.value)) {
+            this.refreshEnrolled();
+          }
+          this.previousUrl = event.url;
+        });
   }
 
   ngOnInit(): void {
@@ -40,6 +51,9 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
     /** Destroying subscription */
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
+    if (this.navSub) {
+      this.navSub.unsubscribe();
+    }
   }
 
   /**
@@ -86,6 +100,7 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
       this.enrolledStudents = [];
       return;
     }
-    this.courseService.getEnrolledStudents(this.courseService.currentCourseSubject.value).pipe(first()).subscribe(students => this.enrolledStudents = students);
+    this.courseService.getEnrolledStudents(this.courseService.currentCourseSubject.value)
+        .pipe(first()).subscribe(students => this.enrolledStudents = students);
   }
 }

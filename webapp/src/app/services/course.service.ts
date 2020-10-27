@@ -356,4 +356,17 @@ export class CourseService {
       )
     );
   }
+
+  createAssignment(formData: FormData): Observable<Assignment> {
+    return this.http.post<Assignment>(
+        `${environment.base_courses_url}/${this.currentCourseSubject.value}/assignments`,
+        formData
+    ).pipe(
+        tap(() => this.toastrService.success(
+            `Assignment successfully created`,
+            `Awesome 😃`
+            ),
+        catchError(handleError<Assignment>(this.toastrService, `Assignment Creation Failed`)))
+    );
+  }
 }

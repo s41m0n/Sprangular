@@ -2,9 +2,9 @@ import {AfterViewInit, Component, EventEmitter, Input, Output} from '@angular/co
 import {MatTableDataSource} from '@angular/material/table';
 
 import {VM} from '../../models/vm.model';
-import {VmOptionsModalComponent} from '../../modals/vm-options-modal/vm-options-modal.component';
+import {VmOptionsDialogComponent} from '../../modals/vm-options-modal/vm-options-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
+import {NewVmDialogComponent} from '../../modals/new-vm/new-vm.component';
 
 /**
  * VmsComponent
@@ -35,7 +35,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   openDialog(id: number): void {
     const selectedVm = this.dataSource.data.find(vm => vm.id === id);
     const index = this.dataSource.data.findIndex(vm => vm === selectedVm);
-    const dialogRef = this.dialog.open(VmOptionsModalComponent, {
+    const dialogRef = this.dialog.open(VmOptionsDialogComponent, {
       width: '300px',
       data: {vCpu: selectedVm.vcpu, ram: selectedVm.ram, disk: selectedVm.diskStorage}
     });
@@ -65,7 +65,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   }
 
   newVm() {
-    const newVmDialog = this.dialog.open(NewVmComponent, {
+    const newVmDialog = this.dialog.open(NewVmDialogComponent, {
       width: '300px',
       data: {teams: ['aggiungere', 'dati'], courses: ['aggiungere', 'dati']}
     });

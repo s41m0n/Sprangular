@@ -12,12 +12,13 @@ import {Assignment} from '../../models/assignment.model';
  */
 @Component({
   selector: 'app-tab-professor-assignments',
-  templateUrl: './tab-assignments.component.html'
+  templateUrl: './tab-assignments.component.html',
+  styleUrls: ['./tab-assignments.component.css']
 })
 export class TabProfessorAssignmentsComponent implements AfterViewInit {
 
   dataSource = new MatTableDataSource<Assignment>();                     // Table datasource dynamically modified
-  colsToDisplay = ['id', 'name', 'professor'];                          // Columns to be displayed in the table
+  colsToDisplay = ['id', 'name', 'releaseDate', 'dueDate'];             // Columns to be displayed in the table
   @ViewChild(MatSort, {static: true}) sort: MatSort;                  // Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator;                   // Mat paginator for the table
   @Input() set assignments(assignments: Assignment[]) {              // Assignments to be displayed in the table
