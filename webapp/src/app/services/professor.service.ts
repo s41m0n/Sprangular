@@ -88,7 +88,7 @@ export class ProfessorService {
 
   uploadAssignmentCorrection(uploadDto: Upload): Observable<Upload> {
     return this.http
-        .post<Upload>(`${environment.base_assignments_url}/${uploadDto.id.toString()}/review`,
+        .post<Upload>(`${environment.base_uploads_url}/${uploadDto.id.toString()}/review`,
             uploadDto,
             environment.base_http_headers)
         .pipe(

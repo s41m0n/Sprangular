@@ -2,19 +2,19 @@ import { Component, Inject, Input } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-vm-options-modal',
-  templateUrl: './vm-viewer-dialog.component.html',
+  selector: 'app-image-viewer-dialog',
+  templateUrl: './image-viewer-dialog.component.html',
 })
-export class VmViewerDialogComponent {
-  id = '';
+export class ImageViewerDialogComponent {
+  title = '';
   imageSrc = '';
 
   constructor(
-    public dialogRef: MatDialogRef<VmViewerDialogComponent>,
+    public dialogRef: MatDialogRef<ImageViewerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.imageSrc = data.imageSrc;
-    this.id = data.id;
+    this.title = data.title;
   }
 
   onNoClick(): void {

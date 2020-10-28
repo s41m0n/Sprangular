@@ -2,7 +2,7 @@
 
     <h2>Published Assignments</h2>
 
-    <button mat-raised-button color="primary"
+    <button mat-raised-button color="primary" class="new-ass"
             [routerLink]=""
             [queryParams]="{ addAssignment: true }">New Assignment</button>
 
@@ -31,6 +31,17 @@
         <ng-container matColumnDef="dueDate">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
             <td mat-cell *matCellDef="let element"> {{element.dueDate}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="document">
+            <th mat-header-cell *matHeaderCellDef>Document</th>
+            <td mat-cell *matCellDef="let element">
+                <button mat-raised-button
+                        color="primary"
+                        (click)="viewAssignment(element)">
+                    View
+                </button>
+            </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="colsToDisplay"></tr>

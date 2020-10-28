@@ -235,6 +235,22 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId)")
+  public Resource getAssignmentDocument(Long assignmentId) throws FileNotFoundException {
+    Assignment assignment = assignmentRepository.findById(assignmentId)
+        .orElseThrow(() -> new AssignmentNotFoundException("Assignment " + assignmentId + " does not exist"));
+    Resource file = null;
+    try {
+      file = new UrlResource(Paths.get(assignment.getImagePath()).toUri());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    if (file == null)
+      throw new FileNotFoundException("Assignment" + assignmentId + " image not found");
+    return file;
+  }
+
+  @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
       "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorUploadReviewer(#studentUploadId)")
   public UploadDTO uploadProfessorUpload(UploadDetails details, Long studentUploadId) {
