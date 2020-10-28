@@ -7,8 +7,8 @@ import { catchError, tap } from 'rxjs/operators';
 import { Course } from '../models/course.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
-import {handleError} from '../helpers/handle.error';
-import {Upload} from '../models/upload.model';
+import { handleError } from '../helpers/handle.error';
+import { Upload } from '../models/upload.model';
 
 /** Team service
  *
@@ -22,36 +22,44 @@ export class ProfessorService {
 
   public getProfessorCourses(professorId: string): Observable<Course[]> {
     return this.http
-        .get<Course[]>(
-            `${environment.base_professors_url}/${professorId}/courses`
+      .get<Course[]>(
+        `${environment.base_professors_url}/${professorId}/courses`
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched professor ${professorId} courses - getProfessorCourses()`
+          )
+        ),
+        catchError(
+          handleError<Course[]>(
+            this.toastrService,
+            `getProfessorCourses(${professorId})`
+          )
         )
-        .pipe(
-            tap(() =>
-                console.log(
-                    `fetched professor ${professorId} courses - getProfessorCourses()`
-                )
-            ),
-            catchError(handleError<Course[]>(this.toastrService, `getProfessorCourses(${professorId})`))
-        );
+      );
   }
 
   public updateProfessor(professor: Professor): Observable<Professor> {
     return this.http
-        .put<Professor>(
-            `${environment.base_professors_url}/${professor.id}`,
-            professor,
-            environment.base_http_headers
+      .put<Professor>(
+        `${environment.base_professors_url}/${professor.id}`,
+        professor,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `updated professor ${professor.email} - updateProfessor()`
+          )
+        ),
+        catchError(
+          handleError<Professor>(
+            this.toastrService,
+            `updateProfessor(${professor.email})`
+          )
         )
-        .pipe(
-            tap(() =>
-                console.log(
-                    `updated professor ${professor.email} - updateProfessor()`
-                )
-            ),
-            catchError(
-                handleError<Professor>(this.toastrService, `updateProfessor(${professor.email})`)
-            )
-        );
+      );
   }
 
   /**
@@ -70,37 +78,49 @@ export class ProfessorService {
       }
     }
     return this.http
-        .get<Professor[]>(
-            `${environment.base_professors_url}?surname_like=${name}`
+      .get<Professor[]>(
+        `${environment.base_professors_url}?surname_like=${name}`
+      )
+      .pipe(
+        // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
+        tap((x) =>
+          console.log(
+            `found ${x.length} results matching ${name} - searchProfessors()`
+          )
+        ),
+        catchError(
+          handleError<Professor[]>(
+            this.toastrService,
+            `searchProfessors(${name})`,
+            [],
+            false
+          )
         )
-        .pipe(
-            // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
-            tap((x) =>
-                console.log(
-                    `found ${x.length} results matching ${name} - searchProfessors()`
-                )
-            ),
-            catchError(
-                handleError<Professor[]>(this.toastrService, `searchProfessors(${name})`, [], false)
-            )
-        );
+      );
   }
 
   uploadAssignmentCorrection(uploadDto: Upload): Observable<Upload> {
     return this.http
-        .post<Upload>(`${environment.base_assignments_url}/${uploadDto.id.toString()}/review`,
-            uploadDto,
-            environment.base_http_headers)
-        .pipe(
-            tap((x) =>
-                this.toastrService.success(
-                    `Uploaded a new assignment correction`,
-                    'Congratulations 😃'
-                )
-            ),
-            catchError(
-                handleError<Upload>(this.toastrService, `uploadAssignmentCorrection()`, null, false)
-            )
-        );
+      .post<Upload>(
+        `${environment.base_assignments_url}/${uploadDto.id.toString()}/review`,
+        uploadDto,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((x) =>
+          this.toastrService.success(
+            `Uploaded a new assignment correction`,
+            'Congratulations 😃'
+          )
+        ),
+        catchError(
+          handleError<Upload>(
+            this.toastrService,
+            `uploadAssignmentCorrection()`,
+            null,
+            false
+          )
+        )
+      );
   }
 }

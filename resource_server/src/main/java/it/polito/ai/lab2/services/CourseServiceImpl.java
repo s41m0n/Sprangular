@@ -134,8 +134,7 @@ public class CourseServiceImpl implements CourseService {
     Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
     Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
     if (p.isVerified()) {
-      p.addCourse(c);
-      return true;
+      return p.addCourse(c);
     }
     throw new UserNotVerifiedException("Professor " + professor + " is not verified");
   }
@@ -145,7 +144,7 @@ public class CourseServiceImpl implements CourseService {
   public ProfessorDTO removeProfessorFromCourse(String professor, String courseId) {
     Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
     Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
-    if (p.getCourses().size() != 1) {
+    if (c.getProfessors().size() != 1) {
       p.removeCourse(c);
       return modelMapper.map(p, ProfessorDTO.class);
     }

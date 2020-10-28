@@ -2,6 +2,7 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
+import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
 import it.polito.ai.lab2.repositories.ProfessorRepository;
 import it.polito.ai.lab2.repositories.RoleRepository;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,6 +48,18 @@ public class ProfessorServiceImpl implements ProfessorService {
     return professorRepository.findAll().stream()
         .map(professor -> modelMapper.map(professor, ProfessorDTO.class))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  public List<ProfessorDTO> getProfessorsLike(String pattern) {
+    List<ProfessorDTO> returnedList = new ArrayList<>();
+    for (ProfessorDTO p : this.getProfessors()) {
+      if (p.getSurname().toLowerCase().contains(pattern.toLowerCase())) {
+        returnedList.add(p);
+      }
+    }
+    return returnedList;
   }
 
   @Override

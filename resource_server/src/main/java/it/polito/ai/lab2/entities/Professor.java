@@ -20,11 +20,13 @@ public class Professor extends User {
   @OneToMany(mappedBy = "professor")
   List<Assignment> assignments = new ArrayList<>();
 
-  public void addCourse(Course course) {
+  public boolean addCourse(Course course) {
     if (!this.courses.contains(course)) {
       this.courses.add(course);
       course.getProfessors().add(this);
+      return true;
     }
+    return false;
   }
 
   public void removeCourse(Course course) {

@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 
 import { Student } from '../models/student.model';
-import {Observable, of} from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { environment } from 'src/environments/environment';
 import { CourseService } from './course.service';
-import {handleError} from '../helpers/handle.error';
-import {AssignmentSolution} from '../models/assignment-solution.model';
-import {Upload} from '../models/upload.model';
-import {AuthService} from './auth.service';
+import { handleError } from '../helpers/handle.error';
+import { AssignmentSolution } from '../models/assignment-solution.model';
+import { Upload } from '../models/upload.model';
+import { AuthService } from './auth.service';
 
 /** StudentService service
  *
@@ -21,10 +21,12 @@ import {AuthService} from './auth.service';
   providedIn: 'root',
 })
 export class StudentService {
-    constructor(private http: HttpClient,
-                private toastrService: ToastrService,
-                private courseService: CourseService,
-                private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private toastrService: ToastrService,
+    private courseService: CourseService,
+    private authService: AuthService
+  ) {}
 
   /**
    * Function to retrieve all students whose name matches a specific string
@@ -97,35 +99,50 @@ export class StudentService {
       );
   }
 
-  public getAssignmentSolution(assignmentId: number,
-                               studentId: string = this.authService.currentUserValue.id): Observable<AssignmentSolution> {
+  public getAssignmentSolution(
+    assignmentId: number,
+    studentId: string = this.authService.currentUserValue.id
+  ): Observable<AssignmentSolution> {
     return this.http
-        .get<AssignmentSolution>(
-            `${environment.base_students_url}/${studentId}/assignments/${assignmentId}`
-        ).pipe(
-            tap(() =>
-                console.log(`fetched assignment solution ${assignmentId} - getAssignmentSolution()`)
-            ),
-            catchError(handleError<AssignmentSolution>(
-                this.toastrService,
-                `getAssignmentSolution(${studentId}, ${assignmentId})`)
-            )
-        );
+      .get<AssignmentSolution>(
+        `${environment.base_students_url}/${studentId}/assignments/${assignmentId}`
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched assignment solution ${assignmentId} - getAssignmentSolution()`
+          )
+        ),
+        catchError(
+          handleError<AssignmentSolution>(
+            this.toastrService,
+            `getAssignmentSolution(${studentId}, ${assignmentId})`
+          )
+        )
+      );
   }
 
-  public getAssignmentUploads(assignmentId: number, studentId: string = this.authService.currentUserValue.id): Observable<Upload[]> {
+  public getAssignmentUploads(
+    assignmentId: number,
+    studentId: string = this.authService.currentUserValue.id
+  ): Observable<Upload[]> {
     return this.http
-        .get<Upload[]>(
-            `${environment.base_students_url}/${studentId}/assignments/${assignmentId}/uploads`
-        ).pipe(
-            tap(() =>
-                console.log(`fetched assignment uploads ${assignmentId} - getAssignmentUploads()`)
-            ),
-            catchError(handleError<Upload[]>(
-                this.toastrService,
-                `getAssignmentUploads(${studentId}, ${assignmentId})`)
-            )
-        );
+      .get<Upload[]>(
+        `${environment.base_students_url}/${studentId}/assignments/${assignmentId}/uploads`
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched assignment uploads ${assignmentId} - getAssignmentUploads()`
+          )
+        ),
+        catchError(
+          handleError<Upload[]>(
+            this.toastrService,
+            `getAssignmentUploads(${studentId}, ${assignmentId})`
+          )
+        )
+      );
   }
 
   public getStudentCourses(id: string): Observable<Course[]> {
@@ -162,23 +179,30 @@ export class StudentService {
       );
   }
 
-  uploadAssignmentSolution(uploadDetails: FormData,
-                           assignmentId: number,
-                           studentId: string = this.authService.currentUserValue.id): Observable<Upload> {
-      return this.http
-          .post<Upload>(`${environment.base_students_url}/${studentId}/assignments/${assignmentId}/uploads`,
-              uploadDetails,
-              environment.base_http_headers)
-          .pipe(
-              tap((x) =>
-                  this.toastrService.success(
-                      `Uploaded a new assignment solution`,
-                      'Congratulations 😃'
-                  )
-              ),
-              catchError(
-                  handleError<Upload>(this.toastrService, `uploadAssignmentSolution(studentId, AssignmentId)`)
-              )
-          );
+  uploadAssignmentSolution(
+    uploadDetails: FormData,
+    assignmentId: number,
+    studentId: string = this.authService.currentUserValue.id
+  ): Observable<Upload> {
+    return this.http
+      .post<Upload>(
+        `${environment.base_students_url}/${studentId}/assignments/${assignmentId}/uploads`,
+        uploadDetails,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((x) =>
+          this.toastrService.success(
+            `Uploaded a new assignment solution`,
+            'Congratulations 😃'
+          )
+        ),
+        catchError(
+          handleError<Upload>(
+            this.toastrService,
+            `uploadAssignmentSolution(studentId, AssignmentId)`
+          )
+        )
+      );
   }
 }

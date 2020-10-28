@@ -1,11 +1,11 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import {Student} from '../../models/student.model';
-import {StudentService} from '../../services/student.service';
-import {filter, finalize, first, switchMap, takeUntil} from 'rxjs/operators';
-import {Observable, Subject} from 'rxjs';
-import {CourseService} from '../../services/course.service';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import { Student } from '../../models/student.model';
+import { StudentService } from '../../services/student.service';
+import { filter, finalize, first, switchMap, takeUntil } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { CourseService } from '../../services/course.service';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 /**
  * StudentsContainer class
@@ -17,33 +17,38 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
   templateUrl: './tab-students.container.html',
 })
 export class TabStudentsContComponent implements OnInit, OnDestroy {
-
-  enrolledStudents: Student[] = [];                             // The current enrolled list
-  filteredStudents: Observable<Student[]>;                     // The list of students matching a criteria
-  private searchTerms = new Subject<string>();                  // The search criteria emitter
+  enrolledStudents: Student[] = []; // The current enrolled list
+  filteredStudents: Observable<Student[]>; // The list of students matching a criteria
+  private searchTerms = new Subject<string>(); // The search criteria emitter
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
   private previousUrl = '';
   navSub;
 
-  constructor(private studentService: StudentService,
-              private courseService: CourseService,
-              private router: Router) {
+  constructor(
+    private studentService: StudentService,
+    private courseService: CourseService,
+    private router: Router
+  ) {
     this.navSub = this.router.events
-        .pipe(filter(event => event instanceof NavigationEnd))
-        .subscribe((event: NavigationEnd) => {
-          if (!this.previousUrl.includes(this.courseService.currentCourseSubject.value)) {
-            this.refreshEnrolled();
-          }
-          this.previousUrl = event.url;
-        });
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        if (
+          !this.previousUrl.includes(
+            this.courseService.currentCourseSubject.value
+          )
+        ) {
+          this.refreshEnrolled();
+        }
+        this.previousUrl = event.url;
+      });
   }
 
   ngOnInit(): void {
     // Subscribe to the search terms emitter
     this.filteredStudents = this.searchTerms.pipe(
-        takeUntil(this.destroy$),
-        // switch to new search observable each time the term changes
-        switchMap((name: string) => this.studentService.searchStudents(name)),
+      takeUntil(this.destroy$),
+      // switch to new search observable each time the term changes
+      switchMap((name: string) => this.studentService.searchStudents(name))
     );
   }
 
@@ -71,12 +76,13 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
    * @param(students) the list of students to be unenrolled
    */
   unenrollStudents(students: Student[]) {
-    this.courseService.unenrollStudents(students)
-        .pipe(
-            first(),
-            finalize(() => this.refreshEnrolled())
-        )
-        .subscribe();
+    this.courseService
+      .unenrollStudents(students)
+      .pipe(
+        first(),
+        finalize(() => this.refreshEnrolled())
+      )
+      .subscribe();
   }
 
   /**
@@ -85,12 +91,13 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
    * @param(students) the list of students to be enrolled
    */
   enrollStudents(students: Student[]) {
-    this.courseService.enrollStudents(students)
-        .pipe(
-            first(),
-            finalize(() => this.refreshEnrolled())
-        )
-        .subscribe();
+    this.courseService
+      .enrollStudents(students)
+      .pipe(
+        first(),
+        finalize(() => this.refreshEnrolled())
+      )
+      .subscribe();
   }
 
   /** Private function to refresh the list of enrolled students */
@@ -100,7 +107,9 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
       this.enrolledStudents = [];
       return;
     }
-    this.courseService.getEnrolledStudents(this.courseService.currentCourseSubject.value)
-        .pipe(first()).subscribe(students => this.enrolledStudents = students);
+    this.courseService
+      .getEnrolledStudents(this.courseService.currentCourseSubject.value)
+      .pipe(first())
+      .subscribe((students) => (this.enrolledStudents = students));
   }
 }

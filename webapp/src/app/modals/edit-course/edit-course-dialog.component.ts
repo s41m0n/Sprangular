@@ -1,11 +1,25 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {first, takeUntil} from 'rxjs/operators';
+import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormControl,
+} from '@angular/forms';
 import { CourseService } from 'src/app/services/course.service';
+import { ProfessorService } from 'src/app/services/professor.service';
 import { Course } from 'src/app/models/course.model';
-import {Subject} from 'rxjs';
-import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import { Observable, Subject } from 'rxjs';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { Professor } from 'src/app/models/professor.model';
+import { AuthService } from 'src/app/services/auth.service';
+import {
+  first,
+  debounceTime,
+  distinctUntilChanged,
+  takeUntil,
+  switchMap,
+} from 'rxjs/operators';
 
 @Component({
   selector: 'app-edit-course-dialog',
@@ -17,33 +31,53 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
   course: Course;
   checked: boolean;
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
+  professors: Professor[] = [];
+  currentProfessorId: string;
+  addProfessorControl = new FormControl();
+  searchProfessorEvent = new EventEmitter<string>();
+  filteredProfessors: Observable<Professor[]>;
 
   constructor(
     private fb: FormBuilder,
     private courseService: CourseService,
+    private authService: AuthService,
     public dialogRef: MatDialogRef<EditCourseDialogComponent>,
+    private professorService: ProfessorService,
     public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      teamMinSize: [
-        '',
-        [Validators.min(1), Validators.max(10)],
-      ],
-      teamMaxSize: [
-        '',
-        [Validators.min(1), Validators.max(10)],
-      ],
+      teamMinSize: ['', [Validators.min(1), Validators.max(10)]],
+      teamMaxSize: ['', [Validators.min(1), Validators.max(10)]],
     });
-    this.courseService.course.asObservable().pipe(takeUntil(this.destroy$)).subscribe(c => {
-      if (c) {
-        this.course = c;
-        this.form.get('teamMinSize').setValue(c.teamMinSize);
-        this.form.get('teamMaxSize').setValue(c.teamMaxSize);
-        this.checked = c.enabled;
-      }
-    });
+    this.courseService.course
+      .asObservable()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((c) => {
+        if (c) {
+          this.course = c;
+          this.form.get('teamMinSize').setValue(c.teamMinSize);
+          this.form.get('teamMaxSize').setValue(c.teamMaxSize);
+          this.checked = c.enabled;
+        }
+      });
+    this.refreshProfessors();
+    this.currentProfessorId = this.authService.currentUserValue.id;
+    this.addProfessorControl.valueChanges
+      .pipe(
+        takeUntil(this.destroy$),
+        // wait 300ms after each keystroke before considering the term
+        debounceTime(300),
+        // ignore new term if same as previous term
+        distinctUntilChanged()
+      )
+      .subscribe(
+        (name: string) =>
+          (this.filteredProfessors = this.professorService.searchProfessors(
+            name
+          ))
+      );
   }
 
   ngOnDestroy() {
@@ -51,7 +85,8 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
     this.destroy$.unsubscribe();
   }
 
-  onSubmit() {
+  editCourse() {
+    console.log('ciao');
     if (this.form.invalid) {
       return;
     }
@@ -76,13 +111,15 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
 
   deleteCourse() {
     const confirmRef = this.dialog.open(ConfirmationDialogComponent, {
-      disableClose: false
+      disableClose: false,
     });
-    confirmRef.componentInstance.confirmMessage =
-        `Are you sure you want to delete ${this.course.name} course?\nThis operation cannot be undone!`;
-    confirmRef.afterClosed().pipe(first()).subscribe(result => {
-      if (result) {
-        this.courseService
+    confirmRef.componentInstance.confirmMessage = `Are you sure you want to delete ${this.course.name} course?\nThis operation cannot be undone!`;
+    confirmRef
+      .afterClosed()
+      .pipe(first())
+      .subscribe((result) => {
+        if (result) {
+          this.courseService
             .deleteCourse()
             .pipe(first())
             .subscribe((res) => {
@@ -90,8 +127,8 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
                 this.dialogRef.close(null);
               }
             });
-      }
-    });
+        }
+      });
   }
 
   adaptMin(value: number) {
@@ -112,5 +149,45 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
 
   courseStatusChanged(value: boolean) {
     this.checked = value;
+  }
+
+  displayFn(professor: Professor): string {
+    return professor ? Professor.displayFn(professor) : '';
+  }
+
+  removeProfessor(professor: Professor) {
+    this.courseService
+      .removeProfessorFromCourse(professor, this.course)
+      .pipe(first())
+      .subscribe((res) => {
+        if (res) {
+          this.refreshProfessors();
+        }
+      });
+  }
+
+  addProfessor() {
+    if (this.addProfessorControl.value.id === this.currentProfessorId) {
+      this.addProfessorControl.setValue('');
+      return;
+    }
+
+    this.courseService
+      .addProfessorToCourse(this.addProfessorControl.value, this.course)
+      .pipe(first())
+      .subscribe((res) => {
+        if (res) {
+          this.refreshProfessors();
+        }
+      });
+    this.addProfessorControl.setValue('');
+  }
+
+  private refreshProfessors() {
+    this.courseService
+      .getCourseProfessors(this.course)
+      .subscribe((professors) => {
+        this.professors = professors;
+      });
   }
 }
