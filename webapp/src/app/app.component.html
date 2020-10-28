@@ -46,14 +46,14 @@
 
 <!-- Second toolbar with current selected course name -->
 <mat-toolbar class="subheader">
-  Course: {{ selectedCourseName || '❓' }}
+  Course: {{ course ? course.name : '❓' }}
   <span class="example-fill-remaining-space"></span>
   <button
     mat-icon-button
     [disabled]="inModal"
     aria-label="Example icon button with a gear icon"
     *ngIf="
-      selectedCourseName && this.currentUser.roles.includes('ROLE_PROFESSOR')
+      course && this.currentUser.roles.includes('ROLE_PROFESSOR')
     "
     [routerLink]="routerUrl"
     [queryParams]="{ editCourse: true }"

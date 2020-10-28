@@ -38,8 +38,7 @@ export class StudentComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.courseService.currentCourseSubject.next(null);
-    this.teamService.currentTeamSubject.next(null);
+    this.courseService.setNext(null);
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
   }

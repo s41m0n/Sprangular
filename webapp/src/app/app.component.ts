@@ -23,7 +23,6 @@ import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dial
 export class AppComponent {
   currentUser: User; // Variable to keep track of the current user
   courseList: Observable<Course[]>; // Variable to keep track (asynchronously) of the courses
-  selectedCourseName: string; // Variable to store the current selected course name (notified by sub routes via Broadcaster service)
   inModal: boolean; // Variable to check if a modal is already open
   course: Course;
   routerUrl: string;
@@ -50,14 +49,10 @@ export class AppComponent {
 
     this.courseService.course
       .asObservable()
-      .subscribe((x) => (this.course = x));
-
-    this.courseService.currentCourseSubject
-      .asObservable()
-      .subscribe((course) => {
-        this.selectedCourseName = course;
+      .subscribe((x) => {
+        this.course = x;
         this.routerUrl =
-          '/professor/courses/' + this.selectedCourseName + '/students';
+            '/professor/courses/' + (x ? x.acronym : '') + '/students';
       });
 
     // Subscribing to the route queryParam to check doLogin parameter
@@ -155,12 +150,12 @@ export class AppComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.router.navigate(
-          [`/professor/courses/${this.selectedCourseName}/assignments`],
+          [`/professor/courses/${this.course.acronym}/assignments`],
           { queryParams: { refreshAssignments: true } }
         );
       } else {
         this.router.navigate([
-          `/professor/courses/${this.selectedCourseName}/assignments`,
+          `/professor/courses/${this.course.acronym}/assignments`,
         ]);
       }
       this.inModal = false;
@@ -208,7 +203,7 @@ export class AppComponent {
    */
   logout() {
     this.authService.logout();
-    this.selectedCourseName = null;
+    this.course = null;
     this.router.navigate(['/home']);
   }
 

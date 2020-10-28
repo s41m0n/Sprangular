@@ -33,6 +33,10 @@ export class CourseService {
 
   setNext(acronym: string) {
     this.currentCourseSubject.next(acronym);
+    if (!acronym ) {
+      this.course.next(null);
+      return;
+    }
     this.getCourse(acronym)
       .pipe(first())
       .subscribe((x) => this.course.next(x));
