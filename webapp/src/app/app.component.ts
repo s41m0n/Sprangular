@@ -25,7 +25,6 @@ export class AppComponent {
   courseList: Observable<Course[]>; // Variable to keep track (asynchronously) of the courses
   inModal: boolean; // Variable to check if a modal is already open
   course: Course;
-  routerUrl: string;
 
   // Unsubscribes are not performed here since alive till this root component is always alive and must be updated
   constructor(
@@ -51,8 +50,6 @@ export class AppComponent {
       .asObservable()
       .subscribe((x) => {
         this.course = x;
-        this.routerUrl =
-            '/professor/courses/' + (x ? x.acronym : '') + '/students';
       });
 
     // Subscribing to the route queryParam to check doLogin parameter
@@ -147,7 +144,7 @@ export class AppComponent {
     const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
       width: '400px',
     });
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(first()).subscribe((result) => {
       if (result) {
         this.router.navigate(
           [`/professor/courses/${this.course.acronym}/assignments`],
@@ -172,6 +169,9 @@ export class AppComponent {
         if (result) {
           this.refreshCourses();
           this.router.navigate([this.router.url.split('?')[0]]);
+        } else if (result === null) {
+          this.router.navigate(['/home']);
+          this.refreshCourses();
         } else {
           this.router.navigate([this.router.url.split('?')[0]]);
         }
@@ -211,7 +211,7 @@ export class AppComponent {
     if (status === this.course.enabled) {
       return;
     }
-    this.courseService.changeCourseStatus(status).subscribe((x) => {
+    this.courseService.changeCourseStatus(status).pipe(first()).subscribe((x) => {
       this.course.enabled = x;
       this.refreshCourses();
     });

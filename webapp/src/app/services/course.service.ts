@@ -368,7 +368,7 @@ export class CourseService {
       );
   }
 
-  deleteCourse(courseAcronym: string = this.currentCourseSubject.value) {
+  deleteCourse(courseAcronym: string = this.course.value.acronym) {
     return this.http
       .delete<Course>(`${environment.base_courses_url}/${courseAcronym}`)
       .pipe(

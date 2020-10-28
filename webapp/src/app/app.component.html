@@ -55,7 +55,7 @@
     *ngIf="
       course && this.currentUser.roles.includes('ROLE_PROFESSOR')
     "
-    [routerLink]="routerUrl"
+    [routerLink]=""
     [queryParams]="{ editCourse: true }"
   >
     <mat-icon>settings</mat-icon>

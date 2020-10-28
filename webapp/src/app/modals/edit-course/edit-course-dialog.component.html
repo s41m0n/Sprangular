@@ -23,12 +23,14 @@
     ></mat-slider>
     <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
       <mat-button-toggle
-        [checked]="course && course.enabled"
+        [checked]="checked"
+        [disabled]="checked"
         (click)="courseStatusChanged(true)"
         >Enable</mat-button-toggle
       >
       <mat-button-toggle
-        [checked]="course && !course.enabled"
+        [checked]="!checked"
+        [disabled]="!checked"
         (click)="courseStatusChanged(false)"
         >Disable</mat-button-toggle
       >
@@ -37,9 +39,7 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button color="warn" (click)="deleteCourse()">
-    Delete Course
-  </button>
+  <button mat-button color="accent" (click)="deleteCourse()">Delete Course</button>
   <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
   <button mat-button color="primary" (click)="onSubmit()">Edit</button>
 </div>

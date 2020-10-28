@@ -66,6 +66,7 @@ import { UserConfirmComponent } from './user/user-confirm.component';
 import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirmation-dialog.component';
 
 @NgModule({
   declarations: [
@@ -99,6 +100,7 @@ import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
     UserConfirmComponent,
     NewAssignmentDialogComponent,
     EditCourseDialogComponent,
+    ConfirmationDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -147,6 +149,7 @@ import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
     VmOwnerDialogComponent,
     VmViewerDialogComponent,
     EditCourseDialogComponent,
+    ConfirmationDialogComponent
   ],
   providers: [
     MatDatepickerModule,

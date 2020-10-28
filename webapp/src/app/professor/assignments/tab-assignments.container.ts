@@ -2,6 +2,7 @@ import {Component, OnDestroy} from '@angular/core';
 import {Assignment} from '../../models/assignment.model';
 import {CourseService} from '../../services/course.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {first} from 'rxjs/operators';
 
 /**
  * AssignmentsContainer
@@ -21,15 +22,14 @@ export class TabProfessorAssignmentsContComponent implements OnDestroy {
               private router: Router,
               private route: ActivatedRoute) {
     this.courseService.getCourseAssignments(this.courseService.currentCourseSubject.value)
-        .subscribe(assignments => this.assignments = assignments);
-    this.navSub = this.route.queryParams.subscribe((queryParam) => {
-          queryParam && queryParam.refreshAssignments ? this.refreshAssignments() : null;
-        });
+        .pipe(first()).subscribe(assignments => this.assignments = assignments);
+    this.navSub = this.route.queryParams.subscribe((queryParam) =>
+          queryParam && queryParam.refreshAssignments ? this.refreshAssignments() : null);
   }
 
   refreshAssignments() {
     this.courseService.getCourseAssignments(this.courseService.currentCourseSubject.value)
-        .subscribe(assignments => this.assignments = assignments);
+        .pipe(first()).subscribe(assignments => this.assignments = assignments);
     this.router.navigate([this.router.url.split('?')[0]]);
   }
 

@@ -3,6 +3,7 @@ import {FileInput} from 'ngx-material-file-input';
 import {FormBuilder, FormGroup} from '@angular/forms';
 import {CourseService} from '../../services/course.service';
 import {MatDialogRef} from '@angular/material/dialog';
+import {first} from 'rxjs/operators';
 
 @Component({
   selector: 'app-new-assignment',
@@ -39,7 +40,7 @@ export class NewAssignmentDialogComponent implements OnInit {
     const fileInput: FileInput = this.form.get('doc').value;
     formData.append('document', fileInput.files[0]);
 
-    this.courseService.createAssignment(formData).subscribe((assignment) => {
+    this.courseService.createAssignment(formData).pipe(first()).subscribe((assignment) => {
       if (assignment) {
         this.dialogRef.close(true);
       }

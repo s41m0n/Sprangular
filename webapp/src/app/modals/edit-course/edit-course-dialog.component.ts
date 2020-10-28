@@ -1,38 +1,54 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import {first, takeUntil} from 'rxjs/operators';
 import { CourseService } from 'src/app/services/course.service';
 import { Course } from 'src/app/models/course.model';
+import {Subject} from 'rxjs';
+import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-edit-course-dialog',
   templateUrl: './edit-course-dialog.component.html',
   styleUrls: ['./edit-course-dialog.component.css'],
 })
-export class EditCourseDialogComponent implements OnInit {
+export class EditCourseDialogComponent implements OnInit, OnDestroy {
   form: FormGroup;
   course: Course;
   checked: boolean;
+  private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
   constructor(
     private fb: FormBuilder,
     private courseService: CourseService,
-    public dialogRef: MatDialogRef<EditCourseDialogComponent>
+    public dialogRef: MatDialogRef<EditCourseDialogComponent>,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    this.course = this.courseService.course.getValue();
     this.form = this.fb.group({
       teamMinSize: [
-        this.course.teamMinSize,
+        '',
         [Validators.min(1), Validators.max(10)],
       ],
       teamMaxSize: [
-        this.course.teamMaxSize,
+        '',
         [Validators.min(1), Validators.max(10)],
       ],
     });
+    this.courseService.course.asObservable().pipe(takeUntil(this.destroy$)).subscribe(c => {
+      if (c) {
+        this.course = c;
+        this.form.get('teamMinSize').setValue(c.teamMinSize);
+        this.form.get('teamMaxSize').setValue(c.teamMaxSize);
+        this.checked = c.enabled;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
   }
 
   onSubmit() {
@@ -40,8 +56,8 @@ export class EditCourseDialogComponent implements OnInit {
       return;
     }
     const course = new Course(
-      this.course.acronym,
-      this.course.name,
+      this.courseService.course.value.acronym,
+      this.courseService.course.value.name,
       this.form.get('teamMinSize').value,
       this.form.get('teamMaxSize').value,
       this.checked
@@ -52,20 +68,30 @@ export class EditCourseDialogComponent implements OnInit {
       .pipe(first())
       .subscribe((res) => {
         if (res) {
-          this.dialogRef.close();
+          this.courseService.course.next(res);
+          this.dialogRef.close(res);
         }
       });
   }
 
   deleteCourse() {
-    this.courseService
-      .deleteCourse()
-      .pipe(first())
-      .subscribe((res) => {
-        if (res) {
-          this.dialogRef.close();
-        }
-      });
+    const confirmRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false
+    });
+    confirmRef.componentInstance.confirmMessage =
+        `Are you sure you want to delete ${this.course.name} course?\nThis operation cannot be undone!`;
+    confirmRef.afterClosed().pipe(first()).subscribe(result => {
+      if (result) {
+        this.courseService
+            .deleteCourse()
+            .pipe(first())
+            .subscribe((res) => {
+              if (res) {
+                this.dialogRef.close(null);
+              }
+            });
+      }
+    });
   }
 
   adaptMin(value: number) {
