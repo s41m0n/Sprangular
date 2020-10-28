@@ -33,7 +33,7 @@ export class CourseService {
 
   setNext(acronym: string) {
     this.currentCourseSubject.next(acronym);
-    if (!acronym ) {
+    if (!acronym) {
       this.course.next(null);
       return;
     }
@@ -171,24 +171,36 @@ export class CourseService {
       );
   }
 
-  assignProfessorsToCourse(
-    professors: Professor[],
+  addProfessorToCourse(
+    professor: Professor,
     course: Course
-  ): Observable<Professor[]> {
-    return from(professors).pipe(
-      mergeMap((professor: Professor) => {
-        // Checking if ADD has been pressed without selecting a professor (or modifying the selected one)
-        if (typeof professor === 'string') {
-          this.toastrService.error(
-            `${professor} is not a valid Professor, please select one from the options`,
-            'Error 😅'
-          );
-          return of(null);
-        }
-        return this.updateCourse(course);
-      }),
-      toArray()
-    );
+  ): Observable<Professor> {
+    return this.http
+      .put<any>(
+        `${environment.base_courses_url}/${course.acronym}/addProfessor`,
+        { professorId: professor.id },
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((p) => {
+          if (p) {
+            this.toastrService.success(
+              `Added ${professor.id} to ${course.acronym}`,
+              'Congratulations 😃'
+            );
+          } else {
+            this.toastrService.info(
+              `Professor ${professor.id} already teaches ${course.acronym}`
+            );
+          }
+        }),
+        catchError(
+          handleError<Professor>(
+            this.toastrService,
+            `addProfessor(${professor.id}, ${course.acronym})`
+          )
+        )
+      );
   }
 
   /**
@@ -281,24 +293,32 @@ export class CourseService {
     );
   }
 
-  removeProfessorsFromCourse(
-    professors: Professor[],
+  removeProfessorFromCourse(
+    professor: Professor,
     course: Course
-  ): Observable<Professor[]> {
-    return from(professors).pipe(
-      mergeMap((professor: Professor) => {
-        // Checking if ADD has been pressed without selecting a professor (or modifying the selected one)
-        if (typeof professor === 'string') {
-          this.toastrService.error(
-            `${professor} is not a valid Professor, please select one from the options`,
-            'Error 😅'
+  ): Observable<Professor> {
+    return this.http
+      .put<Professor>(
+        `${environment.base_courses_url}/${course.acronym}/removeProfessor`,
+        { professorId: professor.id },
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((p) => {
+          this.toastrService.success(
+            `Removed ${Professor.displayFn(p)} from ${course.acronym}`,
+            'Congratulations 😃'
           );
-          return of(null);
-        }
-        return this.updateCourse(course);
-      }),
-      toArray()
-    );
+        }),
+        catchError(
+          handleError<Professor>(
+            this.toastrService,
+            `removeProfessor(${Professor.displayFn(professor)}, ${
+              course.acronym
+            })`
+          )
+        )
+      );
   }
 
   createCourse(course: Course): Observable<Course> {

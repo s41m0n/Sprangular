@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Edit Course</h1>
 
 <div mat-dialog-content>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <form [formGroup]="form">
     <label>Team Min Size:</label><br />
     <mat-slider
       formControlName="teamMinSize"
@@ -35,11 +35,49 @@
         >Disable</mat-button-toggle
       >
     </mat-button-toggle-group>
+    <h3>Professors:</h3>
+    <mat-list style="margin-top: -20px">
+      <mat-list-item *ngFor="let professor of professors">
+        {{ displayFn(professor) }}
+        <button
+          mat-button
+          color="warn"
+          *ngIf="professor.id !== currentProfessorId"
+          (click)="removeProfessor(professor)"
+        >
+          Remove
+        </button>
+      </mat-list-item>
+    </mat-list>
+    <mat-form-field>
+      <mat-label>Add Professor</mat-label>
+      <input
+        matInput
+        type="search"
+        placeholder="Add Professor"
+        aria-label="Number"
+        matInput
+        value=""
+        [formControl]="addProfessorControl"
+        [matAutocomplete]="auto"
+      />
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+        <mat-option
+          *ngFor="let option of filteredProfessors | async"
+          [value]="option"
+        >
+          {{ displayFn(option) }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+    <button mat-button color="primary" (click)="addProfessor()">Add</button>
   </form>
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-button color="accent" (click)="deleteCourse()">Delete Course</button>
+  <button mat-button color="accent" (click)="deleteCourse()">
+    Delete Course
+  </button>
   <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-  <button mat-button color="primary" (click)="onSubmit()">Edit</button>
+  <button mat-button color="primary" (click)="editCourse()">Edit</button>
 </div>

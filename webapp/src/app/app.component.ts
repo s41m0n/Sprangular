@@ -46,11 +46,9 @@ export class AppComponent {
 
     // Subscribe to Broadcaster selected course subject
 
-    this.courseService.course
-      .asObservable()
-      .subscribe((x) => {
-        this.course = x;
-      });
+    this.courseService.course.asObservable().subscribe((x) => {
+      this.course = x;
+    });
 
     // Subscribing to the route queryParam to check doLogin parameter
     this.route.queryParams.subscribe((queryParam) =>
@@ -144,19 +142,22 @@ export class AppComponent {
     const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
       width: '400px',
     });
-    dialogRef.afterClosed().pipe(first()).subscribe((result) => {
-      if (result) {
-        this.router.navigate(
-          [`/professor/courses/${this.course.acronym}/assignments`],
-          { queryParams: { refreshAssignments: true } }
-        );
-      } else {
-        this.router.navigate([
-          `/professor/courses/${this.course.acronym}/assignments`,
-        ]);
-      }
-      this.inModal = false;
-    });
+    dialogRef
+      .afterClosed()
+      .pipe(first())
+      .subscribe((result) => {
+        if (result) {
+          this.router.navigate(
+            [`/professor/courses/${this.course.acronym}/assignments`],
+            { queryParams: { refreshAssignments: true } }
+          );
+        } else {
+          this.router.navigate([
+            `/professor/courses/${this.course.acronym}/assignments`,
+          ]);
+        }
+        this.inModal = false;
+      });
   }
 
   editCourse() {
@@ -211,9 +212,12 @@ export class AppComponent {
     if (status === this.course.enabled) {
       return;
     }
-    this.courseService.changeCourseStatus(status).pipe(first()).subscribe((x) => {
-      this.course.enabled = x;
-      this.refreshCourses();
-    });
+    this.courseService
+      .changeCourseStatus(status)
+      .pipe(first())
+      .subscribe((x) => {
+        this.course.enabled = x;
+        this.refreshCourses();
+      });
   }
 }

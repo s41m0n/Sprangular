@@ -2,16 +2,14 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
+import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
 import it.polito.ai.lab2.services.ProfessorService;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -26,11 +24,16 @@ public class ProfessorController {
   ProfessorService professorService;
 
   @GetMapping({"", "/"})
-  public List<ProfessorDTO> all() {
-    log.info("all() called");
-    return professorService.getProfessors().stream()
-        .map(ModelHelper::enrich)
-        .collect(Collectors.toList());
+  public List<ProfessorDTO> all(@RequestParam(required = false, name = "surname_like") String pattern) {
+    if (pattern == null || pattern.isEmpty()) {
+      return professorService.getProfessors().stream()
+          .map(ModelHelper::enrich)
+          .collect(Collectors.toList());
+    } else {
+      return professorService.getProfessorsLike(pattern).stream()
+          .map(ModelHelper::enrich)
+          .collect(Collectors.toList());
+    }
   }
 
   @GetMapping("/{id}")

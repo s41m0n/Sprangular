@@ -52,9 +52,7 @@
     mat-icon-button
     [disabled]="inModal"
     aria-label="Example icon button with a gear icon"
-    *ngIf="
-      course && this.currentUser.roles.includes('ROLE_PROFESSOR')
-    "
+    *ngIf="course && this.currentUser.roles.includes('ROLE_PROFESSOR')"
     [routerLink]=""
     [queryParams]="{ editCourse: true }"
   >
