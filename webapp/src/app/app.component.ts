@@ -131,6 +131,7 @@ export class AppComponent {
       .subscribe((result) => {
         if (result) {
           this.refreshCourses();
+          this.router.navigate([`/professor/courses/${result.get('acronym')}`]);
         } else {
           this.router.navigate([this.router.url.split('?')[0]]);
         }

@@ -50,6 +50,7 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       teamMinSize: ['', [Validators.min(1), Validators.max(10)]],
       teamMaxSize: ['', [Validators.min(1), Validators.max(10)]],
+      vmModel: [''],
     });
     this.courseService.course
       .asObservable()
@@ -94,16 +95,14 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
       return;
     }
     const formData = new FormData();
-    formData.append('acronym', this.form.get('acronym').value);
-    formData.append('name', this.form.get('name').value);
     formData.append('teamMinSize', this.form.get('teamMinSize').value);
     formData.append('teamMaxSize', this.form.get('teamMaxSize').value);
-    formData.append('enabled', 'true');
+    formData.append('enabled', this.checked.toString());
     const fileInput: FileInput = this.form.get('vmModel').value;
     formData.append('vmModel', fileInput.files[0]);
 
     this.courseService
-      .createCourse(formData)
+      .updateCourse(formData)
       .pipe(first())
       .subscribe((res) => {
         if (res) {

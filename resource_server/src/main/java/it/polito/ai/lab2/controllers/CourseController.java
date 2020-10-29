@@ -262,11 +262,7 @@ public class CourseController {
   @PutMapping("/{courseId}")
   public CourseDTO updateCourse(@PathVariable String courseId, @ModelAttribute CourseWithModelDetails courseDTO) {
     try {
-      CourseDTO c = courseService.updateCourse(courseId, courseDTO);
-      if (c == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TeamMaxSize has to be greater than TeamMinSize");
-      }
-      return c;
+      return ModelHelper.enrich(courseService.updateCourse(courseId, courseDTO));
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (CannotUpdateCourseException e) {

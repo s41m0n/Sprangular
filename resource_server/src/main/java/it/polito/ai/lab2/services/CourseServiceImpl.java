@@ -213,22 +213,47 @@ public class CourseServiceImpl implements CourseService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-  public CourseDTO updateCourse(String courseId, CourseWithModelDetails updateCourseDetails) {
-    if (updateCourseDetails.getTeamMaxSize() < updateCourseDetails.getTeamMinSize()) {
-      return null;
+  public CourseDTO updateCourse(String courseId, CourseWithModelDetails course) {
+
+    if(course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
+      throw new CannotUpdateCourseException("Cannot update course " + course.getAcronym() + ": wrong team sizes");
     }
+
     Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
     for(Team t : c.getTeams()){
-      if(t.getMembers().size() < updateCourseDetails.getTeamMinSize() || t.getMembers().size() > updateCourseDetails.getTeamMaxSize()){
+      if(t.getMembers().size() < course.getTeamMinSize() || t.getMembers().size() > course.getTeamMaxSize()){
         throw new CannotUpdateCourseException("Course " + courseId + " cannot be updated: some teams are not compliant with new restrictions");
       }
     }
 
-    c.setTeamMaxSize(updateCourseDetails.getTeamMaxSize());
-    c.setTeamMinSize(updateCourseDetails.getTeamMinSize());
-    c.setEnabled(updateCourseDetails.isEnabled());
+    Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
+    try {
+      Files.delete(oldVmModelPath);
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot delete the file: " + e.getMessage());
+    }
+    vmModelRepository.delete(c.getVmModel());
+
+    VmModel v = new VmModel();
+    v.setName(c.getAcronym());
+    v.assignToCourse(c);
+
+    VmModel savedVmModel = vmModelRepository.save(v);
+
+    Path vmModelPath = Utility.VM_MODELS_DIR.resolve(savedVmModel.getId().toString());
+    savedVmModel.setImagePath(vmModelPath.toString());
+    try {
+      Files.copy(course.getVmModel().getInputStream(), vmModelPath, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot store the file: " + e.getMessage());
+    }
+
+    c.setTeamMaxSize(course.getTeamMaxSize());
+    c.setTeamMinSize(course.getTeamMinSize());
+    c.setEnabled(course.isEnabled());
     courseRepository.save(c);
+
     return modelMapper.map(c, CourseDTO.class);
   }
 
