@@ -43,6 +43,16 @@
       max="10"
       step="1"
     ></mat-slider>
+
+    <mat-form-field>
+      <ngx-mat-file-input
+        formControlName="vmModel"
+        placeholder="VM Model"
+        accept=".txt, .yaml, .yml"
+        required
+      ></ngx-mat-file-input>
+      <mat-icon matSuffix>folder</mat-icon>
+    </mat-form-field>
   </form>
 </div>
 

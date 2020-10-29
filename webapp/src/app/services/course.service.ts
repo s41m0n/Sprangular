@@ -347,47 +347,40 @@ export class CourseService {
       );
   }
 
-  createCourse(course: Course): Observable<Course> {
-    return this.http
-      .post<Course>(
-        environment.base_courses_url,
-        course,
-        environment.base_http_headers
-      )
-      .pipe(
-        tap(() =>
-          this.toastrService.success(
-            `Course ${course.name} successfully created!`,
-            'Awesome 😃'
-          )
-        ),
-        catchError(
-          handleError<Course>(
-            this.toastrService,
-            `createCourse(${course.name})`
-          )
+  createCourse(formData: FormData): Observable<Course> {
+    return this.http.post<Course>(environment.base_courses_url, formData).pipe(
+      tap(() =>
+        this.toastrService.success(
+          `Course ${formData.get('name')} successfully created!`,
+          'Awesome 😃'
         )
-      );
+      ),
+      catchError(
+        handleError<Course>(
+          this.toastrService,
+          `createCourse(${formData.get('name')})`
+        )
+      )
+    );
   }
 
-  updateCourse(course: Course): Observable<Course> {
+  updateCourse(formData: FormData): Observable<Course> {
     return this.http
       .put<Course>(
-        `${environment.base_courses_url}/${course.acronym}`,
-        course,
-        environment.base_http_headers
+        `${environment.base_courses_url}/${formData.get('acronym')}`,
+        formData
       )
       .pipe(
         tap(() =>
           this.toastrService.success(
-            `Course ${course.name} successfully updated!`,
+            `Course ${formData.get('name')} successfully updated!`,
             'Awesome 😃'
           )
         ),
         catchError(
           handleError<Course>(
             this.toastrService,
-            `updateCourse(${course.name})`
+            `updateCourse(${formData.get('name')})`
           )
         )
       );

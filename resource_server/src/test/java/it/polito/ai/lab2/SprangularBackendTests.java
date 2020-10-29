@@ -40,18 +40,6 @@ class SprangularBackendTests {
   }
 
   @Test
-  @Order(3)
-  void testAddCourse() {
-    Boolean verifier = courseService.getCourse(courseID).orElse(null) == null;
-    CourseDTO c = new CourseDTO();
-    c.setEnabled(true);
-    c.setTeamMaxSize(2);
-    c.setTeamMinSize(1);
-    c.setName(courseID);
-    assertThat(courseService.addCourse(c)).isEqualTo(verifier);
-  }
-
-  @Test
   @Order(4)
   void testDisableCourse() {
     courseService.disableCourse(courseID);

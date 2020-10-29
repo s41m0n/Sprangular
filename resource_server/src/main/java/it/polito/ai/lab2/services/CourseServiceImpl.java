@@ -6,15 +6,15 @@ import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.dtos.TeamDTO;
-import it.polito.ai.lab2.entities.Course;
-import it.polito.ai.lab2.entities.Professor;
-import it.polito.ai.lab2.entities.Student;
-import it.polito.ai.lab2.entities.Team;
+import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.CourseWithModelDetails;
 import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
 import it.polito.ai.lab2.repositories.CourseRepository;
 import it.polito.ai.lab2.repositories.ProfessorRepository;
 import it.polito.ai.lab2.repositories.StudentRepository;
+import it.polito.ai.lab2.repositories.VmModelRepository;
+import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +22,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +46,9 @@ public class CourseServiceImpl implements CourseService {
   StudentRepository studentRepository;
 
   @Autowired
+  VmModelRepository vmModelRepository;
+
+  @Autowired
   StudentService studentService;
 
   @Autowired
@@ -52,16 +59,36 @@ public class CourseServiceImpl implements CourseService {
 
   @Override
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
-  public boolean addCourse(CourseDTO course) {
-    if (course.getTeamMaxSize() < course.getTeamMinSize() || courseRepository.existsById(course.getAcronym())) {
-      return false;
+  public CourseDTO addCourse(CourseWithModelDetails course) {
+    if (courseRepository.existsById(course.getAcronym())) {
+      throw new DuplicatedCourseException("Course " + course.getAcronym() + " already exists");
     }
+
+    if(course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
+      throw new TeamSizesNotCoherentException("Cannot create course " + course.getAcronym() + ": wrong team sizes");
+    }
+
     Course c = modelMapper.map(course, Course.class);
+
+    VmModel v = new VmModel();
+    v.setName(c.getAcronym());
+    v.assignToCourse(c);
+
+    VmModel savedVmModel = vmModelRepository.save(v);
+
+    Path vmModelPath = Utility.VM_MODELS_DIR.resolve(savedVmModel.getId().toString());
+    savedVmModel.setImagePath(vmModelPath.toString());
+    try {
+      Files.copy(course.getVmModel().getInputStream(), vmModelPath, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot store the file: " + e.getMessage());
+    }
+
     courseRepository.save(c);
     if (professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent()) {
       this.addProfessorToCourse(professorRepository.getOne(SecurityContextHolder.getContext().getAuthentication().getName()).getId(), course.getAcronym());
     }
-    return true;
+    return modelMapper.map(c, CourseDTO.class);
   }
 
   @Override
@@ -186,7 +213,7 @@ public class CourseServiceImpl implements CourseService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
-  public CourseDTO updateCourse(String courseId, CourseDTO updateCourseDetails) {
+  public CourseDTO updateCourse(String courseId, CourseWithModelDetails updateCourseDetails) {
     if (updateCourseDetails.getTeamMaxSize() < updateCourseDetails.getTeamMinSize()) {
       return null;
     }

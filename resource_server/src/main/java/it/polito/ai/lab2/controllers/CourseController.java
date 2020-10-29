@@ -120,12 +120,13 @@ public class CourseController {
   }
 
   @PostMapping({"", "/"})
-  public CourseDTO add(@RequestBody CourseDTO courseDTO) {
-    log.info("add(" + courseDTO + ") called");
+  public CourseDTO add(@ModelAttribute CourseWithModelDetails courseDTO) {
     try {
-      if (!courseService.addCourse(courseDTO))
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Course " + courseDTO.getAcronym() + " already exists");
-      return ModelHelper.enrich(courseDTO);
+      return ModelHelper.enrich(courseService.addCourse(courseDTO));
+    } catch (DuplicatedCourseException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+    } catch (TeamSizesNotCoherentException e ) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     } catch (DataIntegrityViolationException e) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "A course with the same name (" + courseDTO.getName() + ") already exists");
     }
@@ -211,26 +212,6 @@ public class CourseController {
     log.info("getStudents() called");
     try {
         return courseService.getStudentsOfCourse(courseId, pattern);
-    } catch (CourseNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
-  @PostMapping("/{courseId}/vmModel")
-  public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDetails vmModelDetails) {
-    try {
-      return vmService.createVmModel(vmModelDetails, courseId);
-    } catch (CourseNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmModelAlreadyPresentException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-    }
-  }
-
-  @PutMapping("/{courseId}/vmModel")
-  public VmModelDTO updateVmModel(@PathVariable String courseId, @RequestBody VmModelDetails vmModelDetails) {
-    try {
-      return vmService.updateVmModel(vmModelDetails, courseId);
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }

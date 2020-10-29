@@ -9,7 +9,7 @@ import {
 import { CourseService } from 'src/app/services/course.service';
 import { ProfessorService } from 'src/app/services/professor.service';
 import { Course } from 'src/app/models/course.model';
-import {Observable, of, Subject} from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Professor } from 'src/app/models/professor.model';
 import { AuthService } from 'src/app/services/auth.service';
@@ -18,8 +18,8 @@ import {
   debounceTime,
   distinctUntilChanged,
   takeUntil,
-  switchMap, filter,
 } from 'rxjs/operators';
+import { FileInput } from 'ngx-material-file-input';
 
 @Component({
   selector: 'app-edit-course-dialog',
@@ -72,12 +72,15 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
         // ignore new term if same as previous term
         distinctUntilChanged()
       )
-      .subscribe(
-        (name: string) =>
-          (this.professorService.searchProfessors(
-            name
-          ).subscribe(arr => this.filteredProfessors = of(
-              arr.filter(p => p.id !== this.authService.currentUserValue.id))))
+      .subscribe((name: string) =>
+        this.professorService
+          .searchProfessors(name)
+          .subscribe(
+            (arr) =>
+              (this.filteredProfessors = of(
+                arr.filter((p) => p.id !== this.authService.currentUserValue.id)
+              ))
+          )
       );
   }
 
@@ -87,25 +90,24 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
   }
 
   editCourse() {
-    console.log('ciao');
     if (this.form.invalid) {
       return;
     }
-    const course = new Course(
-      this.courseService.course.value.acronym,
-      this.courseService.course.value.name,
-      this.form.get('teamMinSize').value,
-      this.form.get('teamMaxSize').value,
-      this.checked
-    );
+    const formData = new FormData();
+    formData.append('acronym', this.form.get('acronym').value);
+    formData.append('name', this.form.get('name').value);
+    formData.append('teamMinSize', this.form.get('teamMinSize').value);
+    formData.append('teamMaxSize', this.form.get('teamMaxSize').value);
+    formData.append('enabled', 'true');
+    const fileInput: FileInput = this.form.get('vmModel').value;
+    formData.append('vmModel', fileInput.files[0]);
 
     this.courseService
-      .updateCourse(course)
+      .createCourse(formData)
       .pipe(first())
       .subscribe((res) => {
         if (res) {
-          this.courseService.course.next(res);
-          this.dialogRef.close(res);
+          this.dialogRef.close();
         }
       });
   }
@@ -168,24 +170,26 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
   }
 
   addProfessor() {
-    this.professors.pipe(first()).subscribe(arr => {
-      if (arr.find(p => p.id === this.addProfessorControl.value.id)) {
+    this.professors.pipe(first()).subscribe((arr) => {
+      if (arr.find((p) => p.id === this.addProfessorControl.value.id)) {
         this.addProfessorControl.setValue('');
         return;
       }
       this.courseService
-          .addProfessorToCourse(this.addProfessorControl.value, this.course)
-          .pipe(first())
-          .subscribe((res) => {
-            if (res) {
-              this.refreshProfessors();
-            }
-          });
+        .addProfessorToCourse(this.addProfessorControl.value, this.course)
+        .pipe(first())
+        .subscribe((res) => {
+          if (res) {
+            this.refreshProfessors();
+          }
+        });
       this.addProfessorControl.setValue('');
     });
   }
 
   private refreshProfessors() {
-    this.professors = this.courseService.getCourseProfessors(this.course).pipe(first());
+    this.professors = this.courseService
+      .getCourseProfessors(this.course)
+      .pipe(first());
   }
 }

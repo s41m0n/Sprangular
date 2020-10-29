@@ -122,14 +122,15 @@ export class AppComponent {
 
   newCourse() {
     this.inModal = true;
-    const dialogRef = this.dialog.open(NewCourseDialogComponent);
+    const dialogRef = this.dialog.open(NewCourseDialogComponent, {
+      width: '450px',
+    });
     dialogRef
       .afterClosed()
       .pipe(first())
       .subscribe((result) => {
         if (result) {
           this.refreshCourses();
-          this.router.navigate([`/professor/courses/${result.acronym}`]);
         } else {
           this.router.navigate([this.router.url.split('?')[0]]);
         }

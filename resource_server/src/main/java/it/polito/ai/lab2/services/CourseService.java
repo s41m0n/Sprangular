@@ -3,6 +3,7 @@ package it.polito.ai.lab2.services;
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
 import it.polito.ai.lab2.dtos.StudentDTO;
+import it.polito.ai.lab2.pojos.CourseWithModelDetails;
 import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
 
 import java.io.Reader;
@@ -11,11 +12,11 @@ import java.util.Optional;
 
 public interface CourseService {
 
-  boolean addCourse(CourseDTO course);
+  CourseDTO addCourse(CourseWithModelDetails course);
 
   CourseDTO removeCourse(String courseId);
 
-  CourseDTO updateCourse(String courseId, CourseDTO updateCourseDetails);
+  CourseDTO updateCourse(String courseId, CourseWithModelDetails course);
 
   Optional<CourseDTO> getCourse(String courseId);
 

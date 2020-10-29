@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { CourseService } from 'src/app/services/course.service';
 import { Course } from 'src/app/models/course.model';
+import { FileInput } from 'ngx-material-file-input';
 
 @Component({
   selector: 'app-new-course',
@@ -25,6 +26,7 @@ export class NewCourseDialogComponent implements OnInit {
       name: [''],
       teamMinSize: [1, [Validators.min(1), Validators.max(10)]],
       teamMaxSize: [1, [Validators.min(1), Validators.max(10)]],
+      vmModel: [''],
     });
   }
 
@@ -32,19 +34,21 @@ export class NewCourseDialogComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    const course = new Course(
-      this.form.get('acronym').value.toLowerCase(),
-      this.form.get('name').value,
-      this.form.get('teamMinSize').value,
-      this.form.get('teamMaxSize').value,
-      true
-    );
+    const formData = new FormData();
+    formData.append('acronym', this.form.get('acronym').value);
+    formData.append('name', this.form.get('name').value);
+    formData.append('teamMinSize', this.form.get('teamMinSize').value);
+    formData.append('teamMaxSize', this.form.get('teamMaxSize').value);
+    formData.append('enabled', 'true');
+    const fileInput: FileInput = this.form.get('vmModel').value;
+    formData.append('vmModel', fileInput.files[0]);
+
     this.courseService
-      .createCourse(course)
+      .createCourse(formData)
       .pipe(first())
       .subscribe((res) => {
         if (res) {
-          this.dialogRef.close(course);
+          this.dialogRef.close();
         }
       });
   }

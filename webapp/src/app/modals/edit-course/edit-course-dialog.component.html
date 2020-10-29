@@ -35,6 +35,15 @@
         >Disable</mat-button-toggle
       >
     </mat-button-toggle-group>
+    <mat-form-field>
+      <ngx-mat-file-input
+        formControlName="vmModel"
+        placeholder="VM Model"
+        accept=".txt, .yaml, .yml"
+        required
+      ></ngx-mat-file-input>
+      <mat-icon matSuffix>folder</mat-icon>
+    </mat-form-field>
     <h3>Professors:</h3>
     <mat-list style="margin-top: -20px">
       <mat-list-item *ngFor="let professor of professors | async">

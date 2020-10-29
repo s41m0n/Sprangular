@@ -1,22 +1,22 @@
 mat-form-field {
-    width: 100%;
+  width: 100%;
 }
 
 .centered {
-    display: block;
-    margin: auto;
+  display: block;
+  margin: auto;
 }
 
 mat-slider {
-    width: 100%;
-    margin-top: 12px;
+  width: 100%;
+  margin-top: 12px;
 }
 
 .mat-dialog-actions {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 form {
-    height: 470px;
+  height: 470px;
 }
