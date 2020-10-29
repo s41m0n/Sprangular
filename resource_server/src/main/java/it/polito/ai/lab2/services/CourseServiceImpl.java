@@ -142,9 +142,11 @@ public class CourseServiceImpl implements CourseService {
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
   public ProfessorDTO removeProfessorFromCourse(String professor, String courseId) {
-    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-    Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
-    if (c.getProfessors().size() != 1) {
+    Course c = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    Professor p = professorRepository.findById(professor).orElseThrow(
+        () -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
+    if (c.getProfessors().size() > 1) {
       p.removeCourse(c);
       return modelMapper.map(p, ProfessorDTO.class);
     }

@@ -9,7 +9,7 @@ import {
 import { CourseService } from 'src/app/services/course.service';
 import { ProfessorService } from 'src/app/services/professor.service';
 import { Course } from 'src/app/models/course.model';
-import { Observable, Subject } from 'rxjs';
+import {Observable, of, Subject} from 'rxjs';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { Professor } from 'src/app/models/professor.model';
 import { AuthService } from 'src/app/services/auth.service';
@@ -18,7 +18,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   takeUntil,
-  switchMap,
+  switchMap, filter,
 } from 'rxjs/operators';
 
 @Component({
@@ -31,7 +31,7 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
   course: Course;
   checked: boolean;
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
-  professors: Professor[] = [];
+  professors: Observable<Professor[]>;
   currentProfessorId: string;
   addProfessorControl = new FormControl();
   searchProfessorEvent = new EventEmitter<string>();
@@ -60,9 +60,9 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
           this.form.get('teamMinSize').setValue(c.teamMinSize);
           this.form.get('teamMaxSize').setValue(c.teamMaxSize);
           this.checked = c.enabled;
+          this.refreshProfessors();
         }
       });
-    this.refreshProfessors();
     this.currentProfessorId = this.authService.currentUserValue.id;
     this.addProfessorControl.valueChanges
       .pipe(
@@ -74,9 +74,10 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (name: string) =>
-          (this.filteredProfessors = this.professorService.searchProfessors(
+          (this.professorService.searchProfessors(
             name
-          ))
+          ).subscribe(arr => this.filteredProfessors = of(
+              arr.filter(p => p.id !== this.authService.currentUserValue.id))))
       );
   }
 
@@ -167,27 +168,24 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
   }
 
   addProfessor() {
-    if (this.addProfessorControl.value.id === this.currentProfessorId) {
+    this.professors.pipe(first()).subscribe(arr => {
+      if (arr.find(p => p.id === this.addProfessorControl.value.id)) {
+        this.addProfessorControl.setValue('');
+        return;
+      }
+      this.courseService
+          .addProfessorToCourse(this.addProfessorControl.value, this.course)
+          .pipe(first())
+          .subscribe((res) => {
+            if (res) {
+              this.refreshProfessors();
+            }
+          });
       this.addProfessorControl.setValue('');
-      return;
-    }
-
-    this.courseService
-      .addProfessorToCourse(this.addProfessorControl.value, this.course)
-      .pipe(first())
-      .subscribe((res) => {
-        if (res) {
-          this.refreshProfessors();
-        }
-      });
-    this.addProfessorControl.setValue('');
+    });
   }
 
   private refreshProfessors() {
-    this.courseService
-      .getCourseProfessors(this.course)
-      .subscribe((professors) => {
-        this.professors = professors;
-      });
+    this.professors = this.courseService.getCourseProfessors(this.course).pipe(first());
   }
 }
