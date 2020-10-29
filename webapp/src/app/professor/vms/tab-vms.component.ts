@@ -29,7 +29,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     this.dataSource.data = vms;
   }
   @Output() wipeVmEvent = new EventEmitter<number>();
-  @Output() connectVmEvent = new EventEmitter<number>();
+  @Output() connectVmEvent = new EventEmitter<VM>();
   @Output() triggerVmEvent = new EventEmitter<number>();
 
   constructor(public dialog: MatDialog) {}
@@ -64,7 +64,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     this.wipeVmEvent.emit(id);
   }
 
-  connectToVm(id: number) {
+  connectToVm(id: VM) {
     this.connectVmEvent.emit(id);
   }
 

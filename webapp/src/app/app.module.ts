@@ -59,13 +59,12 @@ import { NewAssignmentUploadDialogComponent } from './modals/new-assignment-uplo
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { MatNativeDateModule } from '@angular/material/core';
 import { VmOwnerDialogComponent } from './modals/vm-owner/vm-owner-dialog.component';
-import { VmViewerDialogComponent } from './modals/vm-viewer/vm-viewer-dialog.component';
+import { ImageViewerDialogComponent } from './modals/image-viewer/image-viewer-dialog.component';
 import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UserConfirmComponent } from './user/user-confirm.component';
 import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
-import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirmation-dialog.component';
 
 @NgModule({
@@ -94,7 +93,7 @@ import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirma
     NewAssignmentUploadDialogComponent,
     RegisterDialogComponent,
     VmOwnerDialogComponent,
-    VmViewerDialogComponent,
+    ImageViewerDialogComponent,
     NewCourseDialogComponent,
     TabExpandendAssignmentComponent,
     UserConfirmComponent,
@@ -147,7 +146,7 @@ import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirma
     NewVmDialogComponent,
     VmOptionsDialogComponent,
     VmOwnerDialogComponent,
-    VmViewerDialogComponent,
+    ImageViewerDialogComponent,
     EditCourseDialogComponent,
     ConfirmationDialogComponent
   ],

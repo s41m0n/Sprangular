@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NewVmDialogComponent } from 'src/app/modals/new-vm/new-vm.component';
 import { VmService } from 'src/app/services/vm.service';
 import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
-import { VmViewerDialogComponent } from '../../modals/vm-viewer/vm-viewer-dialog.component';
+import { ImageViewerDialogComponent } from '../../modals/image-viewer/image-viewer-dialog.component';
 import { DomSanitizer } from '@angular/platform-browser';
 import {Team} from '../../models/team.model';
 
@@ -78,7 +78,7 @@ export class TabStudentVmsContComponent implements OnInit {
       .subscribe((instance) => {
         if (!instance) { return; }
         const url = URL.createObjectURL(instance);
-        const dialogRef = this.dialog.open(VmViewerDialogComponent, {
+        const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
           data: {
             id: vmId,
             imageSrc: this.sanitizer.bypassSecurityTrustUrl(url),

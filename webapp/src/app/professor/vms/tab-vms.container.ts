@@ -5,7 +5,7 @@ import { CourseService } from '../../services/course.service';
 import { first } from 'rxjs/operators';
 import { VmService } from 'src/app/services/vm.service';
 import { MatDialog } from '@angular/material/dialog';
-import { VmViewerDialogComponent } from 'src/app/modals/vm-viewer/vm-viewer-dialog.component';
+import { ImageViewerDialogComponent } from 'src/app/modals/image-viewer/image-viewer-dialog.component';
 import { createUrlResolverWithoutPackagePrefix } from '@angular/compiler';
 import { UrlHandlingStrategy } from '@angular/router';
 
@@ -41,12 +41,12 @@ export class TabProfessorVmsContComponent {
     this.vmService.triggerVm(id, this.vms.find(vm => vm.id === id).active).pipe(first()).subscribe(x => this.refreshVmList());
   }
 
-  connect(vmId: number) {
-    this.vmService.getInstance(vmId).pipe(first()).subscribe(instance => {
+  connect(vm: VM) {
+    this.vmService.getInstance(vm.id).pipe(first()).subscribe(instance => {
       if (!instance) { return; }
       const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(VmViewerDialogComponent, {
-        data: {id : vmId, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
+      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+        data: {title : `VM: ${vm.id} - ${vm.name}`, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
       });
       dialogRef.afterClosed().subscribe(() => {
         URL.revokeObjectURL(url);
