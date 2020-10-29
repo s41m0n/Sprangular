@@ -260,9 +260,9 @@ public class CourseController {
   }
 
   @PutMapping("/{courseId}")
-  public CourseDTO updateCourse(@PathVariable String courseId, @RequestBody CourseDTO updateCourseDetails) {
+  public CourseDTO updateCourse(@PathVariable String courseId, @ModelAttribute CourseWithModelDetails courseDTO) {
     try {
-      CourseDTO c = courseService.updateCourse(courseId, updateCourseDetails);
+      CourseDTO c = courseService.updateCourse(courseId, courseDTO);
       if (c == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TeamMaxSize has to be greater than TeamMinSize");
       }
