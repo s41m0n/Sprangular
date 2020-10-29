@@ -20,6 +20,8 @@ import org.springframework.scheduling.TaskScheduler;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -132,6 +134,7 @@ public class SprangularBackend {
         if (assignmentSolution.getAssignment().getDueDate().isBefore(LocalDate.now())) {
           // Deliver assignment
           assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
+          assignmentSolution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
           assignmentSolutionRepository.save(assignmentSolution);
         } else {
           // Schedule assignment delivery
@@ -142,6 +145,7 @@ public class SprangularBackend {
             Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
                 solution -> {
                   solution.setStatus(AssignmentStatus.DELIVERED);
+                  solution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
                   assignmentSolutionRepository.save(solution);
                 }
             );

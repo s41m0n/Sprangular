@@ -6,6 +6,7 @@ import it.polito.ai.lab2.dtos.UploadDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.AssignmentDetails;
+import it.polito.ai.lab2.pojos.AssignmentSolutionDetails;
 import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.AssignmentStatus;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,11 +80,21 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
       "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId)")
-  public List<AssignmentSolutionDTO> getAssignmentSolutionsForAssignment(Long assignmentId) {
+  public List<AssignmentSolutionDetails> getAssignmentSolutionsForAssignment(Long assignmentId) {
     Assignment assignment = assignmentRepository.findById(assignmentId)
         .orElseThrow(() -> new AssignmentNotFoundException("Assignment " + assignmentId + " does not exist"));
     return assignment.getSolutions().stream()
-        .map(solution -> modelMapper.map(solution, AssignmentSolutionDTO.class))
+        .map(solution -> {
+          AssignmentSolutionDetails asd = new AssignmentSolutionDetails();
+          asd.setId(solution.getId());
+          asd.setStudentName(solution.getStudent().getName());
+          asd.setStudentSurname(solution.getStudent().getSurname());
+          asd.setStudentId(solution.getStudent().getId());
+          asd.setStatus(solution.getStatus());
+          asd.setStatusTs(solution.getStatusTs());
+          asd.setGrade(solution.getGrade());
+          return asd;
+        })
         .collect(Collectors.toList());
   }
 
@@ -162,6 +174,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       assignment.getSolutions().add(assignmentSolution);
       assignmentSolution.setStudent(student);
       assignmentSolution.setStatus(AssignmentStatus.NULL);
+      assignmentSolution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
       assignmentSolutionRepository.save(assignmentSolution);
     });
     Assignment savedAssignment = assignmentRepository.save(assignment);
@@ -176,6 +189,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
         assignmentSolution -> {
           assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
+          assignmentSolution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
           assignmentSolutionRepository.save(assignmentSolution);
         }
     );
@@ -201,6 +215,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     studentUpload.setAssignmentSolution(assignmentSolution);
     assignmentSolution.getStudentUploads().add(studentUpload);
     assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
+    assignmentSolution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
 
     StudentUpload savedUpload = studentUploadRepository.save(studentUpload);
     Path uploadPath = Utility.UPLOADS_DIR.resolve(savedUpload.getId().toString());
@@ -231,6 +246,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     if (file == null)
       throw new FileNotFoundException("Assignment" + assignmentId + " image not found");
     assignmentSolution.setStatus(AssignmentStatus.READ);
+    assignmentSolution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
     return file;
   }
 
@@ -267,6 +283,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED_UPLOADABLE);
     else
       studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED);
+    studentUpload.getAssignmentSolution().setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
 
     ProfessorUpload savedUpload = professorUploadRepository.save(professorUpload);
     Path uploadPath = Utility.UPLOADS_DIR.resolve(savedUpload.getId().toString());
@@ -295,6 +312,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           "Assignment solution for assignment " + assignmentId + " and student " + studentId + " not reviewed yet");
     assignmentSolution.setGrade(grade);
     assignmentSolution.setStatus(AssignmentStatus.DEFINITIVE);
+    assignmentSolution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
     return modelMapper.map(assignmentSolution, AssignmentSolutionDTO.class);
   }
 

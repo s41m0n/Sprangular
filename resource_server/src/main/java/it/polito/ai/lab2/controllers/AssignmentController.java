@@ -4,6 +4,7 @@ import it.polito.ai.lab2.dtos.AssignmentSolutionDTO;
 import it.polito.ai.lab2.exceptions.AssignmentNotFoundException;
 import it.polito.ai.lab2.exceptions.AssignmentSolutionNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
+import it.polito.ai.lab2.pojos.AssignmentSolutionDetails;
 import it.polito.ai.lab2.services.AssignmentAndUploadService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class AssignmentController {
   AssignmentAndUploadService assAndUploadService;
 
   @GetMapping("/{assignmentId}/solutions")
-  public List<AssignmentSolutionDTO> solutionsForAssignment(@PathVariable Long assignmentId) {
+  public List<AssignmentSolutionDetails> solutionsForAssignment(@PathVariable Long assignmentId) {
     log.info("solutionsForAssignment() called");
     try {
       return assAndUploadService.getAssignmentSolutionsForAssignment(assignmentId);

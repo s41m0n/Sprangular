@@ -4,6 +4,7 @@ import it.polito.ai.lab2.dtos.AssignmentDTO;
 import it.polito.ai.lab2.dtos.AssignmentSolutionDTO;
 import it.polito.ai.lab2.dtos.UploadDTO;
 import it.polito.ai.lab2.pojos.AssignmentDetails;
+import it.polito.ai.lab2.pojos.AssignmentSolutionDetails;
 import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.utility.AssignmentStatus;
 import org.springframework.core.io.Resource;
@@ -15,7 +16,7 @@ public interface AssignmentAndUploadService {
 
   List<AssignmentDTO> getAssignmentsForCourse(String courseId);
 
-  List<AssignmentSolutionDTO> getAssignmentSolutionsForAssignment(Long assignmentId);
+  List<AssignmentSolutionDetails> getAssignmentSolutionsForAssignment(Long assignmentId);
 
   AssignmentSolutionDTO getAssignmentSolutionForAssignmentOfStudent(Long assignmentId, String studentId);
 
