@@ -260,8 +260,7 @@ export class CourseService {
     return this.http
       .put<boolean[]>(
         `${environment.base_courses_url}/${courseId}/enrollMany`,
-        formData,
-        environment.base_http_headers
+        formData
       )
       .pipe(
         tap((p) => {
