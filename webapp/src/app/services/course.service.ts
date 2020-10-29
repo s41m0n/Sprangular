@@ -11,6 +11,7 @@ import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
 import { handleError } from '../helpers/handle.error';
+import { FileInput } from 'ngx-material-file-input';
 
 /**
  * CourseService service
@@ -250,6 +251,32 @@ export class CourseService {
       }),
       toArray()
     );
+  }
+
+  enrollWithCsv(
+    formData: FormData,
+    courseId: string = this.currentCourseSubject.value
+  ) {
+    return this.http
+      .put<boolean[]>(
+        `${environment.base_courses_url}/${courseId}/enrollMany`,
+        formData,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((p) => {
+          this.toastrService.success(
+            `Successfully enrolled more students in ${courseId}`,
+            'Congratulations 😃'
+          );
+        }),
+        catchError(
+          handleError<Professor>(
+            this.toastrService,
+            `enrollWithCsv(csv, ${courseId})`
+          )
+        )
+      );
   }
 
   /**

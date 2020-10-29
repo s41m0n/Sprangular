@@ -15,7 +15,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { FormControl } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-
+import { FileInput } from 'ngx-material-file-input';
 import { Student } from '../../models/student.model';
 
 /**
@@ -32,12 +32,18 @@ export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy {
   selection = new SelectionModel<Student>(true, []); // Keeps track of the selected rows
   colsToDisplay = ['select', 'id', 'surname', 'name', 'team']; // Columns to be displayed in the table
   addStudentControl = new FormControl(); // Form control to input the user to be enrolled
+  csvControl = new FormControl();
+
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
+
   @Output() addStudentsEvent = new EventEmitter<Student[]>(); // Event emitter for the enroll student
   @Output() removeStudentsEvent = new EventEmitter<Student[]>(); // Event emitter for the unenroll student
   @Output() searchStudentsEvent = new EventEmitter<string>(); // Event emitter for the search students (autocompletions)
+  @Output() addStudentsWithCsv = new EventEmitter<FormData>();
+
   @ViewChild(MatSort, { static: true }) sort: MatSort; // Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator; // Mat paginator for the table
+
   @Input() filteredStudents: Observable<Student[]>; // List of students matching search criteria
   @Input() set enrolledStudents(students: Student[]) {
     // Enrolled students to be displayed in the table
@@ -108,5 +114,13 @@ export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy {
   /** Function to set the value displayed in input and mat-options */
   displayFn(student: Student): string {
     return student ? Student.displayFn(student) : '';
+  }
+
+  enrollMany() {
+    const formData = new FormData();
+    const fileInput: FileInput = this.csvControl.value;
+    formData.append('file', fileInput.files[0]);
+    this.addStudentsWithCsv.emit(formData);
+    this.csvControl.reset();
   }
 }

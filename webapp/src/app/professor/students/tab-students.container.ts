@@ -6,6 +6,7 @@ import { filter, finalize, first, switchMap, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { CourseService } from '../../services/course.service';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { FileInput } from 'ngx-material-file-input';
 
 /**
  * StudentsContainer class
@@ -93,6 +94,16 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
   enrollStudents(students: Student[]) {
     this.courseService
       .enrollStudents(students)
+      .pipe(
+        first(),
+        finalize(() => this.refreshEnrolled())
+      )
+      .subscribe();
+  }
+
+  enrollWithCsv(formData: FormData) {
+    this.courseService
+      .enrollWithCsv(formData)
       .pipe(
         first(),
         finalize(() => this.refreshEnrolled())
