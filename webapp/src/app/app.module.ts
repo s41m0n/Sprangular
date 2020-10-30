@@ -65,7 +65,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { UserConfirmComponent } from './user/user-confirm.component';
 import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
-import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirmation-dialog.component';
+import { EditTeamVmOptionsDialogComponent } from './modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
+import { ConfirmationDialogComponent } from './modals/confirmation-dialog/confirmation-dialog.component';
 
 @NgModule({
   declarations: [
@@ -99,6 +100,7 @@ import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirma
     UserConfirmComponent,
     NewAssignmentDialogComponent,
     EditCourseDialogComponent,
+    EditTeamVmOptionsDialogComponent,
     ConfirmationDialogComponent
   ],
   imports: [
@@ -148,6 +150,7 @@ import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirma
     VmOwnerDialogComponent,
     ImageViewerDialogComponent,
     EditCourseDialogComponent,
+    EditTeamVmOptionsDialogComponent,
     ConfirmationDialogComponent
   ],
   providers: [

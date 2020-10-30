@@ -1,7 +1,18 @@
 .active {
-    background: lightgreen;
+    border: solid greenyellow;
 }
 
 .inactive {
-    background: lightcoral;
+    border: solid #ff4d51;
+}
+
+div.section-title {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    margin-bottom: 4px;
+}
+
+button.centered-button {
+    align-self: center;
 }

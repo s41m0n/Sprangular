@@ -21,4 +21,8 @@ public class VmDTO extends RepresentationModel<VmDTO> {
   boolean active;
 
   String imagePath;
+
+  TeamDTO team;
+
+  Long teamId;
 }

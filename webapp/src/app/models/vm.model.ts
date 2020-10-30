@@ -16,6 +16,7 @@ export class VM {
   diskStorage: number;
   ram: number;
   active: boolean;
+  team;
 
   constructor(
     id: number = 0,
@@ -23,7 +24,8 @@ export class VM {
     vCpu: number = 1,
     ram: number = 0.5,
     diskStorage: number = 2,
-    active: boolean = false
+    active: boolean = false,
+    team: {}
   ) {
     this.id = id;
     this.name = name;
@@ -31,5 +33,6 @@ export class VM {
     this.ram = ram;
     this.diskStorage = diskStorage;
     this.active = active;
+    this.team = team;
   }
 }

@@ -1,0 +1,72 @@
+<h1 mat-dialog-title>Edit Team VMs options</h1>
+
+<div mat-dialog-content>
+    <form [formGroup]="form">
+        <label>Team max number of instances:</label><br/>
+        <mat-slider
+                color="primary"
+                formControlName="maxTotalInstances"
+                [thumbLabel]="true"
+                (valueChange)="adaptMin($event)"
+                min="1"
+                max="10"
+                step="1"
+        >
+        </mat-slider>
+
+        <label>Team max number of active instances:</label><br/>
+        <mat-slider
+                color="primary"
+                formControlName="maxActiveInstances"
+                [thumbLabel]="true"
+                (valueChange)="adaptMax($event)"
+                min="1"
+                max="10"
+                step="1"
+        >
+        </mat-slider>
+
+        <label>Max number of vCPUs:</label><br />
+        <mat-slider
+                color="primary"
+                formControlName="maxVCpu"
+                max="4"
+                min="1"
+                step="1"
+                [thumbLabel]="true"
+                [tickInterval]="getSliderTickInterval()"
+        >
+        </mat-slider>
+
+        <label>RAM size: {{ this.form.get('maxRam').value }}GB</label><br />
+        <mat-slider
+                color="primary"
+                formControlName="maxRam"
+                class="example-margin"
+                max="8"
+                min="1"
+                step="1"
+                [thumbLabel]="true"
+                [tickInterval]="getSliderTickInterval()"
+        >
+        </mat-slider>
+
+        <label>Disk space: {{ this.form.get('maxDisk').value }}GB</label><br />
+        <mat-slider
+                color="primary"
+                formControlName="maxDisk"
+                class="example-margin"
+                max="10"
+                min="1"
+                step="1"
+                [thumbLabel]="true"
+                [tickInterval]="getSliderTickInterval()"
+        >
+        </mat-slider>
+    </form>
+</div>
+
+<div mat-dialog-actions style="justify-content: center">
+    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+    <button mat-button color="primary" (click)="editTeamSpec()">Edit</button>
+</div>

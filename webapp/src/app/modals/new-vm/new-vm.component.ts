@@ -15,9 +15,9 @@ export class NewVmDialogComponent implements OnInit {
   vmInvalid = false;
 
   constructor(
-    private fb: FormBuilder,
-    private vmService: VmService,
-    public dialogRef: MatDialogRef<NewVmDialogComponent>
+      private fb: FormBuilder,
+      private vmService: VmService,
+      public dialogRef: MatDialogRef<NewVmDialogComponent>
   ) {}
 
   ngOnInit(): void {
@@ -34,19 +34,21 @@ export class NewVmDialogComponent implements OnInit {
       return;
     }
     const vm = new VM(
-      0,
-      this.form.get('name').value,
-      this.form.get('vCpu').value,
-      this.form.get('ram').value,
-      this.form.get('diskStorage').value
+        0,
+        this.form.get('name').value,
+        this.form.get('vCpu').value,
+        this.form.get('ram').value,
+        this.form.get('diskStorage').value,
+        true,
+        {}
     );
     this.vmService
-      .createVmForTeam(vm)
-      .pipe(first())
-      .subscribe((res) => {
-        if (res) {
-          this.dialogRef.close(true);
-        }
-      });
+        .createVmForTeam(vm)
+        .pipe(first())
+        .subscribe((res) => {
+          if (res) {
+            this.dialogRef.close(true);
+          }
+        });
   }
 }

@@ -11,6 +11,7 @@ import { VM } from '../../models/vm.model';
 import { VmOptionsDialogComponent } from '../../modals/vm-options/vm-options-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NewVmDialogComponent } from '../../modals/new-vm/new-vm.component';
+import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 
 /**
  * VmsComponent
@@ -23,10 +24,16 @@ import { NewVmDialogComponent } from '../../modals/new-vm/new-vm.component';
   styleUrls: ['./tab-vms.component.css'],
 })
 export class TabProfessorVmsComponent implements AfterViewInit {
-  dataSource = new MatTableDataSource<VM>(); // Table datasource dynamically modified
+  dataSources = new Array<MatTableDataSource<VM>>();
+  teams = new Set();
   @Input() set vms(vms: VM[]) {
     // VMs to be displayed in the table
-    this.dataSource.data = vms;
+    vms.forEach(vm => this.teams.add(vm.team.id));
+    this.teams.forEach(team => {
+      const data = new MatTableDataSource<VM>();
+      data.data = vms.filter(vm => vm.team.id === team);
+      this.dataSources.push(data);
+    });
   }
   @Output() wipeVmEvent = new EventEmitter<number>();
   @Output() connectVmEvent = new EventEmitter<VM>();
@@ -36,9 +43,29 @@ export class TabProfessorVmsComponent implements AfterViewInit {
 
   ngAfterViewInit() {}
 
-  openDialog(id: number): void {
-    const selectedVm = this.dataSource.data.find((vm) => vm.id === id);
-    const index = this.dataSource.data.findIndex((vm) => vm === selectedVm);
+  openDialogTeamOption(teamId: number, index: number): void {
+    const teamToChange = this.dataSources[index].data[0].team;
+    const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
+      data: {
+        maxInstances: teamToChange.maxTotalInstances,
+        maxActive: teamToChange.maxActiveInstances,
+        vCpu: teamToChange.maxVCpu,
+        ram: teamToChange.maxRam,
+        disk: teamToChange.maxDiskStorage
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log(result);
+        // TODO - da pushare la modifica
+      }
+    });
+  }
+
+  openDialogVmOption(id: number, i: number): void {
+    const selectedVm = this.dataSources[i].data.find((vm) => vm.id === id);
+    const index = this.dataSources[i].data.findIndex((vm) => vm === selectedVm);
     const dialogRef = this.dialog.open(VmOptionsDialogComponent, {
       width: '300px',
       data: {
@@ -54,7 +81,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
         selectedVm.vcpu = Number(result.vCpu);
         selectedVm.ram = Number(result.ram);
         selectedVm.diskStorage = Number(result.disk);
-        this.dataSource.data[index] = selectedVm;
+        this.dataSources[i].data[index] = selectedVm;
         // TODO - da pushare la modifica
       }
     });
