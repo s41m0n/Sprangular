@@ -367,20 +367,21 @@ export class CourseService {
   updateCourse(formData: FormData): Observable<Course> {
     return this.http
       .put<Course>(
-        `${environment.base_courses_url}/${formData.get('acronym')}`,
+        `${environment.base_courses_url}/${this.course.value.acronym}`,
         formData
       )
       .pipe(
-        tap(() =>
+        tap((course) => {
           this.toastrService.success(
-            `Course ${formData.get('name')} successfully updated!`,
+            `Course ${this.course.value.name} successfully updated!`,
             'Awesome 😃'
-          )
-        ),
+          );
+          this.course.next(course);
+        }),
         catchError(
           handleError<Course>(
             this.toastrService,
-            `updateCourse(${formData.get('name')})`
+            `updateCourse(${this.course.value.name})`
           )
         )
       );

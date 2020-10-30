@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 
 @Entity
 @Data
@@ -24,7 +24,7 @@ public class Proposal {
 
   String courseId;
 
-  LocalDate deadline;
+  Timestamp deadline;
 
   @Enumerated(EnumType.STRING)
   ProposalStatus status;

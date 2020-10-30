@@ -48,7 +48,7 @@ export class NewCourseDialogComponent implements OnInit {
       .pipe(first())
       .subscribe((res) => {
         if (res) {
-          this.dialogRef.close();
+          this.dialogRef.close(formData);
         }
       });
   }

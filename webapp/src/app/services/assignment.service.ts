@@ -7,6 +7,7 @@ import {catchError, tap} from 'rxjs/operators';
 import {handleError} from '../helpers/handle.error';
 import {AssignmentSolution} from '../models/assignment-solution.model';
 import {AssignmentSolutionDetails} from '../models/assignment-solution-details.model';
+import {Upload} from '../models/upload.model';
 
 @Injectable({
   providedIn: 'root',
@@ -31,5 +32,12 @@ export class AssignmentService {
         .pipe(
           tap(() => console.log(`fetched assignment solutions for assignment ${assignmentId} - getSolutionsForAssignment()`)),
           catchError(handleError<any>(this.toastrService, `getSolutionsForAssingment(${assignmentId})`)));
+  }
+
+  public getAssignmentSolutionUploads(assignmentSolutionId: number): Observable<Upload[]> {
+    return this.http.get<Upload[]>(`${environment.base_assignmentSolutions_url}/${assignmentSolutionId}/uploads`)
+        .pipe(
+            tap(() => console.log(`fetched assignment solution ${assignmentSolutionId} uploads - getAssignmentUploads()`)),
+            catchError(handleError<Upload[]>(this.toastrService, `getAssignmentUploads(${assignmentSolutionId})`)));
   }
 }

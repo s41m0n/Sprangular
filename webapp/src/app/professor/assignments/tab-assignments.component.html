@@ -2,9 +2,18 @@
 
     <h2>Published Assignments</h2>
 
-    <button mat-raised-button color="primary" class="new-ass"
-            [routerLink]=""
-            [queryParams]="{ addAssignment: true }">New Assignment</button>
+    <div>
+        <button mat-raised-button color="primary" class="new-ass"
+                [routerLink]=""
+                [queryParams]="{ addAssignment: true }">New Assignment</button>
+    </div>
+
+    Filter Solutions by Status:
+    <div *ngFor="let status of assignmentStatuses" style="display: inline-block; margin: 20px">
+        <button mat-flat-button
+                [color]="this.filteredStatuses.includes(status) ? '' : 'accent'"
+                (click)="changeFiltering(status)">{{status}}</button>
+    </div>
 
     <!-- Assignments in course table -->
     <table mat-table [dataSource]="dataSource"
@@ -23,13 +32,13 @@
         <!-- Assignment RELEASE_DATE Column -->
         <ng-container matColumnDef="releaseDate">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Release Date</th>
-            <td mat-cell *matCellDef="let element"> {{element.releaseDate}} </td>
+            <td mat-cell *matCellDef="let element"> {{dateString(element.releaseDate)}} </td>
         </ng-container>
 
         <!-- Assignment DUE_DATE Column -->
         <ng-container matColumnDef="dueDate">
             <th mat-header-cell *matHeaderCellDef mat-sort-header="dueDate">Due Date</th>
-            <td mat-cell *matCellDef="let element"> {{element.dueDate}} </td>
+            <td mat-cell *matCellDef="let element"> {{dateString(element.dueDate)}} </td>
         </ng-container>
 
         <ng-container matColumnDef="document">
@@ -87,8 +96,17 @@
                             <th mat-header-cell *matHeaderCellDef mat-sort-header>Grade</th>
                             <td mat-cell *matCellDef="let element"> {{element.grade}} </td>
                         </ng-container>
+                        <ng-container matColumnDef="uploads">
+                            <th mat-header-cell *matHeaderCellDef>Uploads</th>
+                            <td mat-cell *matCellDef="let element">
+                                <button mat-raised-button
+                                        [routerLink]=""
+                                        [queryParams]="{ solution: element.id }">Uploads</button>
+                            </td>
+                        </ng-container>
                         <tr mat-header-row *matHeaderRowDef="innerColsToDisplay"></tr>
-                        <tr mat-row *matRowDef="let row; columns: innerColsToDisplay;"></tr>
+                        <tr mat-row *matRowDef="let row; columns: innerColsToDisplay;"
+                                    [hidden]="this.filteredStatuses.includes(row.status)"></tr>
                     </table>
                 </div>
             </td>

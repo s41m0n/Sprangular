@@ -1,5 +1,3 @@
-import {FileInput} from "ngx-material-file-input";
-
 export class Upload {
     id: number;
     localDateTime: string;

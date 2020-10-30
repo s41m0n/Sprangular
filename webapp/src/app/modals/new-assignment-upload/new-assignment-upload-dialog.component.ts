@@ -40,6 +40,7 @@ export class NewAssignmentUploadDialogComponent implements OnInit {
         formData.append('comment', this.form.get('comment').value);
         const fileInput: FileInput = this.form.get('document').value;
         formData.append('document', fileInput.files[0]);
+        // TODO: not needing assId but assSolutionId!
         this.studentService
             .uploadAssignmentSolution(formData, this.assignmentId)
             .pipe(first())

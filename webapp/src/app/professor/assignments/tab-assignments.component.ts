@@ -11,6 +11,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {AssignmentService} from '../../services/assignment.service';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AssignmentSolutionDetails} from '../../models/assignment-solution-details.model';
+import {AssignmentStatus} from '../../models/assignment-solution.model';
 
 /**
  * AssignmentsComponent
@@ -34,13 +35,15 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   dataSource = new MatTableDataSource<Assignment>();                     // Table datasource dynamically modified
   innerDataSource = new MatTableDataSource<AssignmentSolutionDetails>();
   colsToDisplay = ['name', 'releaseDate', 'dueDate', 'document', 'solutions']; // Columns to be displayed in the table
-  innerColsToDisplay = ['studentName', 'studentSurname', 'studentId', 'status', 'statusTs', 'grade'];
+  innerColsToDisplay = ['studentName', 'studentSurname', 'studentId', 'status', 'statusTs', 'grade', 'uploads'];
   @ViewChild(MatSort, {static: true}) sort: MatSort;                  // Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator;                   // Mat paginator for the table
   @Input() set assignments(assignments: Assignment[]) {              // Assignments to be displayed in the table
     this.dataSource.data = assignments;
   }
   expandedElement: Assignment | null;
+  assignmentStatuses = Object.values(AssignmentStatus).filter(isNaN);
+  filteredStatuses: string[] = [];
 
   constructor(public dialog: MatDialog,
               private assignmentService: AssignmentService,
@@ -76,6 +79,11 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
 
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
-    return date.toLocaleTimeString() + ' - ' + date.toLocaleDateString();
+    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
+  }
+
+  changeFiltering(status: string) {
+    this.filteredStatuses.includes(status) ?
+        this.filteredStatuses = this.filteredStatuses.filter(s => s !== status) : this.filteredStatuses.push(status);
   }
 }

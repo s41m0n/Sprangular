@@ -29,4 +29,8 @@ public interface SecurityService {
   boolean hasStudentTheAssignment(Long assignmentId);
 
   boolean isProfessorUploadReviewer(Long studentUploadId);
+
+  boolean isAssignmentSolutionOfProfessorCourse(Long assignmentSolutionId);
+
+  boolean isAssignmentSolutionOfStudent(Long assignmentSolutionId);
 }
