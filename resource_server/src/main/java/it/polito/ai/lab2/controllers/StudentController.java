@@ -136,17 +136,6 @@ public class StudentController {
     }
   }
 
-  @GetMapping("/{studentId}/assignments/{assignmentId}/uploads")
-  public List<UploadDTO> getUploadsForAssignment(@PathVariable String studentId,
-                                                 @PathVariable Long assignmentId) {
-    log.info("getUploadsForAssignment() called");
-    try {
-      return assAndUploadService.getStudentUploadsForAssignmentSolution(assignmentId, studentId);
-    } catch (StudentNotFoundException | AssignmentNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
   @PostMapping("/{studentId}/assignments/{assignmentId}/uploads")
   public UploadDTO uploadAssignmentUpload(@PathVariable String studentId,
                                           @PathVariable Long assignmentId,

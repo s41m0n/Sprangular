@@ -16,6 +16,7 @@ export const environment = {
   base_teams_url: `${BASE_API}/teams`,
   base_uploads_url: `${BASE_API}/uploads`,
   base_assignments_url: `${BASE_API}/assignments`,
+  base_assignmentSolutions_url: `${BASE_API}/assignmentSolutions`,
   login_url: `${BASE_API}/authentication/login`,
   register_url: `${BASE_API}/authentication/register`,
   confirm_url: `${BASE_API}/authentication/`,

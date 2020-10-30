@@ -123,25 +123,12 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
-      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId)")
-  public List<AssignmentSolutionDTO> filterAssignmentSolutionsForStatus(Long assignmentId, AssignmentStatus status) {
-    if (!assignmentRepository.existsById(assignmentId))
-      throw new AssignmentNotFoundException("Assignment " + assignmentId + " does not exist");
-    return assignmentSolutionRepository.findByAssignmentIdAndStatus(assignmentId, status).stream()
-        .map(solution -> modelMapper.map(solution, AssignmentSolutionDTO.class))
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') " +
-      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId) and @securityServiceImpl.isAssignmentOfProfessorCourse(#assignmentId) " +
-      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.hasStudentTheAssignment(#assignmentId) and @securityServiceImpl.isStudentSelf(studentId)")
-  public List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId) {
-    if (!studentRepository.existsById(studentId))
-      throw new StudentNotFoundException("Student " + studentId + " not found");
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
-        assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
-        "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentSolutionOfProfessorCourse(#assignmentSolutionId)" +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isAssignmentSolutionOfStudent(#assignmentSolutionId)")
+  public List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentSolutionId) {
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElseThrow(
+        () -> new AssignmentSolutionNotFoundException(
+        "Assignment solution " + assignmentSolutionId + " does not exist"));
     List<UploadDTO> toReturn = new ArrayList<>();
     assignmentSolution.getStudentUploads().forEach(
         studentUpload -> {

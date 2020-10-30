@@ -66,6 +66,7 @@ import { UserConfirmComponent } from './user/user-confirm.component';
 import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
 import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirmation-dialog.component';
+import {UploadsDialogComponent} from './modals/uploads/uploads-dialog.component';
 
 @NgModule({
   declarations: [
@@ -99,7 +100,8 @@ import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirma
     UserConfirmComponent,
     NewAssignmentDialogComponent,
     EditCourseDialogComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    UploadsDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -148,7 +150,8 @@ import {ConfirmationDialogComponent} from './modals/confirmation-dialog/confirma
     VmOwnerDialogComponent,
     ImageViewerDialogComponent,
     EditCourseDialogComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    UploadsDialogComponent
   ],
   providers: [
     MatDatepickerModule,

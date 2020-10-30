@@ -60,10 +60,10 @@ export class TabStudentAssignmentsComponent {
         first()
     ).subscribe(solution => table === 'regular' ? this.regularAssignmentSolution = solution : this.expiredAssignmentSolution = solution);
 
-    this.studentService.getAssignmentUploads(element.id)
+    // TODO: not needing assId but assSolutionId!
+    /*this.studentService.getAssignmentUploads(element.id)
         .pipe(
         first()
-    ).subscribe(uploads => table === 'regular' ? this.regularAssignmentUploads = uploads : this.expiredAssignmentUploads = uploads);
-
+    ).subscribe(uploads => table === 'regular' ? this.regularAssignmentUploads = uploads : this.expiredAssignmentUploads = uploads);*/
   }
 }

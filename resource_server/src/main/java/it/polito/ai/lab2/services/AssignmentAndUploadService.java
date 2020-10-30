@@ -22,10 +22,7 @@ public interface AssignmentAndUploadService {
 
   List<AssignmentDTO> getStudentAssignments(String studentId);
 
-  // TODO: do we really need this?
-  List<AssignmentSolutionDTO> filterAssignmentSolutionsForStatus(Long assignmentId, AssignmentStatus status);
-
-  List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentId, String studentId);
+  List<UploadDTO> getStudentUploadsForAssignmentSolution(Long assignmentSolutionId);
 
   AssignmentDTO createAssignment(AssignmentDetails details, String courseId, String professorId);
 

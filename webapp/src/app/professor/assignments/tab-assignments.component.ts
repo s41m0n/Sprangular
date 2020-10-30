@@ -35,7 +35,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   dataSource = new MatTableDataSource<Assignment>();                     // Table datasource dynamically modified
   innerDataSource = new MatTableDataSource<AssignmentSolutionDetails>();
   colsToDisplay = ['name', 'releaseDate', 'dueDate', 'document', 'solutions']; // Columns to be displayed in the table
-  innerColsToDisplay = ['studentName', 'studentSurname', 'studentId', 'status', 'statusTs', 'grade'];
+  innerColsToDisplay = ['studentName', 'studentSurname', 'studentId', 'status', 'statusTs', 'grade', 'uploads'];
   @ViewChild(MatSort, {static: true}) sort: MatSort;                  // Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator;                   // Mat paginator for the table
   @Input() set assignments(assignments: Assignment[]) {              // Assignments to be displayed in the table

@@ -49,10 +49,11 @@ export class TabExpandendAssignmentComponent {
 
   /** Private function to refresh the list of vms */
   private refreshUploads() {
-    this.studentService
+    // TODO: not needing assId but assSolutionId!
+    /*this.studentService
         .getAssignmentUploads(this.expandedElement.id)
         .pipe(first())
-        .subscribe((uploads) => (this.dataSource.data = uploads));
+        .subscribe((uploads) => (this.dataSource.data = uploads));*/
   }
 
   newAssignmentSolution() {
