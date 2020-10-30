@@ -5,13 +5,13 @@ import it.polito.ai.lab2.utility.ProposalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
 public interface ProposalRepository extends JpaRepository<Proposal, String> {
 
-  List<Proposal> findAllByDeadlineAfter(LocalDate t);
+  List<Proposal> findAllByDeadlineAfter(Timestamp t);
 
   List<Proposal> findAllByTeamId(Long teamId);
 

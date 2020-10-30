@@ -19,9 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -98,7 +96,7 @@ public class TeamServiceImpl implements TeamService {
   @Override
   @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
   public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Long deadline) {
-    if (LocalDate.now().isAfter(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneOffset.UTC)))
+    if (new Timestamp(System.currentTimeMillis()).after(new Timestamp(deadline)))
       throw new InvalidTimestampException("Timestamp before current date");
 
     if (memberIds.stream().distinct().count() != memberIds.size())
@@ -151,7 +149,7 @@ public class TeamServiceImpl implements TeamService {
             proposal.setInvitedUserId(member.getId());
             proposal.setTeamId(t.getId());
             proposal.setCourseId(courseId);
-            proposal.setDeadline(LocalDate.ofInstant(Instant.ofEpochMilli(deadline), ZoneOffset.UTC));
+            proposal.setDeadline(new Timestamp(deadline));
             proposal.setStatus(ProposalStatus.PENDING);
             proposalRepository.save(proposal);
           }

@@ -36,7 +36,9 @@ export class NewAssignmentDialogComponent implements OnInit {
     }
     const formData = new FormData();
     formData.append('name', this.form.get('title').value);
-    formData.append('dueDate', new Date(this.date).getTime().toString(10));
+    const deadlineDate = new Date(this.date);
+    deadlineDate.setDate(deadlineDate.getDate() + 1);
+    formData.append('dueDate', deadlineDate.getTime().toString(10));
     const fileInput: FileInput = this.form.get('doc').value;
     formData.append('document', fileInput.files[0]);
 

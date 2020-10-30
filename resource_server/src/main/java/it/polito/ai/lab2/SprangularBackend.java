@@ -21,10 +21,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 
 @Log
@@ -93,7 +89,7 @@ public class SprangularBackend {
       Set<Long> deleted = new HashSet<>();
       Set<Long> scheduled = new HashSet<>();
       proposals.forEach(proposal -> {
-        if (proposal.getDeadline().isBefore(LocalDate.now())) {
+        if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) {
           // Create scheduled task
           if (!scheduled.contains(proposal.getTeamId())) {
             scheduled.add(proposal.getTeamId());
@@ -111,8 +107,7 @@ public class SprangularBackend {
                 teamRepository.deleteById(proposal.getTeamId());
               }
             };
-            scheduler.schedule(proposalDeadline,
-                new Date(proposal.getDeadline().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()));
+            scheduler.schedule(proposalDeadline, new Date(proposal.getDeadline().getTime()));
           }
         } else {
           // Reject proposals and delete team
@@ -131,10 +126,10 @@ public class SprangularBackend {
           Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ));
       Set<Long> programmed = new HashSet<>();
       assignmentSolutions.forEach(assignmentSolution -> {
-        if (assignmentSolution.getAssignment().getDueDate().isBefore(LocalDate.now())) {
+        if (assignmentSolution.getAssignment().getDueDate().before(new Timestamp(System.currentTimeMillis()))) {
           // Deliver assignment
           assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
-          assignmentSolution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
+          assignmentSolution.setStatusTs(new Timestamp(System.currentTimeMillis()));
           assignmentSolutionRepository.save(assignmentSolution);
         } else {
           // Schedule assignment delivery
@@ -145,12 +140,12 @@ public class SprangularBackend {
             Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
                 solution -> {
                   solution.setStatus(AssignmentStatus.DELIVERED);
-                  solution.setStatusTs(new Timestamp(Instant.now().toEpochMilli()));
+                  solution.setStatusTs(new Timestamp(System.currentTimeMillis()));
                   assignmentSolutionRepository.save(solution);
                 }
             );
             scheduler.schedule(automaticDelivery,
-                new Date(assignment.getDueDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()));
+                new Date(assignment.getDueDate().getTime()));
           }
         }
       });

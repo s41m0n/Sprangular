@@ -2,7 +2,6 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.CourseDTO;
 import it.polito.ai.lab2.dtos.ProfessorDTO;
-import it.polito.ai.lab2.dtos.StudentDTO;
 import it.polito.ai.lab2.exceptions.ProfessorNotFoundException;
 import it.polito.ai.lab2.repositories.ProfessorRepository;
 import it.polito.ai.lab2.repositories.RoleRepository;

@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Entity
 @Data
@@ -18,7 +18,7 @@ public class ProfessorUpload {
 
   String imagePath;
 
-  LocalDateTime timestamp;
+  Timestamp timestamp;
 
   String comment;
 

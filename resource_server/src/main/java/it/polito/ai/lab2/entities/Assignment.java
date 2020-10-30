@@ -3,7 +3,7 @@ package it.polito.ai.lab2.entities;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class Assignment {
   @OneToMany(mappedBy = "assignment")
   List<AssignmentSolution> solutions = new ArrayList<>();
 
-  LocalDate releaseDate;
+  Timestamp releaseDate;
 
-  LocalDate dueDate;
+  Timestamp dueDate;
 }

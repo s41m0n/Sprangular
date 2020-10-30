@@ -2,7 +2,7 @@ package it.polito.ai.lab2.dtos;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.sql.Timestamp;
 
 @Data
 public class AssignmentDTO {
@@ -13,7 +13,7 @@ public class AssignmentDTO {
 
   String imagePath;
 
-  LocalDate releaseDate;
+  Timestamp releaseDate;
 
-  LocalDate dueDate;
+  Timestamp dueDate;
 }
