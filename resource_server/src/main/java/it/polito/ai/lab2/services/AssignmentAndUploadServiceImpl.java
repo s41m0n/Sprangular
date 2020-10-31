@@ -28,8 +28,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
-import java.time.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,10 +55,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   ProfessorRepository professorRepository;
 
   @Autowired
-  StudentUploadRepository studentUploadRepository;
-
-  @Autowired
-  ProfessorUploadRepository professorUploadRepository;
+  UploadRepository uploadRepository;
 
   @Autowired
   TaskScheduler scheduler;
@@ -129,16 +124,9 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElseThrow(
         () -> new AssignmentSolutionNotFoundException(
         "Assignment solution " + assignmentSolutionId + " does not exist"));
-    List<UploadDTO> toReturn = new ArrayList<>();
-    assignmentSolution.getStudentUploads().forEach(
-        studentUpload -> {
-          toReturn.add(modelMapper.map(studentUpload, UploadDTO.class));
-          ProfessorUpload professorUpload = studentUpload.getTeacherRevision();
-          if (professorUpload != null)
-            toReturn.add(modelMapper.map(professorUpload, UploadDTO.class));
-        }
-    );
-    return toReturn;
+    return assignmentSolution.getUploads().stream()
+        .map(upload -> modelMapper.map(upload, UploadDTO.class))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -151,7 +139,8 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
         .orElseThrow(() -> new ProfessorNotFoundException("Professor " + professorId + " does not exist"));
     Assignment assignment = new Assignment();
     assignment.setName(details.getName());
-    assignment.setReleaseDate(new Timestamp(System.currentTimeMillis()));
+    Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+    assignment.setReleaseDate(currentTs);
     assignment.setDueDate(new Timestamp(details.getDueDate()));
     assignment.setCourse(course);
     assignment.setProfessor(professor);
@@ -161,8 +150,14 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       assignment.getSolutions().add(assignmentSolution);
       assignmentSolution.setStudent(student);
       assignmentSolution.setStatus(AssignmentStatus.NULL);
-      assignmentSolution.setStatusTs(new Timestamp(System.currentTimeMillis()));
+      assignmentSolution.setStatusTs(currentTs);
       assignmentSolutionRepository.save(assignmentSolution);
+      Upload upload = new Upload();
+      upload.setTimestamp(currentTs);
+      upload.setStatus(AssignmentStatus.NULL);
+      upload.setComment("Assignment published");
+      upload.setAssignmentSolution(assignmentSolution);
+      uploadRepository.save(upload);
     });
     Assignment savedAssignment = assignmentRepository.save(assignment);
     Path assignmentPath = Utility.ASSIGNMENTS_DIR.resolve(savedAssignment.getId().toString());
@@ -175,9 +170,16 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
     Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
         assignmentSolution -> {
+          Timestamp innerCurrentTs = new Timestamp(System.currentTimeMillis());
           assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
-          assignmentSolution.setStatusTs(new Timestamp(System.currentTimeMillis()));
+          assignmentSolution.setStatusTs(innerCurrentTs);
           assignmentSolutionRepository.save(assignmentSolution);
+          Upload upload = new Upload();
+          upload.setTimestamp(innerCurrentTs);
+          upload.setStatus(AssignmentStatus.DELIVERED);
+          upload.setComment("Assignment delivered");
+          upload.setAssignmentSolution(assignmentSolution);
+          uploadRepository.save(upload);
         }
     );
     scheduler.schedule(automaticDelivery, new Date(assignment.getDueDate().getTime()));
@@ -195,15 +197,17 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       throw new UploadNotAllowedException("Student " + studentId + " cannot upload for assignment " + assignmentId
           + ": solution status is " + assignmentSolution.getStatus().toString());
 
-    StudentUpload studentUpload = new StudentUpload();
-    studentUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
-    studentUpload.setComment(details.getComment());
-    studentUpload.setAssignmentSolution(assignmentSolution);
-    assignmentSolution.getStudentUploads().add(studentUpload);
+    Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+    Upload upload = new Upload();
+    upload.setTimestamp(currentTs);
+    upload.setComment(details.getComment());
+    upload.setAssignmentSolution(assignmentSolution);
+    upload.setStatus(AssignmentStatus.DELIVERED);
+    assignmentSolution.getUploads().add(upload);
     assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
-    assignmentSolution.setStatusTs(new Timestamp(System.currentTimeMillis()));
+    assignmentSolution.setStatusTs(currentTs);
 
-    StudentUpload savedUpload = studentUploadRepository.save(studentUpload);
+    Upload savedUpload = uploadRepository.save(upload);
     Path uploadPath = Utility.UPLOADS_DIR.resolve(savedUpload.getId().toString());
     savedUpload.setImagePath(uploadPath.toString());
     try {
@@ -231,8 +235,15 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     }
     if (file == null)
       throw new FileNotFoundException("Assignment" + assignmentId + " image not found");
+    Timestamp currentTs = new Timestamp(System.currentTimeMillis());
     assignmentSolution.setStatus(AssignmentStatus.READ);
-    assignmentSolution.setStatusTs(new Timestamp(System.currentTimeMillis()));
+    assignmentSolution.setStatusTs(currentTs);
+    Upload upload = new Upload();
+    upload.setTimestamp(currentTs);
+    upload.setStatus(AssignmentStatus.DEFINITIVE);
+    upload.setComment("Assignment read");
+    upload.setAssignmentSolution(assignmentSolution);
+    uploadRepository.save(upload);
     return file;
   }
 
@@ -254,24 +265,27 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
-      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorUploadReviewer(#studentUploadId)")
-  public UploadDTO uploadProfessorUpload(UploadDetails details, Long studentUploadId) {
-    StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId)
-        .orElseThrow(() -> new StudentUploadNotFoundException("Student upload " + studentUploadId + " does not exist"));
-    if (!studentUpload.getAssignmentSolution().getStatus().equals(AssignmentStatus.DELIVERED))
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentSolutionOfProfessorCourse(#assignmentSolutionId)")
+  public UploadDTO uploadProfessorUpload(UploadDetails details, Long assignmentSolutionId) {
+    AssignmentSolution assSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElseThrow(
+        () -> new AssignmentSolutionNotFoundException("Assignment solution " + assignmentSolutionId + "does not exist"));
+    if (!assSolution.getStatus().equals(AssignmentStatus.DELIVERED))
       throw new UploadNotAllowedException("Student assignment status is not DELIVERED");
-    ProfessorUpload professorUpload = new ProfessorUpload();
-    professorUpload.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+    Upload professorUpload = new Upload();
+    professorUpload.setTimestamp(currentTs);
     professorUpload.setComment(details.getComment());
-    studentUpload.setTeacherRevision(professorUpload);
-    professorUpload.setRevisedSolution(studentUpload);
-    if (details.isReUploadable())
-      studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED_UPLOADABLE);
-    else
-      studentUpload.getAssignmentSolution().setStatus(AssignmentStatus.REVIEWED);
-    studentUpload.getAssignmentSolution().setStatusTs(new Timestamp(System.currentTimeMillis()));
+    professorUpload.setAssignmentSolution(assSolution);
+    if (details.isReUploadable()) {
+      professorUpload.setStatus(AssignmentStatus.REVIEWED_UPLOADABLE);
+      assSolution.setStatus(AssignmentStatus.REVIEWED_UPLOADABLE);
+    } else {
+      professorUpload.setStatus(AssignmentStatus.REVIEWED);
+      assSolution.setStatus(AssignmentStatus.REVIEWED);
+    }
+    assSolution.setStatusTs(currentTs);
 
-    ProfessorUpload savedUpload = professorUploadRepository.save(professorUpload);
+    Upload savedUpload = uploadRepository.save(professorUpload);
     Path uploadPath = Utility.UPLOADS_DIR.resolve(savedUpload.getId().toString());
     savedUpload.setImagePath(uploadPath.toString());
     try {
@@ -298,7 +312,14 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           "Assignment solution for assignment " + assignmentId + " and student " + studentId + " not reviewed yet");
     assignmentSolution.setGrade(grade);
     assignmentSolution.setStatus(AssignmentStatus.DEFINITIVE);
-    assignmentSolution.setStatusTs(new Timestamp(System.currentTimeMillis()));
+    Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+    assignmentSolution.setStatusTs(currentTs);
+    Upload upload = new Upload();
+    upload.setTimestamp(currentTs);
+    upload.setStatus(AssignmentStatus.DEFINITIVE);
+    upload.setComment("Grade registered: " + grade);
+    upload.setAssignmentSolution(assignmentSolution);
+    uploadRepository.save(upload);
     return modelMapper.map(assignmentSolution, AssignmentSolutionDTO.class);
   }
 

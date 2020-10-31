@@ -88,7 +88,7 @@ export class AppComponent {
   openLogin() {
     this.inModal = true;
     const dialogRef = this.dialog.open(LoginDialogComponent, {
-      width: '600px',
+      width: '20%',
     });
     dialogRef
       .afterClosed()
@@ -108,7 +108,7 @@ export class AppComponent {
   openRegister() {
     this.inModal = true;
     const dialogRef = this.dialog.open(RegisterDialogComponent, {
-      width: '600px',
+      width: '25%',
     });
     dialogRef
       .afterClosed()
@@ -128,7 +128,7 @@ export class AppComponent {
   newCourse() {
     this.inModal = true;
     const dialogRef = this.dialog.open(NewCourseDialogComponent, {
-      width: '450px',
+      width: '25%',
     });
     dialogRef
       .afterClosed()
@@ -147,7 +147,7 @@ export class AppComponent {
   newAssignment() {
     this.inModal = true;
     const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
-      width: '400px',
+      width: '25%',
     });
     dialogRef
       .afterClosed()
@@ -231,6 +231,7 @@ export class AppComponent {
   private uploadsDialog(id: number) {
     this.inModal = true;
     const dialogRef = this.dialog.open(UploadsDialogComponent, {
+      width: '75%',
       data: {id}
     });
     dialogRef

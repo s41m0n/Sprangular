@@ -28,7 +28,7 @@ public class AssignmentSolution {
   AssignmentStatus status;
 
   @OneToMany(mappedBy = "assignmentSolution")
-  List<StudentUpload> studentUploads = new ArrayList<>();
+  List<Upload> uploads = new ArrayList<>();
 
   String grade;
 

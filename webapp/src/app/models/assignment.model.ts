@@ -22,4 +22,7 @@ export class Assignment {
     this.dueDate = dueDate;
   }
 
+  static compare(a: Assignment, b: Assignment) {
+    return a.dueDate.localeCompare(b.dueDate);
+  }
 }

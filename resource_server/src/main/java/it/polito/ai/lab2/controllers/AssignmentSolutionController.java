@@ -1,10 +1,7 @@
 package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.UploadDTO;
-import it.polito.ai.lab2.entities.StudentUpload;
-import it.polito.ai.lab2.exceptions.AssignmentNotFoundException;
 import it.polito.ai.lab2.exceptions.AssignmentSolutionNotFoundException;
-import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.services.AssignmentAndUploadService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;

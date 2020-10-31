@@ -12,13 +12,13 @@ import {first} from 'rxjs/operators';
 export class UploadsDialogComponent {
 
   dataSource = new MatTableDataSource<Upload>();
-  colsToDisplay = ['id', 'comment', 'timestamp'];
+  colsToDisplay = ['timestamp', 'comment', 'status', 'download'];
 
   constructor(public dialogRef: MatDialogRef<UploadsDialogComponent>,
               private assignmentService: AssignmentService,
               @Inject(MAT_DIALOG_DATA) public data: any) {
     this.assignmentService.getAssignmentSolutionUploads(data.id).pipe(first()).subscribe(
-        uploads => this.dataSource.data = uploads);
+        uploads => this.dataSource.data = uploads.sort(Upload.compare));
   }
 
   dateString(statusTs: string): string {

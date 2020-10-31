@@ -31,7 +31,7 @@ public class SecurityServiceImpl implements SecurityService {
   AssignmentRepository assignmentRepository;
 
   @Autowired
-  StudentUploadRepository studentUploadRepository;
+  UploadRepository uploadRepository;
 
   @Autowired
   AssignmentSolutionRepository assignmentSolutionRepository;
@@ -142,10 +142,10 @@ public class SecurityServiceImpl implements SecurityService {
 
   @Override
   public boolean isProfessorUploadReviewer(Long studentUploadId) {
-    StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId).orElse(null);
-    if (studentUpload == null)
+    Upload upload = uploadRepository.findById(studentUploadId).orElse(null);
+    if (upload == null)
       return false;
-    return studentUpload.getAssignmentSolution().getAssignment().getProfessor().getId()
+    return upload.getAssignmentSolution().getAssignment().getProfessor().getId()
         .equals(SecurityContextHolder.getContext().getAuthentication().getName());
   }
 

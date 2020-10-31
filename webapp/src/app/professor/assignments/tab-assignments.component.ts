@@ -39,7 +39,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   @ViewChild(MatSort, {static: true}) sort: MatSort;                  // Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator;                   // Mat paginator for the table
   @Input() set assignments(assignments: Assignment[]) {              // Assignments to be displayed in the table
-    this.dataSource.data = assignments;
+    this.dataSource.data = assignments.sort(Assignment.compare);
   }
   expandedElement: Assignment | null;
   assignmentStatuses = Object.values(AssignmentStatus).filter(isNaN);
@@ -74,7 +74,8 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     if (this.expandedElement === null) {
       return;
     }
-    this.assignmentService.getSolutionsForAssignment(row.id).pipe(first()).subscribe(solutions => this.innerDataSource.data = solutions);
+    this.assignmentService.getSolutionsForAssignment(row.id).pipe(first()).subscribe(
+        solutions => this.innerDataSource.data = solutions.sort(AssignmentSolutionDetails.compare));
   }
 
   dateString(statusTs: string): string {

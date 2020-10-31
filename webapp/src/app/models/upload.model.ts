@@ -1,17 +1,32 @@
+export enum AssignmentStatus {
+    NULL,
+    READ,
+    DELIVERED,
+    REVIEWED,
+    REVIEWED_UPLOADABLE,
+    DEFINITIVE
+}
+
 export class Upload {
     id: number;
-    localDateTime: string;
-    comment: string;
     imagePath: string;
-    imageFile: File;
+    timestamp: string;
+    comment: string;
+    status: AssignmentStatus;
 
     constructor(id: number = 0,
+                imagePath: string = '',
+                timestamp: string = '',
                 comment: string = '',
-                localDateTime: string = '',
-                imageFile: File = new File([], '')) {
+                status: AssignmentStatus) {
         this.id = id;
+        this.imagePath = imagePath;
+        this.timestamp = timestamp;
         this.comment = comment;
-        this.localDateTime = localDateTime;
-        this.imageFile = imageFile;
+        this.status = status;
+    }
+
+    static compare(a: Upload, b: Upload) {
+        return a.timestamp.localeCompare(b.timestamp);
     }
 }
