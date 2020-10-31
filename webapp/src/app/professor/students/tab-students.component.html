@@ -40,6 +40,12 @@
   <!-- Delete student button -->
   <button mat-button (click)="deleteSelected()">Delete Selected</button>
 
+  <mat-card *ngIf="isEntirePageSelected() && !selection.isEmpty()"
+    >You currently selected only the first page of the table.
+    <button mat-button color="primary" (click)="selectAll()">
+      Click here to select all the entries
+    </button>
+  </mat-card>
   <!-- Students in course table -->
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
     <!-- Checkbox Column description-->
@@ -47,8 +53,8 @@
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
           (change)="$event ? masterToggle() : null"
-          [checked]="selection.hasValue() && isAllSelected()"
-          [indeterminate]="selection.hasValue() && !isAllSelected()"
+          [checked]="selection.hasValue() && isEntirePageSelected()"
+          [indeterminate]="selection.hasValue() && !isEntirePageSelected()"
           [aria-label]="checkboxLabel()"
         >
         </mat-checkbox>

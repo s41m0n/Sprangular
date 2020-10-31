@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  ElementRef,
   EventEmitter,
   Input,
   OnDestroy,
@@ -82,19 +83,23 @@ export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy {
 
   /** Function to select all rows if they are not all selected; otherwise clear selection. */
   masterToggle() {
-    this.isAllSelected()
-      ? this.selection.clear()
-      : this.dataSource.data.forEach((row) => this.selection.select(row));
+    this.isEntirePageSelected()
+      ? this.selection.deselect(...this.getPageData())
+      : this.selection.select(...this.getPageData());
   }
 
   /** Function to retrieve a checkbox label */
   checkboxLabel(row?: Student): string {
     if (!row) {
-      return `${this.isAllSelected() ? 'select' : 'deselect'} all`;
+      return `${this.isEntirePageSelected() ? 'select' : 'deselect'} all`;
     }
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${
-      row.id
+      row.id + 1
     }`;
+  }
+
+  selectAll() {
+    this.dataSource.data.forEach((row) => this.selection.select(row));
   }
 
   /** Function to emit the unenroll event for the selected rows */
@@ -109,6 +114,7 @@ export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy {
   addStudent() {
     this.addStudentsEvent.emit([this.addStudentControl.value]);
     this.addStudentControl.setValue('');
+    this.selection.clear();
   }
 
   /** Function to set the value displayed in input and mat-options */
@@ -121,6 +127,16 @@ export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy {
     const fileInput: FileInput = this.csvControl.value;
     formData.append('file', fileInput.files[0]);
     this.addStudentsWithCsv.emit(formData);
-    this.csvControl.reset();
+    this.csvControl.reset(undefined);
+  }
+
+  getPageData() {
+    return this.dataSource._pageData(
+      this.dataSource._orderData(this.dataSource.filteredData)
+    );
+  }
+
+  isEntirePageSelected() {
+    return this.getPageData().every((row) => this.selection.isSelected(row));
   }
 }

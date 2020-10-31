@@ -64,7 +64,7 @@ public class CourseServiceImpl implements CourseService {
       throw new DuplicatedCourseException("Course " + course.getAcronym() + " already exists");
     }
 
-    if(course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
+    if (course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
       throw new TeamSizesNotCoherentException("Cannot create course " + course.getAcronym() + ": wrong team sizes");
     }
 
@@ -188,7 +188,7 @@ public class CourseServiceImpl implements CourseService {
         .map(course -> course.getStudents().stream()
             .filter(x -> !applyFilter || x.getSurname().toLowerCase().contains(pattern.toLowerCase()))
             .map(x -> {
-              if(applyFilter){
+              if (applyFilter) {
                 return modelMapper.map(x, StudentWithTeamDetails.class);
               }
               StudentWithTeamDetails ret = modelMapper.map(x, StudentWithTeamDetails.class);
@@ -215,14 +215,14 @@ public class CourseServiceImpl implements CourseService {
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
   public CourseDTO updateCourse(String courseId, CourseWithModelDetails course) {
 
-    if(course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
+    if (course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
       throw new CannotUpdateCourseException("Cannot update course " + course.getAcronym() + ": wrong team sizes");
     }
 
     Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
-    for(Team t : c.getTeams()){
-      if(t.getMembers().size() < course.getTeamMinSize() || t.getMembers().size() > course.getTeamMaxSize()){
+    for (Team t : c.getTeams()) {
+      if (t.getMembers().size() < course.getTeamMinSize() || t.getMembers().size() > course.getTeamMaxSize()) {
         throw new CannotUpdateCourseException("Course " + courseId + " cannot be updated: some teams are not compliant with new restrictions");
       }
     }
@@ -304,14 +304,21 @@ public class CourseServiceImpl implements CourseService {
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
   public StudentDTO removeStudentFromCourse(String studentId, String courseId) {
     Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
-
     Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
-    if (!course.getStudents().contains(student)) {
-      throw new StudentNotInCourseException("Student " + studentId + " is not enrolled in course " + courseId);
-    }
+      if (!course.getStudents().contains(student)) {
+        throw new StudentNotInCourseException("Student " + studentId + " is not enrolled in course " + courseId);
+      }
+      student.removeCourse(course); //symmetric method, it updates also the course
 
-    student.removeCourse(course); //symmetric method, it updates also the course
     return modelMapper.map(student, StudentDTO.class);
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  public List<StudentDTO> removeStudentsFromCourse(List<String> studentIds, String courseId) {
+    return studentIds.stream()
+        .map(studentId -> removeStudentFromCourse(studentId, courseId))
+        .collect(Collectors.toList());
   }
 }

@@ -78,7 +78,7 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
    */
   unenrollStudents(students: Student[]) {
     this.courseService
-      .unenrollStudents(students)
+      .unenrollStudents2(students)
       .pipe(
         first(),
         finalize(() => this.refreshEnrolled())

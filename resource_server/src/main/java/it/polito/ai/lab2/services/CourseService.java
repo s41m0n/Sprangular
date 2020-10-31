@@ -34,6 +34,8 @@ public interface CourseService {
 
   StudentDTO removeStudentFromCourse(String studentId, String courseId);
 
+  List<StudentDTO> removeStudentsFromCourse(List<String> studentIds, String courseId);
+
   List<ProfessorDTO> getCourseProfessors(String courseId);
 
   boolean addProfessorToCourse(String professorId, String courseId);

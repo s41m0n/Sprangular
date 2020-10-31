@@ -230,7 +230,20 @@ public class CourseController {
   public StudentDTO removeStudentFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
     try {
       String studentId = reqBody.get("studentId");
+      log.info("removeStudentFromCourse(" + studentId + ", " + courseId + ") called");
       return courseService.removeStudentFromCourse(studentId, courseId);
+    } catch (StudentNotFoundException | CourseNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (StudentNotInCourseException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  @PutMapping("/{courseId}/removeStudents")
+  public List<StudentDTO> removeStudentsFromCourse(@PathVariable String courseId, @RequestBody List<String> reqBody) {
+    try {
+      log.info("removeStudentsFromCourse(" + courseId + ") called");
+      return courseService.removeStudentsFromCourse(reqBody, courseId);
     } catch (StudentNotFoundException | CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (StudentNotInCourseException e) {

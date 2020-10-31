@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { BehaviorSubject, from, Observable, of } from 'rxjs';
+import { BehaviorSubject, from, Observable, of, forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
@@ -11,7 +11,6 @@ import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
 import { handleError } from '../helpers/handle.error';
-import { FileInput } from 'ngx-material-file-input';
 
 /**
  * CourseService service
@@ -232,13 +231,13 @@ export class CourseService {
             environment.base_http_headers
           )
           .pipe(
-            tap((s) => {
+            tap(() => {
               this.toastrService.success(
-                `Enrolled ${Student.displayFn(s)} to ${courseId}`,
+                `Enrolled ${Student.displayFn(student)} to ${courseId}`,
                 'Congratulations 😃'
               );
               console.log(
-                `enrolled ${Student.displayFn(s)} - enrollStudents()`
+                `enrolled ${Student.displayFn(student)} - enrollStudents()`
               );
             }),
             catchError(
@@ -264,15 +263,47 @@ export class CourseService {
       )
       .pipe(
         tap((p) => {
-          this.toastrService.success(
-            `Successfully enrolled more students in ${courseId}`,
-            'Congratulations 😃'
-          );
+          if (p.includes(false)) {
+            this.toastrService.info(
+              `One or more students were already enrolled in ${courseId}`
+            );
+          } else {
+            this.toastrService.success(
+              `Successfully enrolled one or more students in ${courseId}`,
+              'Congratulations 😃'
+            );
+          }
         }),
         catchError(
           handleError<Professor>(
             this.toastrService,
             `enrollWithCsv(csv, ${courseId})`
+          )
+        )
+      );
+  }
+
+  unenrollStudent(student: Student, courseId: string) {
+    return this.http
+      .put<Student>(
+        `${environment.base_courses_url}/${courseId}/removeStudent`,
+        { studentId: student.id },
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((s) => {
+          this.toastrService.success(
+            `Unenrolled ${Student.displayFn(s)} from ${courseId}`,
+            'Congratulations 😃'
+          );
+          console.log(
+            `unenrolled ${Student.displayFn(s)} - unenrollStudents()`
+          );
+        }),
+        catchError(
+          handleError<Student>(
+            this.toastrService,
+            `unenrollStudents(${Student.displayFn(student)}, ${courseId})`
           )
         )
       );
@@ -317,6 +348,31 @@ export class CourseService {
       }),
       toArray()
     );
+  }
+
+  unenrollStudents2(
+    students: Student[],
+    courseId: string = this.currentCourseSubject.value
+  ) {
+    const studentsString: string[] = [];
+    students.forEach((el) => studentsString.push(el.id));
+    return this.http
+      .put<Student>(
+        `${environment.base_courses_url}/${courseId}/removeStudents`,
+        studentsString,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((s) => {
+          this.toastrService.success(
+            `Successfully unenrolled one ore more students from ${courseId}`,
+            'Congratulations 😃'
+          );
+        }),
+        catchError(
+          handleError<Student>(this.toastrService, `unenrollStudents failed`)
+        )
+      );
   }
 
   removeProfessorFromCourse(
