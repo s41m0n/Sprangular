@@ -2,16 +2,16 @@ import { Student } from './student.model';
 
 export class Proposal {
   token: string;
-  proposalCreator: Student;
+  proposalCreator: string;
   teamName: string;
-  membersAndStatus: Map<string, string>;
+  membersAndStatus: string[];
   deadline: string;
 
   constructor(
     token: string = '',
-    proposalCreator: Student,
+    proposalCreator: string,
     teamName: string,
-    membersAndStatus: Map<string, string>,
+    membersAndStatus: string[],
     deadline: string
   ) {
     this.token = token;

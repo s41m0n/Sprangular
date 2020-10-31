@@ -35,9 +35,15 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   dataSource = new MatTableDataSource<Student>(); // Table datasource dynamically modified
   dataSourceProposals = new MatTableDataSource<Proposal>();
   colsToDisplay = ['select', 'id', 'name', 'surname']; // Columns to be displayed in the table
+  colsToDisplayProposals = [
+    'proposalCreator',
+    'teamName',
+    'membersAndStatus',
+    'deadline',
+    'select',
+  ];
   addStudentControl = new FormControl(); // Form control to input the user to be enrolled
   teamNameControl = new FormControl();
-  proposalsReceived: Proposal[] = [];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
   @Output() searchStudentsEvent = new EventEmitter<string>(); // Event emitter for the search students (autocompletions)
   @Output() submitTeamEvent = new EventEmitter<TeamProposal>(); // Event emitter for the search students (autocompletions)
@@ -45,7 +51,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator; // Mat paginator for the table
   @Input() filteredStudents: Observable<Student[]>; // List of students matching search criteria
   @Input() set proposals(proposals: Proposal[]) {
-    this.proposalsReceived = proposals;
+    this.dataSourceProposals.data = proposals;
   }
   @Input() set availableStudents(students: Student[]) {
     // Enrolled students to be displayed in the table
@@ -117,5 +123,16 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   /** Function to set the value displayed in input and mat-options */
   displayFn(student: Student): string {
     return student ? Student.displayFn(student) : '';
+  }
+
+  dateString(statusTs: string): string {
+    const date = new Date(statusTs);
+    return date.toLocaleDateString();
+  }
+
+  displayFnMembers(members: string[]): string {
+    let returnedString = '';
+    members.forEach((s) => (returnedString += s + '\n'));
+    return returnedString;
   }
 }
