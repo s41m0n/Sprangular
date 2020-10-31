@@ -63,26 +63,6 @@ public class SprangularBackend {
         log.info("Uploads directory already exists");
       }
 
-      // Insert roles in the DB
-      if (!roleRepository.existsByName(Utility.ADMIN_ROLE)) {
-        log.info("Creating Role " + Utility.ADMIN_ROLE);
-        Role role = new Role();
-        role.setName(Utility.ADMIN_ROLE);
-        roleRepository.save(role);
-      }
-      if (!roleRepository.existsByName(Utility.PROFESSOR_ROLE)) {
-        log.info("Creating Role " + Utility.PROFESSOR_ROLE);
-        Role role = new Role();
-        role.setName(Utility.PROFESSOR_ROLE);
-        roleRepository.save(role);
-      }
-      if (!roleRepository.existsByName(Utility.STUDENT_ROLE)) {
-        log.info("Creating Role " + Utility.STUDENT_ROLE);
-        Role role = new Role();
-        role.setName(Utility.STUDENT_ROLE);
-        roleRepository.save(role);
-      }
-
       // TODO: test!
       // Team proposals management
       List<Proposal> proposals = proposalRepository.findAllByStatus(ProposalStatus.PENDING);

@@ -14,10 +14,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { FormControl } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-
 import { TeamProposal } from '../../models/team-proposal.model';
-
 import { Student } from '../../models/student.model';
+import { Proposal } from '../../models/proposal.model';
 
 /**
  * TabNoTeamComponent
@@ -34,15 +33,20 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   date: string = null;
   chosenMembers: Student[] = [];
   dataSource = new MatTableDataSource<Student>(); // Table datasource dynamically modified
+  dataSourceProposals = new MatTableDataSource<Proposal>();
   colsToDisplay = ['select', 'id', 'name', 'surname']; // Columns to be displayed in the table
   addStudentControl = new FormControl(); // Form control to input the user to be enrolled
   teamNameControl = new FormControl();
+  proposalsReceived: Proposal[] = [];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
   @Output() searchStudentsEvent = new EventEmitter<string>(); // Event emitter for the search students (autocompletions)
   @Output() submitTeamEvent = new EventEmitter<TeamProposal>(); // Event emitter for the search students (autocompletions)
   @ViewChild(MatSort, { static: true }) sort: MatSort; // Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator; // Mat paginator for the table
   @Input() filteredStudents: Observable<Student[]>; // List of students matching search criteria
+  @Input() set proposals(proposals: Proposal[]) {
+    this.proposalsReceived = proposals;
+  }
   @Input() set availableStudents(students: Student[]) {
     // Enrolled students to be displayed in the table
     const userInfo = JSON.parse(localStorage.getItem('currentUser'));
@@ -86,24 +90,27 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   addWishMember(student: Student) {
     if (!this.chosenMembers.find((x) => x.id === student.id)) {
       this.chosenMembers.push(student);
+      this.addStudentControl.setValue('');
     }
   }
 
   submitTeam() {
     this.chosenMembers.push(this.currentUser);
-    const dateToPush = new Date(this.date);
+    const deadlineDate = new Date(this.date);
+    deadlineDate.setDate(deadlineDate.getDate() + 1);
     if (
       this.teamNameControl.valid &&
       this.chosenMembers.length &&
-      dateToPush >= new Date()
+      deadlineDate >= new Date()
     ) {
       this.submitTeamEvent.emit(
         new TeamProposal(
           this.teamNameControl.value,
           this.chosenMembers.map((x) => x.id),
-          dateToPush.getTime()
+          deadlineDate.getTime().toString(10)
         )
       );
+      this.chosenMembers = [];
     }
   }
 

@@ -1,12 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-
 import { Student } from '../../models/student.model';
 import { StudentService } from '../../services/student.service';
 import { filter, finalize, first, switchMap, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { CourseService } from '../../services/course.service';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { FileInput } from 'ngx-material-file-input';
+import { NavigationEnd, Router } from '@angular/router';
 
 /**
  * StudentsContainer class

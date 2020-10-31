@@ -1,14 +1,22 @@
 .part1 {
-    width: 70%;
-    float: left;
+  width: 70%;
+  float: left;
 }
 
 .part2 {
-    width: 28%;
-    margin-left: 2%;
-    float: right;
+  width: 28%;
+  margin-left: 2%;
+  float: right;
 }
 
 .submitter {
-    float: right;
+  float: right;
+}
+
+mat-form-field {
+  width: 70%;
+}
+
+mat-card {
+  margin-bottom: 5px;
 }

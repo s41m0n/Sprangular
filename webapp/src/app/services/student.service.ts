@@ -12,6 +12,7 @@ import { handleError } from '../helpers/handle.error';
 import { AssignmentSolution } from '../models/assignment-solution.model';
 import { Upload } from '../models/upload.model';
 import { AuthService } from './auth.service';
+import { Proposal } from '../models/proposal.model';
 
 /** StudentService service
  *
@@ -177,6 +178,30 @@ export class StudentService {
           handleError<Upload>(
             this.toastrService,
             `uploadAssignmentSolution(${assignmentSolutionId})`
+          )
+        )
+      );
+  }
+
+  getTeamProposalsForCourse(
+    studentId: string = this.authService.currentUserValue.id,
+    courseId: string = this.courseService.currentCourseSubject.value
+  ) {
+    return this.http
+      .get<Proposal[]>(
+        `${environment.base_students_url}/${studentId}/teamProposalsOfCourse/${courseId}`,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched proposals for student ${studentId} of course ${courseId} - getTeamProposalsForCourse()`
+          )
+        ),
+        catchError(
+          handleError<Proposal[]>(
+            this.toastrService,
+            `getTeamProposalsForCourse(${studentId}, ${courseId})`
           )
         )
       );

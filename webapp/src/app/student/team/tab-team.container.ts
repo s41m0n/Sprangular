@@ -7,6 +7,7 @@ import { TeamService } from 'src/app/services/team.service';
 import { TeamProposal } from 'src/app/models/team-proposal.model';
 import { CourseService } from 'src/app/services/course.service';
 import { Team } from 'src/app/models/team.model';
+import { Proposal } from 'src/app/models/proposal.model';
 
 /**
  * TabTeamContainer class
@@ -21,6 +22,7 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
   team: Team;
   availableStudents: Student[] = []; // The current enrolled list
   filteredStudents: Observable<Student[]>; // The list of students matching a criteria
+  proposals: Proposal[] = [];
   private searchTerms = new Subject<string>(); // The search criteria emitter
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
@@ -47,6 +49,7 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
         this.studentService.searchStudentsInCourseAvailable(name)
       )
     );
+    this.refreshProposals();
   }
 
   ngOnDestroy() {
@@ -65,13 +68,16 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
   }
 
   submitTeam(proposal: TeamProposal): void {
-    this.teamService.createTeam(proposal).subscribe((team) => {
-      if (team) {
-        this.teamService
-          .getStudentTeam()
-          .pipe(first())
-          .subscribe((t) => this.teamService.currentTeamSubject.next(t));
-      }
-    });
+    this.teamService
+      .createTeam(proposal)
+      .pipe(first())
+      .subscribe(() => this.refreshProposals());
+  }
+
+  private refreshProposals() {
+    this.studentService
+      .getTeamProposalsForCourse()
+      .pipe(first())
+      .subscribe((proposals) => (this.proposals = proposals));
   }
 }

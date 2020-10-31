@@ -116,10 +116,9 @@ public class StudentController {
     }
   }
 
-  @GetMapping("/{studentId}/teamProposalsOfCourse")
-  public List<TeamProposalDetails> getProposalsForStudentOfCourse(@PathVariable String studentId, @RequestBody Map<String, String> reqBody) {
+  @GetMapping("/{studentId}/teamProposalsOfCourse/{courseId}")
+  public List<TeamProposalDetails> getProposalsForStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
     try {
-      String courseId = reqBody.get("courseId");
       return studentService.getProposalsForStudentOfCourse(studentId, courseId);
     } catch (CourseNotFoundException | StudentNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());

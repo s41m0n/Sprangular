@@ -22,10 +22,12 @@ import { handleError } from '../helpers/handle.error';
 export class TeamService {
   public currentTeamSubject: BehaviorSubject<Team>;
 
-  constructor(private http: HttpClient,
-              private toastrService: ToastrService,
-              private courseService: CourseService,
-              private authService: AuthService) {
+  constructor(
+    private http: HttpClient,
+    private toastrService: ToastrService,
+    private courseService: CourseService,
+    private authService: AuthService
+  ) {
     this.currentTeamSubject = new BehaviorSubject<Team>(null);
   }
 
@@ -52,16 +54,34 @@ export class TeamService {
       );
   }
 
-  public getStudentTeam(courseId: string = this.courseService.currentCourseSubject.value, studentId: string = this.authService.currentUserValue.id): Observable<Team>{
-    return this.http.get<Team>(`${environment.base_students_url}/${studentId}/teams/${courseId}`)
+  public getStudentTeam(
+    courseId: string = this.courseService.currentCourseSubject.value,
+    studentId: string = this.authService.currentUserValue.id
+  ): Observable<Team> {
+    return this.http
+      .get<Team>(
+        `${environment.base_students_url}/${studentId}/teams/${courseId}`
+      )
       .pipe(
-        tap(() => console.log(`retrieved team of ${studentId} for course ${courseId} - getStudentTeam()`)),
-        catchError(handleError<Team>(this.toastrService, `getStudentTeam(${courseId}, ${studentId})`, null, false))
+        tap(() =>
+          console.log(
+            `retrieved team of ${studentId} for course ${courseId} - getStudentTeam()`
+          )
+        ),
+        catchError(
+          handleError<Team>(
+            this.toastrService,
+            `getStudentTeam(${courseId}, ${studentId})`,
+            null,
+            false
+          )
+        )
       );
   }
 
   public getStudentsInTeam(teamId: number = this.currentTeamSubject.value.id) {
-    return this.http.get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
+    return this.http
+      .get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
       .pipe(
         tap(() =>
           console.log(

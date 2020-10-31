@@ -93,16 +93,18 @@ public class StudentServiceImpl implements StudentService {
     for (Proposal p : proposals) {
       TeamProposalDetails tpd = new TeamProposalDetails();
       tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
-      tpd.setProposalCreator(studentRepository.getOne(p.getProposalCreatorId()));
+      tpd.setProposalCreator(modelMapper.map(studentRepository.getOne(p.getProposalCreatorId()), StudentDTO.class));
       tpd.setToken(p.getId());
 
-      Map<Student, ProposalStatus> teamApprovalDetails = new HashMap<>();
+      Map<String, ProposalStatus> teamApprovalDetails = new HashMap<>();
 
       for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
-        teamApprovalDetails.put(studentRepository.getOne(pr.getInvitedUserId()), pr.getStatus());
+        Student s = studentRepository.getOne(pr.getInvitedUserId());
+        teamApprovalDetails.put(s.getName() + " " + s.getSurname(), pr.getStatus());
       }
 
       tpd.setMembersAndStatus(teamApprovalDetails);
+      tpd.setDeadline(p.getDeadline());
 
       proposalsDetails.add(tpd);
     }

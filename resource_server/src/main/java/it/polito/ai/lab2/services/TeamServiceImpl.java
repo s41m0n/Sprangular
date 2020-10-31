@@ -80,7 +80,11 @@ public class TeamServiceImpl implements TeamService {
             .findFirst()
             .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
-    return modelMapper.map(team, TeamDetails.class);
+    if (team.isActive()) {
+      return modelMapper.map(team, TeamDetails.class);
+    } else {
+      throw new TeamNotFoundException("No team for student" + studentId + " in course " + courseId);
+    }
   }
 
   @Override
@@ -126,7 +130,7 @@ public class TeamServiceImpl implements TeamService {
 
     if (members.stream()
         .anyMatch(student -> student.getTeams().stream()
-            .anyMatch(team -> team.getCourse().getAcronym().equals(courseId))))
+            .anyMatch(team -> team.getCourse().getAcronym().equals(courseId) && team.isActive())))
       throw new StudentAlreadyInTeam("Some student is already in a team for the course " + courseId);
 
     Student creator = members.stream()
