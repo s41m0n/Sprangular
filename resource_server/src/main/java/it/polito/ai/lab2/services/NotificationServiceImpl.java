@@ -2,6 +2,7 @@ package it.polito.ai.lab2.services;
 
 import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.Proposal;
+import it.polito.ai.lab2.exceptions.TokenNotFoundException;
 import it.polito.ai.lab2.repositories.ProposalRepository;
 import it.polito.ai.lab2.utility.ProposalStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,53 +46,79 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public boolean confirm(String token) {
-    Proposal proposal = proposalRepository.findById(token).orElse(null);
-
-    if (proposal == null) {
-      return false;
-    }
+    Proposal proposal = proposalRepository.findById(token).orElseThrow(() -> new TokenNotFoundException("Token " + token + " does not exists"));
 
     if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) { //if the proposal is expired I delete all the proposals
       proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
       return false;
     }
 
-    proposal.setStatus(ProposalStatus.ACCEPTED);
-    proposalRepository.save(proposal);
+    if(proposal.getStatus() == ProposalStatus.PENDING) {
+      proposal.setStatus(ProposalStatus.ACCEPTED);
+      proposalRepository.save(proposal);
 
-    for (Proposal p : proposalRepository.findAllByTeamId(proposal.getTeamId())) {
-      if (p.getStatus() == ProposalStatus.PENDING) {
-        return false; //There is at least one proposal which is in pending status
+      for (Proposal p : proposalRepository.findAllByTeamId(proposal.getTeamId())) {
+        if (p.getStatus() == ProposalStatus.PENDING) {
+          return false; //There is at least one proposal which is in pending status
+        }
       }
-    }
 
-    teamService.activateTeam(proposal.getTeamId());
-    proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
-    return true;
+      //If they are all in the accepted state I delete all the proposals and confirm the associated team
+      teamService.activateTeam(proposal.getTeamId());
+      proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+      return true;
+    }
+    return false;
   }
 
   @Override
   public boolean reject(String token) {
-    Proposal proposal = proposalRepository.findById(token).orElse(null);
-
-    if (proposal == null) {
-      return false;
-    }
+    Proposal proposal = proposalRepository.findById(token).orElseThrow(() -> new TokenNotFoundException("Token " + token + " does not exists"));
 
     if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) { //if the proposal is expired I delete all the proposals
       proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
       return false;
     }
 
-    proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
-    teamService.evictTeam(proposal.getTeamId());
-    return true;
+    if(proposal.getStatus() == ProposalStatus.PENDING) {
+      proposal.setStatus(ProposalStatus.REJECTED);
+      proposalRepository.save(proposal);
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean deleteProposal(String token) {
+    Proposal proposal = proposalRepository.findById(token).orElseThrow(() -> new TokenNotFoundException("Token " + token + " does not exists"));
+
+    if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) { //if the proposal is expired I delete all the proposals
+      proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+      return false;
+    }
+
+    if(proposal.getStatus() != ProposalStatus.ACCEPTED) {
+      proposal.setStatus(ProposalStatus.DELETED);
+      proposalRepository.save(proposal);
+
+      for (Proposal p : proposalRepository.findAllByTeamId(proposal.getTeamId())) {
+        if (p.getStatus() != ProposalStatus.DELETED) {
+          return false; //I return if at least 1 proposal is not deleted
+        }
+      }
+
+      //If they are all in the deleted state I delete all the proposals and the associated team
+      proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
+      teamService.evictTeam(proposal.getTeamId());
+      return true;
+    }
+    return false;
   }
 
   @Override
   public void notifyTeam(TeamDTO dto, List<String> memberIds, String courseId) {
     String members = String.join("\n- ", memberIds);
-    String url = "http://localhost:8080/API/courses/" + courseId; //TODO: fatti dare link giusto
+    String url = "https://localhost:4200/student/courses/" + courseId + "/teams";
 
     memberIds.remove(SecurityContextHolder.getContext().getAuthentication().getName());
     memberIds.forEach(memberId -> {

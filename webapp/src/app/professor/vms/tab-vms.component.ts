@@ -6,14 +6,12 @@ import {
   Output,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-
 import { VM } from '../../models/vm.model';
 import { VmOptionsDialogComponent } from '../../modals/vm-options/vm-options-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NewVmDialogComponent } from '../../modals/new-vm/new-vm.component';
 import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 import {first} from 'rxjs/operators';
-import {of} from 'rxjs';
 
 /**
  * VmsComponent
@@ -32,10 +30,10 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     this.dataSources = new Array<MatTableDataSource<VM>>();
     this.teams = new Set();
     // VMs to be displayed in the table
-    vms.forEach(vm => this.teams.add(vm.team.id));
-    this.teams.forEach(team => {
+    vms.forEach((vm) => this.teams.add(vm.team.id));
+    this.teams.forEach((team) => {
       const data = new MatTableDataSource<VM>();
-      data.data = vms.filter(vm => vm.team.id === team);
+      data.data = vms.filter((vm) => vm.team.id === team);
       this.dataSources.push(data);
     });
   }
@@ -49,15 +47,15 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   ngAfterViewInit() {}
 
   openDialogTeamOption(teamId: number, index: number): void {
-    const vms          = this.dataSources[index].data;
+    const vms = this.dataSources[index].data;
     const teamToChange = vms[0].team;
-    const dialogRef    = this.dialog.open(EditTeamVmOptionsDialogComponent, {
+    const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
       data: {
         teamId: teamToChange.id,
         maxTotalInstances: teamToChange.maxTotalInstances,
         currentMaxTotalInstances: vms.length,
         maxActiveInstances: teamToChange.maxActiveInstances,
-        currentMaxActiveInstances: vms.filter(vm => vm.active).length,
+        currentMaxActiveInstances: vms.filter((vm) => vm.active).length,
         maxVCpu: teamToChange.maxVCpu,
         currentMaxVCpu: vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0),
         maxRam: teamToChange.maxRam,

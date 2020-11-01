@@ -1,9 +1,9 @@
-import {EventEmitter, Component, Input, Output} from '@angular/core';
+import { EventEmitter, Component, Input, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {MatTableDataSource} from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { first } from 'rxjs/operators';
 import { VmOwnerDialogComponent } from 'src/app/modals/vm-owner/vm-owner-dialog.component';
-import {VM} from '../../models/vm.model';
+import { VM } from '../../models/vm.model';
 
 /**
  * StudentsComponent
@@ -13,11 +13,10 @@ import {VM} from '../../models/vm.model';
 @Component({
   selector: 'app-tab-student-vms',
   templateUrl: './tab-vms.component.html',
-  styleUrls: ['./tab-vms.component.css']
+  styleUrls: ['./tab-vms.component.css'],
 })
 export class TabStudentVmsComponent {
-
-  dataSource = new MatTableDataSource<VM>();                     // Table datasource dynamically modified
+  dataSource = new MatTableDataSource<VM>(); // Table datasource dynamically modified
 
   @Input() set vms(vms: VM[]) {
     this.dataSource.data = vms;
@@ -26,8 +25,7 @@ export class TabStudentVmsComponent {
   @Output() addOwnerEvent = new EventEmitter<any>();
   @Output() connectEvent = new EventEmitter<number>();
 
-  constructor(public dialog: MatDialog) {
-  }
+  constructor(public dialog: MatDialog) {}
 
   triggerTurn(vmId: number) {
     this.turnVmEvent.emit(vmId);
@@ -35,11 +33,12 @@ export class TabStudentVmsComponent {
 
   addOwner(vm: VM) {
     const dialogRef = this.dialog.open(VmOwnerDialogComponent);
-    dialogRef.afterClosed()
+    dialogRef
+      .afterClosed()
       .pipe(first())
-      .subscribe(result => {
+      .subscribe((result) => {
         if (result) {
-          this.addOwnerEvent.emit({vmId: vm.id, studentId: result});
+          this.addOwnerEvent.emit({ vmId: vm.id, studentId: result });
         }
       });
   }

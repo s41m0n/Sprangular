@@ -13,10 +13,6 @@
   float: right;
 }
 
-mat-form-field {
+.form-field-name {
   width: 70%;
-}
-
-mat-card {
-  margin-bottom: 5px;
 }
