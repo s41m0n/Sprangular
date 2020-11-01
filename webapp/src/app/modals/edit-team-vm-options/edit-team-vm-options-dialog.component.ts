@@ -4,6 +4,7 @@ import {Team} from '../../models/team.model';
 import {TeamService} from '../../services/team.service';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subject} from 'rxjs';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
     selector: 'app-edit-team-vm-options-dialog',
@@ -17,19 +18,19 @@ export class EditTeamVmOptionsDialogComponent implements OnInit, OnDestroy {
     constructor(
         private fb: FormBuilder,
         private teamService: TeamService,
+        private toastrService: ToastrService,
         public dialogRef: MatDialogRef<EditTeamVmOptionsDialogComponent>,
         public dialog: MatDialog,
         @Inject(MAT_DIALOG_DATA) public data: any
     ) {}
 
     ngOnInit() {
-        console.log(this.data);
         this.form = this.fb.group({
-            maxTotalInstances: [this.data.maxInstances, [Validators.min(1), Validators.max(10)]],
-            maxActiveInstances: [this.data.maxActive, [Validators.min(1), Validators.max(10)]],
-            maxVCpu: [this.data.vCpu, [Validators.min(1), Validators.max(4)]],
-            maxRam: [this.data.ram, [Validators.min(1), Validators.max(8)]],
-            maxDisk: [this.data.disk, [Validators.min(1), Validators.max(10)]]
+            maxTotalInstances: [this.data.maxTotalInstances, [Validators.min(1), Validators.max(10)]],
+            maxActiveInstances: [this.data.maxActiveInstances, [Validators.min(1), Validators.max(10)]],
+            maxVCpu: [this.data.maxVCpu, [Validators.min(1), Validators.max(4)]],
+            maxRam: [this.data.maxRam, [Validators.min(1), Validators.max(8)]],
+            maxDiskStorage: [this.data.maxDiskStorage, [Validators.min(1), Validators.max(10)]]
         });
     }
 
@@ -60,6 +61,27 @@ export class EditTeamVmOptionsDialogComponent implements OnInit, OnDestroy {
         ) {
             this.form.get('maxTotalInstances').setValue(value);
         }
+    }
+
+    compareWithCurrentValue(value: number, field: string) {
+        const currentField = 'current' + this.capitalizeFirstLetter(field);
+        if (value < this.data[currentField]) {
+            this.form.get(field).setValue(this.data[currentField]);
+            value = this.data[currentField];
+            this.toastrService.info(
+                `There is a vm that violates this new value`,
+                'Ops! Invalid value 😅'
+            );
+        }
+        if (field === 'maxTotalInstances') {
+            this.adaptMin(value);
+        } else if (field === 'maxActiveInstances') {
+            this.adaptMax(value);
+        }
+    }
+
+    capitalizeFirstLetter(word: string) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
     }
 
     getSliderTickInterval(): number | 'auto' {

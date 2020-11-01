@@ -7,7 +7,7 @@
                 color="primary"
                 formControlName="maxTotalInstances"
                 [thumbLabel]="true"
-                (valueChange)="adaptMin($event)"
+                (valueChange)='compareWithCurrentValue($event, "maxTotalInstances")'
                 min="1"
                 max="10"
                 step="1"
@@ -19,7 +19,7 @@
                 color="primary"
                 formControlName="maxActiveInstances"
                 [thumbLabel]="true"
-                (valueChange)="adaptMax($event)"
+                (valueChange)='compareWithCurrentValue($event, "maxActiveInstances")'
                 min="1"
                 max="10"
                 step="1"
@@ -35,6 +35,7 @@
                 step="1"
                 [thumbLabel]="true"
                 [tickInterval]="getSliderTickInterval()"
+                (valueChange)='compareWithCurrentValue($event, "maxVCpu")'
         >
         </mat-slider>
 
@@ -42,25 +43,25 @@
         <mat-slider
                 color="primary"
                 formControlName="maxRam"
-                class="example-margin"
                 max="8"
                 min="1"
                 step="1"
                 [thumbLabel]="true"
                 [tickInterval]="getSliderTickInterval()"
+                (valueChange)='compareWithCurrentValue($event, "maxRam")'
         >
         </mat-slider>
 
-        <label>Disk space: {{ this.form.get('maxDisk').value }}GB</label><br />
+        <label>Disk space: {{ this.form.get('maxDiskStorage').value }}GB</label><br />
         <mat-slider
                 color="primary"
-                formControlName="maxDisk"
-                class="example-margin"
+                formControlName="maxDiskStorage"
                 max="10"
                 min="1"
                 step="1"
                 [thumbLabel]="true"
                 [tickInterval]="getSliderTickInterval()"
+                (valueChange)='compareWithCurrentValue($event, "maxDiskStorage")'
         >
         </mat-slider>
     </form>
