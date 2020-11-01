@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { VM } from '../../models/vm.model';
-import {first, map, takeUntil} from 'rxjs/operators';
+import { first takeUntil } from 'rxjs/operators';
 import { TeamService } from 'src/app/services/team.service';
 import { MatDialog } from '@angular/material/dialog';
 import { NewVmDialogComponent } from 'src/app/modals/new-vm/new-vm.component';
 import { VmService } from 'src/app/services/vm.service';
-import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
+import { Subject } from 'rxjs';
 import { ImageViewerDialogComponent } from '../../modals/image-viewer/image-viewer-dialog.component';
 import { DomSanitizer } from '@angular/platform-browser';
-import {Team} from '../../models/team.model';
 
 /**
  * VmsContainer
@@ -18,7 +17,7 @@ import {Team} from '../../models/team.model';
 @Component({
   selector: 'app-tab-student-vms-cont',
   templateUrl: './tab-vms.container.html',
-  styleUrls: ['./tab-vms.container.css']
+  styleUrls: ['./tab-vms.container.css'],
 })
 export class TabStudentVmsContComponent implements OnInit {
   vms: VM[] = null; // The current vms
@@ -59,7 +58,7 @@ export class TabStudentVmsContComponent implements OnInit {
 
   turnVm(vmId: number) {
     this.vmService
-      .triggerVm(vmId, this.vms.find(vm => vm.id === vmId).active)
+      .triggerVm(vmId, this.vms.find((vm) => vm.id === vmId).active)
       .pipe(first())
       .subscribe((_) => this.refreshVMs());
   }
@@ -76,7 +75,9 @@ export class TabStudentVmsContComponent implements OnInit {
       .getInstance(vmId)
       .pipe(first())
       .subscribe((instance) => {
-        if (!instance) { return; }
+        if (!instance) {
+          return;
+        }
         const url = URL.createObjectURL(instance);
         const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
           data: {

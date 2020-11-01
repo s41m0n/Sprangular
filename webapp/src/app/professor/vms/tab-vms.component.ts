@@ -6,12 +6,11 @@ import {
   Output,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-
 import { VM } from '../../models/vm.model';
 import { VmOptionsDialogComponent } from '../../modals/vm-options/vm-options-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NewVmDialogComponent } from '../../modals/new-vm/new-vm.component';
-import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
+import { EditTeamVmOptionsDialogComponent } from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 
 /**
  * VmsComponent
@@ -28,10 +27,10 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   teams = new Set();
   @Input() set vms(vms: VM[]) {
     // VMs to be displayed in the table
-    vms.forEach(vm => this.teams.add(vm.team.id));
-    this.teams.forEach(team => {
+    vms.forEach((vm) => this.teams.add(vm.team.id));
+    this.teams.forEach((team) => {
       const data = new MatTableDataSource<VM>();
-      data.data = vms.filter(vm => vm.team.id === team);
+      data.data = vms.filter((vm) => vm.team.id === team);
       this.dataSources.push(data);
     });
   }
@@ -44,20 +43,20 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   ngAfterViewInit() {}
 
   openDialogTeamOption(teamId: number, index: number): void {
-    const vms          = this.dataSources[index].data;
+    const vms = this.dataSources[index].data;
     const teamToChange = vms[0].team;
-    const dialogRef    = this.dialog.open(EditTeamVmOptionsDialogComponent, {
+    const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
       data: {
         maxTotalInstances: teamToChange.maxTotalInstances,
         currentMaxTotalInstances: vms.length,
         maxActiveInstances: teamToChange.maxActiveInstances,
-        currentMaxActiveInstances: vms.filter(vm => vm.active).length,
+        currentMaxActiveInstances: vms.filter((vm) => vm.active).length,
         maxVCpu: teamToChange.maxVCpu,
-        currentMaxVCpu: Math.max(...vms.map(vm => vm.vcpu)),
+        currentMaxVCpu: Math.max(...vms.map((vm) => vm.vcpu)),
         maxRam: teamToChange.maxRam,
-        currentMaxRam: Math.max(...vms.map(vm => vm.ram)),
+        currentMaxRam: Math.max(...vms.map((vm) => vm.ram)),
         maxDiskStorage: teamToChange.maxDiskStorage,
-        currentMaxDiskStorage: Math.max(...vms.map(vm => vm.diskStorage))
+        currentMaxDiskStorage: Math.max(...vms.map((vm) => vm.diskStorage)),
       },
     });
 
@@ -80,7 +79,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
         ram: selectedVm.ram,
         maxRam: selectedVm.team.maxRam,
         disk: selectedVm.diskStorage,
-        maxDisk: selectedVm.team.maxDiskStorage
+        maxDisk: selectedVm.team.maxDiskStorage,
       },
     });
 
