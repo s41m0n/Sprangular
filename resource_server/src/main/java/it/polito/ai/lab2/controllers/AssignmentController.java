@@ -1,6 +1,8 @@
 package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.exceptions.AssignmentNotFoundException;
+import it.polito.ai.lab2.exceptions.AssignmentSolutionNotFoundException;
+import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.pojos.AssignmentSolutionDetails;
 import it.polito.ai.lab2.services.AssignmentAndUploadService;
 import lombok.extern.java.Log;
@@ -35,11 +37,21 @@ public class AssignmentController {
   }
 
   @GetMapping("/{assignmentId}/document")
-  public Resource getAssignment(@PathVariable Long assignmentId) {
-    log.info("getAssignment() called");
+  public Resource getAssignmentForProfessor(@PathVariable Long assignmentId) {
+    log.info("getAssignmentForProfessor() called");
     try {
       return assAndUploadService.getAssignmentDocument(assignmentId);
     } catch (FileNotFoundException | AssignmentNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
+  @GetMapping("/{assignmentId}/studentDocument")
+  public Resource getAssignmentForStudent(@PathVariable Long assignmentId) {
+    log.info("getAssignmentForStudent() called");
+    try {
+      return assAndUploadService.getAssignmentForStudent(assignmentId);
+    } catch (FileNotFoundException | StudentNotFoundException | AssignmentSolutionNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }

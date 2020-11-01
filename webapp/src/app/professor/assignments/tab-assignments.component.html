@@ -11,7 +11,7 @@
     Filter Solutions by Status:
     <div *ngFor="let status of assignmentStatuses" style="display: inline-block; margin: 20px">
         <button mat-flat-button
-                [color]="this.filteredStatuses.includes(status) ? '' : 'accent'"
+                [color]="this.filteredStatuses.includes(status) ? null : 'accent'"
                 (click)="changeFiltering(status)">{{status}}</button>
     </div>
 

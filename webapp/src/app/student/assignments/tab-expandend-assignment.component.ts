@@ -1,12 +1,12 @@
 import {Component, Input} from '@angular/core';
-import {Assignment} from '../../models/assignment.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {Upload} from '../../models/upload.model';
-import {AssignmentSolution, AssignmentStatus} from '../../models/assignment-solution.model';
+import {AssignmentStatus} from '../../models/assignment-solution.model';
 import {first} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
-import {StudentService} from '../../services/student.service';
 import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
+import {StudentAssignmentDetails} from '../../models/student-assignment.details';
+import {AssignmentService} from '../../services/assignment.service';
 
 @Component({
   selector: 'app-tab-expandend-assignment',
@@ -15,51 +15,42 @@ import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-up
 })
 export class TabExpandendAssignmentComponent {
 
-  expandedElement: Assignment;
-  assignmentSolution: AssignmentSolution;
+  expandedElement: StudentAssignmentDetails;
   canUpload = false;
   dataSource = new MatTableDataSource<Upload>();
   studentId;
-  colsToDisplay = ['id', 'localTimeStamp', 'comment'];
+  colsToDisplay = ['timestamp', 'comment', 'status', 'download'];
 
   constructor(
       public dialog: MatDialog,
-      private studentService: StudentService
+      private assignmentService: AssignmentService
   ) {}
 
-  @Input() set element(element: Assignment) {
+  @Input() set element(element: StudentAssignmentDetails) {
     this.expandedElement = element;
-  }
-
-  @Input() set solution(assignmentSolution: AssignmentSolution) {
-    this.assignmentSolution = assignmentSolution;
-    if (assignmentSolution.status !== AssignmentStatus.READ &&
-          assignmentSolution.status !== AssignmentStatus.REVIEWED_UPLOADABLE) {
-      this.canUpload = true;
-    }
+    this.canUpload = element && (element.status === AssignmentStatus.READ || element.status === AssignmentStatus.REVIEWED_UPLOADABLE);
   }
 
   @Input() set uploads(uploads: Upload[]) {
     this.dataSource.data = uploads;
   }
 
-  @Input() set student(studentId: string) {
-    this.studentId = studentId;
-  }
-
   /** Private function to refresh the list of vms */
   private refreshUploads() {
-    // TODO: not needing assId but assSolutionId!
-    /*this.studentService
-        .getAssignmentUploads(this.expandedElement.id)
+    this.assignmentService.getAssignmentSolutionUploads(this.expandedElement.assignmentSolutionId)
         .pipe(first())
-        .subscribe((uploads) => (this.dataSource.data = uploads));*/
+        .subscribe((uploads) => {
+          this.dataSource.data = uploads.sort(Upload.compare);
+          this.expandedElement.status = AssignmentStatus.DELIVERED;
+          this.expandedElement.statusTs = this.dataSource.data[uploads.length - 1].timestamp;
+          this.canUpload = false;
+        });
   }
 
   newAssignmentSolution() {
     const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
         {
-          data: { assignmentId: this.expandedElement.id }
+          data: { assignmentSolutionId: this.expandedElement.assignmentSolutionId }
         });
     dialogRef
         .afterClosed()
@@ -69,5 +60,10 @@ export class TabExpandendAssignmentComponent {
             this.refreshUploads();
           }
         });
+  }
+
+  dateString(statusTs: string): string {
+    const date = new Date(statusTs);
+    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
   }
 }

@@ -1,9 +1,6 @@
 package it.polito.ai.lab2;
 
-import it.polito.ai.lab2.entities.Assignment;
-import it.polito.ai.lab2.entities.AssignmentSolution;
-import it.polito.ai.lab2.entities.Proposal;
-import it.polito.ai.lab2.entities.Role;
+import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.AssignmentStatus;
 import it.polito.ai.lab2.utility.ProposalStatus;
@@ -41,6 +38,9 @@ public class SprangularBackend {
 
   @Autowired
   AssignmentSolutionRepository assignmentSolutionRepository;
+
+  @Autowired
+  UploadRepository uploadRepository;
 
   @Bean
   ModelMapper modelMapper() {
@@ -108,8 +108,15 @@ public class SprangularBackend {
       assignmentSolutions.forEach(assignmentSolution -> {
         if (assignmentSolution.getAssignment().getDueDate().before(new Timestamp(System.currentTimeMillis()))) {
           // Deliver assignment
+          Timestamp currentTs = new Timestamp(System.currentTimeMillis());
           assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
-          assignmentSolution.setStatusTs(new Timestamp(System.currentTimeMillis()));
+          assignmentSolution.setStatusTs(currentTs);
+          Upload upload = new Upload();
+          upload.setTimestamp(currentTs);
+          upload.setStatus(AssignmentStatus.DELIVERED);
+          upload.setComment("Assignment published");
+          upload.setAssignmentSolution(assignmentSolution);
+          uploadRepository.save(upload);
           assignmentSolutionRepository.save(assignmentSolution);
         } else {
           // Schedule assignment delivery

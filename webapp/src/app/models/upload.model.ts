@@ -1,11 +1,4 @@
-export enum AssignmentStatus {
-    NULL,
-    READ,
-    DELIVERED,
-    REVIEWED,
-    REVIEWED_UPLOADABLE,
-    DEFINITIVE
-}
+import {AssignmentStatus} from './assignment-solution.model';
 
 export class Upload {
     id: number;

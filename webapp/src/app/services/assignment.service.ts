@@ -40,4 +40,13 @@ export class AssignmentService {
             tap(() => console.log(`fetched assignment solution ${assignmentSolutionId} uploads - getAssignmentUploads()`)),
             catchError(handleError<Upload[]>(this.toastrService, `getAssignmentUploads(${assignmentSolutionId})`)));
   }
+
+  readStudentAssignment(assignmentId: number): Observable<any> {
+    return this.http.get(`${environment.base_assignments_url}/${assignmentId}/studentDocument`, {
+      responseType: 'blob',
+    }).pipe(
+        tap(() => console.log(`returned document for assignment ${assignmentId} - getDocument()`)),
+        catchError(handleError<any>(this.toastrService, `getDocument(${assignmentId})`))
+    );
+  }
 }

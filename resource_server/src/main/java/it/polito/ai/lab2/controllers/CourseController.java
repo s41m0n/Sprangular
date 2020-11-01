@@ -292,6 +292,15 @@ public class CourseController {
     }
   }
 
+  @GetMapping("/{courseId}/studentAssignments")
+  public List<StudentAssignmentDetails> getStudentAssignments(@PathVariable String courseId) {
+    try {
+      return assAndUploadService.getStudentAssignmentsDetails(courseId);
+    } catch (CourseNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
   @PostMapping("/{courseId}/assignments")
   public AssignmentDTO createAssignmentForCourse(@PathVariable String courseId,
                                                  @ModelAttribute AssignmentDetails assignmentDetails) {

@@ -1,12 +1,12 @@
 import {Course} from './course.model';
 
 export enum AssignmentStatus {
-    NULL,
-    READ,
-    DELIVERED,
-    REVIEWED,
-    REVIEWED_UPLOADABLE,
-    DEFINITIVE
+    NULL = 'NULL',
+    READ = 'READ',
+    DELIVERED = 'DELIVERED',
+    REVIEWED = 'REVIEWED',
+    REVIEWED_UPLOADABLE = 'REVIEWED_UPLOADABLE',
+    DEFINITIVE = 'DEFINITIVE'
 }
 
 export class AssignmentSolution {
