@@ -3,8 +3,9 @@
   (turnVmEvent)="turnVm($event)"
   (addOwnerEvent)="addOwner($event)"
   (connectEvent)="connect($event)"
+  (refreshVmList)="refreshVMs()"
 ></app-tab-student-vms>
 <div *ngIf="inTeam$; else single">
-  <button mat-raised-button color="primary" (click)="newVm()">New VM</button>
+  <button mat-raised-button color="primary" [disabled]="checkResourceAvailability()" (click)="newVm()">New VM</button>
 </div>
 <ng-template #single>You have to be member of a team to use vms.</ng-template>

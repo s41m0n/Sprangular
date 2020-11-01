@@ -1,8 +1,10 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {ToastrService} from "ngx-toastr";
-import {Subject} from "rxjs";
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {Subject} from 'rxjs';
+import {first} from 'rxjs/operators';
+import {VmService} from '../../services/vm.service';
 
 @Component({
   selector: 'app-vm-options',
@@ -16,6 +18,7 @@ export class VmOptionsDialogComponent implements OnInit {
   constructor(
       private fb: FormBuilder,
       private toastrService: ToastrService,
+      private vmService: VmService,
       public dialogRef: MatDialogRef<VmOptionsDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
@@ -28,19 +31,31 @@ export class VmOptionsDialogComponent implements OnInit {
     });
   }
 
-  onNoClick(): void {
-    this.dialogRef.close(this.data);
-  }
+  editVmSpec() {
+    if (this.form.invalid) {
+      return;
+    }
+    const formData = new FormData();
+    formData.append('vCpu', this.form.get('vCpu').value);
+    formData.append('ram', this.form.get('ram').value);
+    formData.append('diskStorage', this.form.get('disk').value);
 
-  getSliderTickInterval(): number | 'auto' {
-    return 'auto';
+    this.vmService
+        .updateVm(this.data.vmId, formData)
+        .pipe(first())
+        .subscribe((res) => {
+          if (res) {
+            this.dialogRef.close(res);
+          }
+        });
   }
 
   compareWithCurrentValue(value: number, field: string) {
-    const currentField = 'max' + this.capitalizeFirstLetter(field);
-    if (value > this.data[currentField]) {
-      this.form.get(field).setValue(this.data[currentField]);
-      value = this.data[currentField];
+    const currentField = 'current' + this.capitalizeFirstLetter(field);
+    const maxField     = 'max' + this.capitalizeFirstLetter(field);
+    if (value + this.data[currentField] - this.data[field] > this.data[maxField]) {
+      this.form.get(field).setValue(this.data[maxField] - this.data[currentField] + this.data[field]);
+      value = this.data[maxField] - this.data[currentField] + this.data[field];
       this.toastrService.info(
           `It violates team configuration`,
           'Ops! Invalid value 😅'

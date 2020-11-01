@@ -17,9 +17,21 @@
                     </ul>
                 </mat-card-content>
                 <mat-card-actions align="end">
-                    <button mat-raised-button color="primary" (click)="addOwner(vm)">Add Owner</button>
-                    <button mat-raised-button color="primary" (click)="triggerTurn(vm.id)">TriggerTurn</button>
-                    <button mat-raised-button color="primary" (click)="connectToVm(vm.id)">CONNECT TO VM</button>
+                    <button mat-raised-button [disabled]="!vm.active" color="primary" (click)="connectToVm(vm.id)">CONNECT TO VM</button>
+
+                    <button mat-icon-button [disabled]="isOwner(vm.id)" (click)="addOwner(vm)">
+                        <mat-icon>person_add</mat-icon>
+                    </button>
+
+                    <button mat-icon-button [disabled]="isOwner(vm.id)" (click)="triggerTurn(vm.id, !vm.active)">
+                        <mat-icon *ngIf="vm.active">toggle_on</mat-icon>
+                        <mat-icon *ngIf="!vm.active">toggle_off</mat-icon>
+                    </button>
+
+                    <button mat-icon-button [disabled]="isOwner(vm.id)" (click)="openDialogVmOption(vm.id)">
+                        <mat-icon>mode_edit</mat-icon>
+                    </button>
+
                 </mat-card-actions>
             </mat-card>
         </div>

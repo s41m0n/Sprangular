@@ -1,48 +1,63 @@
 <h1 mat-dialog-title>Create a new VM</h1>
 
 <div mat-dialog-content>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <form [formGroup]="form">
     <mat-form-field>
       <input
-        matInput
-        placeholder="VM Name"
-        type="text"
-        formControlName="name"
-        required
+              matInput
+              placeholder="VM Name"
+              type="text"
+              formControlName="name"
+              required
       />
       <mat-error>Cannot be empty</mat-error>
     </mat-form-field>
 
     <label>CPUs:</label>
     <mat-slider
-      formControlName="vCpu"
-      [thumbLabel]="true"
-      min="1"
-      max="6"
-      step="1"
+            color="primary"
+            formControlName="vCpu"
+            min="1"
+            max="4"
+            step="1"
+            thumbLabel="true"
+            (valueChange)="compareWithCurrentValue($event, 'vCpu')"
     ></mat-slider>
 
     <label>RAM (GB):</label>
     <mat-slider
-      formControlName="ram"
-      [thumbLabel]="true"
-      min="1"
-      max="8"
-      step="1"
+            color="primary"
+            formControlName="ram"
+            min="1"
+            max="8"
+            step="1"
+            thumbLabel="true"
+            (valueChange)="compareWithCurrentValue($event, 'ram')"
     ></mat-slider>
 
     <label>Disk (GB):</label>
     <mat-slider
-      formControlName="diskStorage"
-      [thumbLabel]="true"
-      min="1"
-      max="20"
-      step="1"
+            color="primary"
+            formControlName="disk"
+            min="1"
+            max="20"
+            step="1"
+            thumbLabel="true"
+            (valueChange)="compareWithCurrentValue($event, 'disk')"
     ></mat-slider>
+
+    <label>
+      <mat-checkbox
+              formControlName="active"
+              (change)="checkActivation()"
+      >
+        Activate new vm?
+      </mat-checkbox>
+    </label>
   </form>
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-raised-button color="primary" (click)="onSubmit()">Create</button>
+  <button mat-raised-button color="primary" (click)="createNewVm()">Create</button>
   <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
 </div>

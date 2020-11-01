@@ -17,6 +17,7 @@ export class VM {
   ram: number;
   active: boolean;
   team;
+  owners;
 
   constructor(
     id: number = 0,
@@ -25,7 +26,8 @@ export class VM {
     ram: number = 0.5,
     diskStorage: number = 2,
     active: boolean = false,
-    team: {}
+    team: {},
+    owners: []
   ) {
     this.id = id;
     this.name = name;
@@ -34,5 +36,6 @@ export class VM {
     this.diskStorage = diskStorage;
     this.active = active;
     this.team = team;
+    this.owners = owners;
   }
 }

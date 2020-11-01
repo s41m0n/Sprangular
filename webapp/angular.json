@@ -128,5 +128,8 @@
       }
     }
   },
-  "defaultProject": "ai20-lab04"
+  "defaultProject": "ai20-lab04",
+  "cli": {
+    "analytics": false
+  }
 }

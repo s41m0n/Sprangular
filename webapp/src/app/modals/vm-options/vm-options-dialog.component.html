@@ -2,7 +2,7 @@
 
 <div mat-dialog-content>
   <form [formGroup]="form">
-    <label>Number of vCPUs: {{ data.vCpu }}</label
+    <label>Number of vCPUs: {{ this.form.get("vCpu").value }}</label
     ><br />
     <mat-slider
             color="primary"
@@ -11,7 +11,7 @@
             max="4"
             step="1"
             [thumbLabel]="true"
-            (valueChange)="compareWithCurrentValue($event, 'vCpu')"
+            (valueChange)='compareWithCurrentValue($event, "vCpu")'
     >
     </mat-slider>
 
@@ -23,7 +23,7 @@
             min="1"
             step="1"
             [thumbLabel]="true"
-            (valueChange)="compareWithCurrentValue($event, 'ram')"
+            (valueChange)='compareWithCurrentValue($event, "ram")'
     >
     </mat-slider>
 
@@ -43,5 +43,5 @@
 
 <div mat-dialog-actions style="justify-content: center">
   <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-  <button mat-button color="primary" (click)="onNoClick()">Set options</button>
+  <button mat-button color="primary" (click)="editVmSpec()">Set options</button>
 </div>

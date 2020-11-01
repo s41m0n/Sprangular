@@ -75,31 +75,6 @@ export class TabProfessorVmsComponent implements AfterViewInit {
         });
   }
 
-  // openDialogVmOption(id: number, i: number): void {
-  //   const selectedVm = this.dataSources[i].data.find((vm) => vm.id === id);
-  //   const index = this.dataSources[i].data.findIndex((vm) => vm === selectedVm);
-  //   const dialogRef = this.dialog.open(VmOptionsDialogComponent, {
-  //     width: '300px',
-  //     data: {
-  //       vCpu: selectedVm.vcpu,
-  //       maxVCpu: selectedVm.team.maxVCpu,
-  //       ram: selectedVm.ram,
-  //       maxRam: selectedVm.team.maxRam,
-  //       disk: selectedVm.diskStorage,
-  //       maxDisk: selectedVm.team.maxDiskStorage
-  //     },
-  //   });
-  //
-  //   dialogRef
-  //       .afterClosed()
-  //       .pipe(first())
-  //       .subscribe((result) => {
-  //         if (result) {
-  //           this.refreshVmList.emit();
-  //         }
-  //       });
-  // }
-
   killVm(id: number) {
     this.wipeVmEvent.emit(id);
   }

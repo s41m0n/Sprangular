@@ -1,7 +1,7 @@
 .active {
-    background: lightgreen;
+    border: solid greenyellow;
 }
 
 .inactive {
-    background: indianred;
+    border: solid #ff4d51;
 }
