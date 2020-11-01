@@ -154,7 +154,11 @@ public class TeamServiceImpl implements TeamService {
             proposal.setTeamId(t.getId());
             proposal.setCourseId(courseId);
             proposal.setDeadline(new Timestamp(deadline));
-            proposal.setStatus(ProposalStatus.PENDING);
+            if(member.getId().equals(creator.getId())) {
+              proposal.setStatus(ProposalStatus.ACCEPTED);
+            } else {
+              proposal.setStatus(ProposalStatus.PENDING);
+            }
             proposalRepository.save(proposal);
           }
       );

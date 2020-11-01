@@ -14,8 +14,7 @@ import { RegisterDialogComponent } from './modals/register/register-dialog.compo
 import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
 import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
-import {AssignmentSolutionDetails} from './models/assignment-solution-details.model';
-import {UploadsDialogComponent} from './modals/uploads/uploads-dialog.component';
+import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -74,7 +73,10 @@ export class AppComponent {
     );
 
     this.route.queryParams.subscribe((queryParam) =>
-    queryParam && queryParam.solution ? this.uploadsDialog(queryParam.solution) : null);
+      queryParam && queryParam.solution
+        ? this.uploadsDialog(queryParam.solution)
+        : null
+    );
   }
 
   /** Login Dialog show function
@@ -232,14 +234,14 @@ export class AppComponent {
     this.inModal = true;
     const dialogRef = this.dialog.open(UploadsDialogComponent, {
       width: '75%',
-      data: {id}
+      data: { id },
     });
     dialogRef
-        .afterClosed()
-        .pipe(first())
-        .subscribe(() => {
-          this.router.navigate([this.router.url.split('?')[0]]);
-          this.inModal = false;
-        });
+      .afterClosed()
+      .pipe(first())
+      .subscribe(() => {
+        this.router.navigate([this.router.url.split('?')[0]]);
+        this.inModal = false;
+      });
   }
 }

@@ -107,18 +107,29 @@ public class TeamController {
 
   @GetMapping("/confirmInvitation/{token}")
   public boolean confirmInvitation(@PathVariable String token) {
-    if (!notificationService.confirm(token)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
+    try {
+      return notificationService.confirm(token);
+    } catch (TokenNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
-    return true;
   }
 
   @GetMapping("/rejectInvitation/{token}")
   public boolean rejectInvitation(@PathVariable String token) {
-    if (!notificationService.reject(token)) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, token);
+    try {
+      return notificationService.reject(token);
+    } catch (TokenNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
-    return true;
+  }
+
+  @GetMapping("/deleteProposal/{token}")
+  public boolean deleteProposal(@PathVariable String token) {
+    try {
+      return notificationService.deleteProposal(token);
+    } catch (TokenNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 
 }

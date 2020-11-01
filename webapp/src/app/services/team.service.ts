@@ -96,4 +96,46 @@ export class TeamService {
         )
       );
   }
+
+  public acceptProposal(token: string): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        `${environment.base_teams_url}/confirmInvitation/${token}`,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() => console.log(`accepted proposal ${token} - acceptProposal()`)),
+        catchError(
+          handleError<boolean>(this.toastrService, `acceptProposal(${token})`)
+        )
+      );
+  }
+
+  public rejectProposal(token: string): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        `${environment.base_teams_url}/rejectInvitation/${token}`,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() => console.log(`rejected proposal ${token} - rejectProposal()`)),
+        catchError(
+          handleError<boolean>(this.toastrService, `rejectProposal(${token})`)
+        )
+      );
+  }
+
+  public deleteProposal(token: string): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        `${environment.base_teams_url}/deleteProposal/${token}`,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() => console.log(`deleted proposal ${token} - deleteProposal()`)),
+        catchError(
+          handleError<boolean>(this.toastrService, `deleteProposal(${token})`)
+        )
+      );
+  }
 }

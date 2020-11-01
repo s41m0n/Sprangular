@@ -1,5 +1,10 @@
-<app-tab-student-vms [vms]="vms" (turnVmEvent)="turnVm($event)" (addOwnerEvent)="addOwner($event)" (connectEvent)="connect($event)"></app-tab-student-vms>
+<app-tab-student-vms
+  [vms]="vms"
+  (turnVmEvent)="turnVm($event)"
+  (addOwnerEvent)="addOwner($event)"
+  (connectEvent)="connect($event)"
+></app-tab-student-vms>
 <div *ngIf="inTeam$; else single">
-    <button mat-raised-button color="primary" (click)="newVm()">New VM</button>
+  <button mat-raised-button color="primary" (click)="newVm()">New VM</button>
 </div>
 <ng-template #single>You have to be member of a team to use vms.</ng-template>

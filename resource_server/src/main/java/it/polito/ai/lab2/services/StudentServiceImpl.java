@@ -9,6 +9,7 @@ import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.repositories.*;
+import it.polito.ai.lab2.utility.ProposalStatus;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -92,6 +93,11 @@ public class StudentServiceImpl implements StudentService {
     List<TeamProposalDetails> proposalsDetails = new ArrayList<>();
 
     for (Proposal p : proposals) {
+
+      if (p.getStatus() == ProposalStatus.DELETED) {
+        continue;
+      }
+
       TeamProposalDetails tpd = new TeamProposalDetails();
       tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
       Student creator = studentRepository.getOne(p.getProposalCreatorId());
@@ -102,7 +108,11 @@ public class StudentServiceImpl implements StudentService {
 
       for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
         Student s = studentRepository.getOne(pr.getInvitedUserId());
-        teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ")  :  " + pr.getStatus().name());
+        if (pr.getStatus() == ProposalStatus.DELETED) {
+          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : REJECTED");
+        } else {
+          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : " + pr.getStatus().name());
+        }
       }
 
       tpd.setMembersAndStatus(teamApprovalDetails);

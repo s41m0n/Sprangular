@@ -8,6 +8,7 @@ import { TeamProposal } from 'src/app/models/team-proposal.model';
 import { CourseService } from 'src/app/services/course.service';
 import { Team } from 'src/app/models/team.model';
 import { Proposal } from 'src/app/models/proposal.model';
+import { Router } from '@angular/router';
 
 /**
  * TabTeamContainer class
@@ -29,7 +30,8 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
   constructor(
     private studentService: StudentService,
     private teamService: TeamService,
-    private courseService: CourseService
+    private courseService: CourseService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -70,6 +72,36 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
   submitTeam(proposal: TeamProposal): void {
     this.teamService
       .createTeam(proposal)
+      .pipe(first())
+      .subscribe(() => this.refreshProposals());
+  }
+
+  proposalAccepted(token: string) {
+    this.teamService
+      .acceptProposal(token)
+      .pipe(first())
+      .subscribe((result) => {
+        if (result) {
+          this.teamService
+            .getStudentTeam()
+            .pipe(first())
+            .subscribe((t) => this.teamService.currentTeamSubject.next(t));
+          this.router.navigate([this.router.url]);
+        }
+        this.refreshProposals();
+      });
+  }
+
+  proposalRejected(token: string) {
+    this.teamService
+      .rejectProposal(token)
+      .pipe(first())
+      .subscribe(() => this.refreshProposals());
+  }
+
+  proposalDeleted(token: string) {
+    this.teamService
+      .deleteProposal(token)
       .pipe(first())
       .subscribe(() => this.refreshProposals());
   }

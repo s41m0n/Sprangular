@@ -60,7 +60,11 @@ export class TabStudentAssignmentsComponent {
 
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
-    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
+    return (
+      date.toLocaleDateString('en-GB') +
+      ' at ' +
+      date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    );
   }
 
   viewAssignment(element: StudentAssignmentDetails) {

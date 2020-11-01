@@ -36,6 +36,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   dataSourceProposals = new MatTableDataSource<Proposal>();
   colsToDisplay = ['select', 'id', 'name', 'surname']; // Columns to be displayed in the table
   colsToDisplayProposals = [
+    'cancel',
     'proposalCreator',
     'teamName',
     'membersAndStatus',
@@ -47,17 +48,20 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
   @Output() searchStudentsEvent = new EventEmitter<string>(); // Event emitter for the search students (autocompletions)
   @Output() submitTeamEvent = new EventEmitter<TeamProposal>(); // Event emitter for the search students (autocompletions)
+  @Output() proposalAcceptedEvent = new EventEmitter<string>();
+  @Output() proposalRejectedEvent = new EventEmitter<string>();
+  @Output() proposalDeletedEvent = new EventEmitter<string>();
   @ViewChild(MatSort, { static: true }) sort: MatSort; // Mat sort for the table
   @ViewChild(MatPaginator) paginator: MatPaginator; // Mat paginator for the table
   @Input() filteredStudents: Observable<Student[]>; // List of students matching search criteria
-  @Input() set proposals(proposals: Proposal[]) {
-    this.dataSourceProposals.data = proposals;
-  }
   @Input() set availableStudents(students: Student[]) {
     // Enrolled students to be displayed in the table
     const userInfo = JSON.parse(localStorage.getItem('currentUser'));
     this.currentUser = students.find((s) => s.id === userInfo.id);
     this.dataSource.data = students.filter((s) => s.id !== userInfo.id);
+  }
+  @Input() set proposals(proposals: Proposal[]) {
+    this.dataSourceProposals.data = proposals;
   }
 
   ngOnInit() {
@@ -127,12 +131,47 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
 
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
-    return date.toLocaleDateString();
+    return (
+      date.toLocaleDateString('en-GB') +
+      ' at ' +
+      date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    );
   }
 
   displayFnMembers(members: string[]): string {
     let returnedString = '';
     members.forEach((s) => (returnedString += s + '\n'));
     return returnedString;
+  }
+
+  acceptProposal(token: string) {
+    this.proposalAcceptedEvent.emit(token);
+  }
+
+  rejectProposal(token: string) {
+    this.proposalRejectedEvent.emit(token);
+  }
+
+  accepted(members: string[]): boolean {
+    if (
+      members.includes(
+        `${this.currentUser.name} ${this.currentUser.surname} (${this.currentUser.id}) : ACCEPTED`
+      )
+    ) {
+      return true;
+    }
+  }
+
+  disabled(members: string[]): boolean {
+    let member: string;
+    for (member of members) {
+      if (member.includes('REJECTED')) {
+        return true;
+      }
+    }
+  }
+
+  deleteProposal(token: string) {
+    this.proposalDeletedEvent.emit(token);
   }
 }
