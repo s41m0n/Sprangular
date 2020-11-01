@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { VM } from '../../models/vm.model';
-import { first takeUntil } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
 import { TeamService } from 'src/app/services/team.service';
 import { MatDialog } from '@angular/material/dialog';
 import { NewVmDialogComponent } from 'src/app/modals/new-vm/new-vm.component';
