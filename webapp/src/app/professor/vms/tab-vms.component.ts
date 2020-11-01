@@ -44,14 +44,20 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   ngAfterViewInit() {}
 
   openDialogTeamOption(teamId: number, index: number): void {
-    const teamToChange = this.dataSources[index].data[0].team;
-    const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
+    const vms          = this.dataSources[index].data;
+    const teamToChange = vms[0].team;
+    const dialogRef    = this.dialog.open(EditTeamVmOptionsDialogComponent, {
       data: {
-        maxInstances: teamToChange.maxTotalInstances,
-        maxActive: teamToChange.maxActiveInstances,
-        vCpu: teamToChange.maxVCpu,
-        ram: teamToChange.maxRam,
-        disk: teamToChange.maxDiskStorage
+        maxTotalInstances: teamToChange.maxTotalInstances,
+        currentMaxTotalInstances: vms.length,
+        maxActiveInstances: teamToChange.maxActiveInstances,
+        currentMaxActiveInstances: vms.filter(vm => vm.active).length,
+        maxVCpu: teamToChange.maxVCpu,
+        currentMaxVCpu: Math.max(...vms.map(vm => vm.vcpu)),
+        maxRam: teamToChange.maxRam,
+        currentMaxRam: Math.max(...vms.map(vm => vm.ram)),
+        maxDiskStorage: teamToChange.maxDiskStorage,
+        currentMaxDiskStorage: Math.max(...vms.map(vm => vm.diskStorage))
       },
     });
 
@@ -70,8 +76,11 @@ export class TabProfessorVmsComponent implements AfterViewInit {
       width: '300px',
       data: {
         vCpu: selectedVm.vcpu,
+        maxVCpu: selectedVm.team.maxVCpu,
         ram: selectedVm.ram,
+        maxRam: selectedVm.team.maxRam,
         disk: selectedVm.diskStorage,
+        maxDisk: selectedVm.team.maxDiskStorage
       },
     });
 

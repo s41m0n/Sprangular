@@ -1,45 +1,47 @@
 <h1 mat-dialog-title>VM Options</h1>
 
 <div mat-dialog-content>
-  <label>Number of vCPUs: {{ data.vCpu }}</label
-  ><br />
-  <mat-slider
-    class="example-margin"
-    [max]="4"
-    [min]="1"
-    [step]="1"
-    [thumbLabel]="true"
-    [tickInterval]="getSliderTickInterval()"
-    [(ngModel)]="data.vCpu"
-  >
-  </mat-slider>
+  <form [formGroup]="form">
+    <label>Number of vCPUs: {{ data.vCpu }}</label
+    ><br />
+    <mat-slider
+            color="primary"
+            formControlName="vCpu"
+            min="1"
+            max="4"
+            step="1"
+            [thumbLabel]="true"
+            (valueChange)="compareWithCurrentValue($event, 'vCpu')"
+    >
+    </mat-slider>
 
-  <label>RAM size: {{ data.ram }}GB</label><br />
-  <mat-slider
-    class="example-margin"
-    [max]="8"
-    [min]="0.5"
-    [step]="0.5"
-    [thumbLabel]="true"
-    [tickInterval]="getSliderTickInterval()"
-    [(ngModel)]="data.ram"
-  >
-  </mat-slider>
+    <label>RAM size: {{ this.form.get("ram").value }}GB</label><br />
+    <mat-slider
+            color="primary"
+            formControlName="ram"
+            max="8"
+            min="1"
+            step="1"
+            [thumbLabel]="true"
+            (valueChange)="compareWithCurrentValue($event, 'ram')"
+    >
+    </mat-slider>
 
-  <label>Disk space: {{ data.disk }}GB</label><br />
-  <mat-slider
-    class="example-margin"
-    [max]="10"
-    [min]="2"
-    [step]="0.5"
-    [thumbLabel]="true"
-    [tickInterval]="getSliderTickInterval()"
-    [(ngModel)]="data.disk"
-  >
-  </mat-slider>
+    <label>Disk space: {{ this.form.get('disk').value }}GB</label><br />
+    <mat-slider
+            color="primary"
+            formControlName="disk"
+            max="10"
+            min="1"
+            step="1"
+            [thumbLabel]="true"
+            (valueChange)='compareWithCurrentValue($event, "disk")'
+    >
+    </mat-slider>
+  </form>
 </div>
 
-<div mat-dialog-actions align="end">
-  <button mat-button color="primary" (click)="onNoClick()">Set options</button>
+<div mat-dialog-actions style="justify-content: center">
   <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+  <button mat-button color="primary" (click)="onNoClick()">Set options</button>
 </div>
