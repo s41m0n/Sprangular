@@ -5,6 +5,7 @@ import {TeamService} from '../../services/team.service';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subject} from 'rxjs';
 import {ToastrService} from 'ngx-toastr';
+import {first} from 'rxjs/operators';
 
 @Component({
     selector: 'app-edit-team-vm-options-dialog',
@@ -28,18 +29,31 @@ export class EditTeamVmOptionsDialogComponent implements OnInit, OnDestroy {
         this.form = this.fb.group({
             maxTotalInstances: [this.data.maxTotalInstances, [Validators.min(1), Validators.max(10)]],
             maxActiveInstances: [this.data.maxActiveInstances, [Validators.min(1), Validators.max(10)]],
-            maxVCpu: [this.data.maxVCpu, [Validators.min(1), Validators.max(4)]],
-            maxRam: [this.data.maxRam, [Validators.min(1), Validators.max(8)]],
-            maxDiskStorage: [this.data.maxDiskStorage, [Validators.min(1), Validators.max(10)]]
+            maxVCpu: [this.data.maxVCpu, [Validators.min(1), Validators.max(10)]],
+            maxRam: [this.data.maxRam, [Validators.min(1), Validators.max(20)]],
+            maxDiskStorage: [this.data.maxDiskStorage, [Validators.min(1), Validators.max(50)]]
         });
     }
 
     editTeamSpec() {
         if (this.form.invalid) {
-            console.log('Invalid form');
-        } else {
-            console.log('Form valid! :)');
+            return;
         }
+        const formData = new FormData();
+        formData.append('maxTotalInstances', this.form.get('maxTotalInstances').value);
+        formData.append('maxActiveInstances', this.form.get('maxActiveInstances').value);
+        formData.append('vCpu', this.form.get('maxVCpu').value);
+        formData.append('ram', this.form.get('maxRam').value);
+        formData.append('diskStorage', this.form.get('maxDiskStorage').value);
+
+        this.teamService
+            .updateTeamVmResources(this.data.teamId, formData)
+            .pipe(first())
+            .subscribe((res) => {
+                if (res) {
+                    this.dialogRef.close(res);
+                }
+            });
     }
 
     ngOnDestroy() {

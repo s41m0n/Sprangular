@@ -2,7 +2,7 @@
 
 <div mat-dialog-content>
     <form [formGroup]="form">
-        <label>Team max number of instances:</label><br/>
+        <label>Team max number of instances - currently used: {{this.data.currentMaxTotalInstances}}</label><br/>
         <mat-slider
                 color="primary"
                 formControlName="maxTotalInstances"
@@ -14,7 +14,7 @@
         >
         </mat-slider>
 
-        <label>Team max number of active instances:</label><br/>
+        <label>Team max number of active instances - currently used: {{this.data.currentMaxActiveInstances}}</label><br/>
         <mat-slider
                 color="primary"
                 formControlName="maxActiveInstances"
@@ -26,11 +26,11 @@
         >
         </mat-slider>
 
-        <label>Max number of vCPUs:</label><br />
+        <label>Max number of vCPUs: {{this.form.get('maxVCpu').value}} - currently used: {{ this.data.currentMaxVCpu}}</label><br />
         <mat-slider
                 color="primary"
                 formControlName="maxVCpu"
-                max="4"
+                max="10"
                 min="1"
                 step="1"
                 [thumbLabel]="true"
@@ -39,11 +39,11 @@
         >
         </mat-slider>
 
-        <label>RAM size: {{ this.form.get('maxRam').value }}GB</label><br />
+        <label>RAM size: {{ this.form.get('maxRam').value }}GB - currently used: {{ this.data.currentMaxRam }}</label><br />
         <mat-slider
                 color="primary"
                 formControlName="maxRam"
-                max="8"
+                max="20"
                 min="1"
                 step="1"
                 [thumbLabel]="true"
@@ -52,11 +52,11 @@
         >
         </mat-slider>
 
-        <label>Disk space: {{ this.form.get('maxDiskStorage').value }}GB</label><br />
+        <label>Disk space: {{ this.form.get('maxDiskStorage').value }}GB - currently used: {{ this.data.currentMaxDiskStorage}}GB</label><br />
         <mat-slider
                 color="primary"
                 formControlName="maxDiskStorage"
-                max="10"
+                max="50"
                 min="1"
                 step="1"
                 [thumbLabel]="true"
