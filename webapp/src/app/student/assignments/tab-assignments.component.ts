@@ -1,12 +1,15 @@
 import {Component, Input} from '@angular/core';
 import {MatTableDataSource} from '@angular/material/table';
-import {Assignment} from '../../models/assignment.model';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {AssignmentSolution} from '../../models/assignment-solution.model';
-import {filter, first} from 'rxjs/operators';
-import {User} from '../../models/user.model';
-import {StudentService} from '../../services/student.service';
+import {first} from 'rxjs/operators';
 import {Upload} from '../../models/upload.model';
+import {StudentAssignmentDetails} from '../../models/student-assignment.details';
+import {AssignmentService} from '../../services/assignment.service';
+import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
+import {DomSanitizer} from '@angular/platform-browser';
+import {AssignmentStatus} from '../../models/assignment-solution.model';
+import {CourseService} from '../../services/course.service';
 
 /**
  * StudentsComponent
@@ -25,45 +28,60 @@ import {Upload} from '../../models/upload.model';
   ],
 })
 export class TabStudentAssignmentsComponent {
-  regularDataSource = new MatTableDataSource<Assignment>();                     // Table datasource dynamically modified
-  expiredDataSource = new MatTableDataSource<Assignment>();                     // Table datasource dynamically
-  currentStudent: User;
-  colsToDisplay = ['name', 'dueDate'];                // Columns to be displayed in the table
-  studentService: StudentService;
+  regularDataSource = new MatTableDataSource<StudentAssignmentDetails>();                     // Table datasource dynamically modified
+  expiredDataSource = new MatTableDataSource<StudentAssignmentDetails>();                     // Table datasource dynamically
+  colsToDisplay = ['name', 'releaseDate', 'dueDate', 'status', 'statusTs', 'grade', 'document', 'uploads'];
 
-  regularAssignmentSolution: AssignmentSolution;
-  regularAssignmentUploads: Upload[];
-  expiredAssignmentSolution: AssignmentSolution;
-  expiredAssignmentUploads: Upload[];
+  assignmentUploads: Upload[];
 
-  @Input() set assignments(assignments: Assignment[]) {
+  @Input() set assignments(assignments: StudentAssignmentDetails[]) {
     this.regularDataSource.data = assignments.filter(assignment => Date.now() < Date.parse(assignment.dueDate));
     this.expiredDataSource.data = assignments.filter(assignment => Date.now() > Date.parse(assignment.dueDate));
   }
 
-  @Input() set student(student: User) {
-    this.currentStudent = student;
+  expandedElement: StudentAssignmentDetails | null;
+
+  constructor(private assignmentService: AssignmentService,
+              private courseService: CourseService,
+              public dialog: MatDialog,
+              private sanitizer: DomSanitizer) {
   }
 
-  regularExpandedElement: Assignment | null;
-  expiredExpandedElement: Assignment | null;
-
-  constructor(private studServ: StudentService) {
-    this.studentService = studServ;
+  showUploads(element) {
+    this.expandedElement = this.expandedElement === element ? null : element;
+    if (this.expandedElement === null) {
+      return;
+    }
+    this.assignmentService.getAssignmentSolutionUploads(element.assignmentSolutionId)
+        .pipe(
+        first()
+    ).subscribe(uploads => this.assignmentUploads = uploads.sort(Upload.compare));
   }
 
-  onClickElement(element, table) {
-    this.expiredExpandedElement = this.expiredExpandedElement === element ? null : element;
-    this.regularExpandedElement = this.regularExpandedElement === element ? null : element;
-    this.studentService.getAssignmentSolution(element.id)
-        .pipe(
-        first()
-    ).subscribe(solution => table === 'regular' ? this.regularAssignmentSolution = solution : this.expiredAssignmentSolution = solution);
+  dateString(statusTs: string): string {
+    const date = new Date(statusTs);
+    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
+  }
 
-    // TODO: not needing assId but assSolutionId!
-    /*this.studentService.getAssignmentUploads(element.id)
-        .pipe(
-        first()
-    ).subscribe(uploads => table === 'regular' ? this.regularAssignmentUploads = uploads : this.expiredAssignmentUploads = uploads);*/
+  viewAssignment(element: StudentAssignmentDetails) {
+    this.assignmentService.readStudentAssignment(element.assignmentId).pipe(first()).subscribe(instance => {
+      if (!instance) { return; }
+      const url = URL.createObjectURL(instance);
+      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+        data: {title : `Assignment: ${element.assignmentId} - ${element.name}`, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
+      });
+      dialogRef.afterClosed().subscribe(() => {
+        URL.revokeObjectURL(url);
+        if (element.status === AssignmentStatus.NULL) {
+          this.refreshAssignmentsDetails();
+        }
+      });
+    });
+  }
+
+  private refreshAssignmentsDetails() {
+    this.courseService.getStudentCourseAssignments(this.courseService.course.value.acronym)
+        .pipe(first())
+        .subscribe(as => this.assignments = as);
   }
 }

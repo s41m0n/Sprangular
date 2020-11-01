@@ -14,14 +14,14 @@ import {FileInput} from 'ngx-material-file-input';
 export class NewAssignmentUploadDialogComponent implements OnInit {
     form: FormGroup;
     assignmentInvalid = false;
-    assignmentId: number;
+    assignmentSolutionId: number;
 
     constructor(
         private fb: FormBuilder,
         private studentService: StudentService,
         public dialogRef: MatDialogRef<NewAssignmentUploadDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: any) {
-        this.assignmentId = data.assignmentId;
+        this.assignmentSolutionId = data.assignmentSolutionId;
     }
 
     ngOnInit(): void {
@@ -35,14 +35,12 @@ export class NewAssignmentUploadDialogComponent implements OnInit {
         if (this.form.invalid) {
             return;
         }
-
         const formData = new FormData();
         formData.append('comment', this.form.get('comment').value);
         const fileInput: FileInput = this.form.get('document').value;
         formData.append('document', fileInput.files[0]);
-        // TODO: not needing assId but assSolutionId!
         this.studentService
-            .uploadAssignmentSolution(formData, this.assignmentId)
+            .studentAssignmentUpload(formData, this.assignmentSolutionId)
             .pipe(first())
             .subscribe(
                 () => this.dialogRef.close(true),

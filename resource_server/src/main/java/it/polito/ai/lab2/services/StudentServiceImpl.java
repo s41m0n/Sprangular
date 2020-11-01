@@ -9,7 +9,6 @@ import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.repositories.*;
-import it.polito.ai.lab2.utility.ProposalStatus;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,14 +94,15 @@ public class StudentServiceImpl implements StudentService {
     for (Proposal p : proposals) {
       TeamProposalDetails tpd = new TeamProposalDetails();
       tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
-      tpd.setProposalCreator(modelMapper.map(studentRepository.getOne(p.getProposalCreatorId()), StudentDTO.class));
+      Student creator = studentRepository.getOne(p.getProposalCreatorId());
+      tpd.setProposalCreator(creator.getName() + " " + creator.getSurname() + " (" + creator.getId() + ")");
       tpd.setToken(p.getId());
 
-      Map<String, ProposalStatus> teamApprovalDetails = new HashMap<>();
+      List<String> teamApprovalDetails = new ArrayList<>();
 
       for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
         Student s = studentRepository.getOne(pr.getInvitedUserId());
-        teamApprovalDetails.put(s.getName() + " " + s.getSurname(), pr.getStatus());
+        teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ")  :  " + pr.getStatus().name());
       }
 
       tpd.setMembersAndStatus(teamApprovalDetails);

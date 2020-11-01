@@ -11,6 +11,7 @@ import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
 import { handleError } from '../helpers/handle.error';
+import {StudentAssignmentDetails} from '../models/student-assignment.details';
 
 /**
  * CourseService service
@@ -494,5 +495,25 @@ export class CourseService {
           )
         )
       );
+  }
+
+  getStudentCourseAssignments(courseAcronym: string): Observable<StudentAssignmentDetails[]> {
+    return this.http
+        .get<StudentAssignmentDetails[]>(
+            `${environment.base_courses_url}/${courseAcronym}/studentAssignments`
+        )
+        .pipe(
+            tap(() =>
+                console.log(
+                    `fetched assignments in course ${courseAcronym} - getCourseAssignments()`
+                )
+            ),
+            catchError(
+                handleError<StudentAssignmentDetails[]>(
+                    this.toastrService,
+                    `getCourseAssignments(${courseAcronym})`
+                )
+            )
+        );
   }
 }

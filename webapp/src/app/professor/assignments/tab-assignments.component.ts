@@ -42,7 +42,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.dataSource.data = assignments.sort(Assignment.compare);
   }
   expandedElement: Assignment | null;
-  assignmentStatuses = Object.values(AssignmentStatus).filter(isNaN);
+  assignmentStatuses = Object.values(AssignmentStatus);
   filteredStatuses: string[] = [];
 
   constructor(public dialog: MatDialog,

@@ -7,6 +7,7 @@ import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.AssignmentDetails;
 import it.polito.ai.lab2.pojos.AssignmentSolutionDetails;
+import it.polito.ai.lab2.pojos.StudentAssignmentDetails;
 import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.AssignmentStatus;
@@ -17,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -69,6 +71,32 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     return course.getAssignments().stream()
         .map(assignment -> modelMapper.map(assignment, AssignmentDTO.class))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
+  public List<StudentAssignmentDetails> getStudentAssignmentsDetails(String courseId) {
+    if (!courseRepository.existsById(courseId))
+        throw  new CourseNotFoundException("Course " + courseId + " does not exist");
+    List<AssignmentSolution> ass = assignmentSolutionRepository.findByStudentId(
+        SecurityContextHolder.getContext().getAuthentication().getName()).stream()
+        .filter(as -> as.getAssignment().getCourse().getAcronym().equals(courseId))
+        .collect(Collectors.toList());
+    return ass.stream()
+        .map(as -> {
+          StudentAssignmentDetails sad = new StudentAssignmentDetails();
+          sad.setAssignmentId(as.getAssignment().getId());
+          sad.setName(as.getAssignment().getName());
+          sad.setReleaseDate(as.getAssignment().getReleaseDate());
+          sad.setDueDate(as.getAssignment().getDueDate());
+          sad.setAssignmentSolutionId(as.getId());
+          sad.setStatus(as.getStatus());
+          sad.setGrade(as.getGrade());
+          sad.setStatusTs(as.getStatusTs());
+          return sad;
+        })
         .collect(Collectors.toList());
   }
 
@@ -188,19 +216,19 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
-      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.hasStudentTheAssignment(#assignmentId)")
-  public UploadDTO uploadStudentUpload(UploadDetails details, String studentId, Long assignmentId) {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
+      "or hasRole('ROLE_STUDENT')and @securityServiceImpl.isAssignmentSolutionOfStudent(#assignmentSolutionId)")
+  public UploadDTO uploadStudentUpload(Long assignmentSolutionId, UploadDetails uploadDetails) {
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
-            "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
+            "Assignment solution " + assignmentSolutionId + " does not exist"));
     if (!isUploadable(assignmentSolution.getStatus()))
-      throw new UploadNotAllowedException("Student " + studentId + " cannot upload for assignment " + assignmentId
+      throw new UploadNotAllowedException("Cannot upload for assignment solution " + assignmentSolutionId
           + ": solution status is " + assignmentSolution.getStatus().toString());
 
     Timestamp currentTs = new Timestamp(System.currentTimeMillis());
     Upload upload = new Upload();
     upload.setTimestamp(currentTs);
-    upload.setComment(details.getComment());
+    upload.setComment(uploadDetails.getComment());
     upload.setAssignmentSolution(assignmentSolution);
     upload.setStatus(AssignmentStatus.DELIVERED);
     assignmentSolution.getUploads().add(upload);
@@ -211,7 +239,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     Path uploadPath = Utility.UPLOADS_DIR.resolve(savedUpload.getId().toString());
     savedUpload.setImagePath(uploadPath.toString());
     try {
-      Files.copy(details.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING);
+      Files.copy(uploadDetails.getDocument().getInputStream(), uploadPath, StandardCopyOption.REPLACE_EXISTING);
     } catch (IOException e) {
       throw new RuntimeException("Cannot store the file: " + e.getMessage());
     }
@@ -220,12 +248,12 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.hasStudentTheAssignment(#assignmentId)")
-  public Resource getAssignmentForStudent(Long assignmentId, String studentId) throws FileNotFoundException {
-    if (!studentRepository.existsById(studentId))
-      throw new StudentNotFoundException("Student " + studentId + " does not exist");
+  @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.hasStudentTheAssignment(#assignmentId)")
+  public Resource getAssignmentForStudent(Long assignmentId) throws FileNotFoundException {
+    String studentId = SecurityContextHolder.getContext().getAuthentication().getName();
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(
-        assignmentId, studentId).orElseThrow(() -> new AssignmentSolutionNotFoundException(
+        assignmentId, studentId).orElseThrow(
+            () -> new AssignmentSolutionNotFoundException(
         "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
     Resource file = null;
     try {
@@ -235,15 +263,17 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     }
     if (file == null)
       throw new FileNotFoundException("Assignment" + assignmentId + " image not found");
-    Timestamp currentTs = new Timestamp(System.currentTimeMillis());
-    assignmentSolution.setStatus(AssignmentStatus.READ);
-    assignmentSolution.setStatusTs(currentTs);
-    Upload upload = new Upload();
-    upload.setTimestamp(currentTs);
-    upload.setStatus(AssignmentStatus.DEFINITIVE);
-    upload.setComment("Assignment read");
-    upload.setAssignmentSolution(assignmentSolution);
-    uploadRepository.save(upload);
+    if (assignmentSolution.getStatus().equals(AssignmentStatus.NULL)) {
+      Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+      assignmentSolution.setStatus(AssignmentStatus.READ);
+      assignmentSolution.setStatusTs(currentTs);
+      Upload upload = new Upload();
+      upload.setTimestamp(currentTs);
+      upload.setStatus(AssignmentStatus.READ);
+      upload.setComment("Assignment read");
+      upload.setAssignmentSolution(assignmentSolution);
+      uploadRepository.save(upload);
+    }
     return file;
   }
 
@@ -266,7 +296,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
       "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentSolutionOfProfessorCourse(#assignmentSolutionId)")
-  public UploadDTO uploadProfessorUpload(UploadDetails details, Long assignmentSolutionId) {
+  public UploadDTO uploadProfessorUpload(Long assignmentSolutionId, UploadDetails details) {
     AssignmentSolution assSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElseThrow(
         () -> new AssignmentSolutionNotFoundException("Assignment solution " + assignmentSolutionId + "does not exist"));
     if (!assSolution.getStatus().equals(AssignmentStatus.DELIVERED))
@@ -293,7 +323,6 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     } catch (IOException e) {
       throw new RuntimeException("Cannot store the file: " + e.getMessage());
     }
-
     return modelMapper.map(savedUpload, UploadDTO.class);
   }
 

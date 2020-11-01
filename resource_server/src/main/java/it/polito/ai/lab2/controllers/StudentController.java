@@ -135,18 +135,6 @@ public class StudentController {
     }
   }
 
-  @PostMapping("/{studentId}/assignments/{assignmentId}/uploads")
-  public UploadDTO uploadAssignmentUpload(@PathVariable String studentId,
-                                          @PathVariable Long assignmentId,
-                                          @ModelAttribute UploadDetails details) {
-    log.info("uploadAssignmentUpload() called");
-    try {
-      return assAndUploadService.uploadStudentUpload(details, studentId, assignmentId);
-    } catch (AssignmentSolutionNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
   @GetMapping("/{studentId}/assignments/{assignmentId}")
   public AssignmentSolutionDTO getAssignmentSolution(@PathVariable String studentId,
                                                      @PathVariable Long assignmentId) {
@@ -154,17 +142,6 @@ public class StudentController {
     try {
       return assAndUploadService.getAssignmentSolutionForAssignmentOfStudent(assignmentId, studentId);
     } catch (StudentNotFoundException | AssignmentSolutionNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
-  @GetMapping("/{studentId}/assignments/{assignmentId}/document")
-  public Resource getAssignment(@PathVariable String studentId,
-                                @PathVariable Long assignmentId) {
-    log.info("getAssignment() called");
-    try {
-      return assAndUploadService.getAssignmentForStudent(assignmentId, studentId);
-    } catch (FileNotFoundException | StudentNotFoundException | AssignmentSolutionNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }

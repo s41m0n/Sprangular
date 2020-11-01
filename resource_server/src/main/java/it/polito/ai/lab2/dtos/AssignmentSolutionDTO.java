@@ -12,7 +12,7 @@ public class AssignmentSolutionDTO {
 
   AssignmentStatus status;
 
-  int grade;
+  String grade;
 
   Timestamp statusTs;
 }

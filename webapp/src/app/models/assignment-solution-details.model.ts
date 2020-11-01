@@ -1,6 +1,5 @@
 import {AssignmentStatus} from './assignment-solution.model';
 
-
 export class AssignmentSolutionDetails {
   id: number;
   studentName: string;

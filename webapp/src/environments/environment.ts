@@ -14,7 +14,6 @@ export const environment = {
   base_students_url: `${BASE_API}/students`,
   base_professors_url: `${BASE_API}/professors`,
   base_teams_url: `${BASE_API}/teams`,
-  base_uploads_url: `${BASE_API}/uploads`,
   base_assignments_url: `${BASE_API}/assignments`,
   base_assignmentSolutions_url: `${BASE_API}/assignmentSolutions`,
   login_url: `${BASE_API}/authentication/login`,

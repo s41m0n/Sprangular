@@ -5,31 +5,27 @@
         <mat-error *ngIf="assignmentInvalid">Error while uploading your solution!</mat-error>
 
         <mat-form-field class="full-width-input">
-            <input
-                    matInput
-                    type="text"
-                    placeholder="Comment about your work"
-                    formControlName="comment"
-                    required
-            />
+            <input matInput
+                   type="text"
+                   placeholder="Comment about your work"
+                   formControlName="comment"
+                   required/>
             <mat-error>Please provide a valid comment</mat-error>
         </mat-form-field>
 
         <mat-form-field class="full-width-input">
             <ngx-mat-file-input
                     formControlName="document"
-                    placeholder="Your Solution - pdf/png/jpg/jpeg"
+                    placeholder="Assignment Solution"
                     accept=".png, .pdf, .jpg, .jpeg"
-                    required
-            ></ngx-mat-file-input>
+                    required>
+            </ngx-mat-file-input>
             <mat-icon matSuffix>folder</mat-icon>
         </mat-form-field>
-
     </form>
 </div>
-
-<div mat-dialog-actions align="end">
-    <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
+<div mat-dialog-actions style="justify-content: center">
+    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
     <button mat-button color="primary" (click)="onSubmit()">Upload</button>
 </div>
 
