@@ -62,7 +62,8 @@ export class TabProfessorVmsContComponent {
         const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
           data: {
             title: `VM: ${vm.id} - ${vm.name}`,
-            imageSrc: this.sanitizer.bypassSecurityTrustUrl(url),
+            imageSrc: url,
+            downloadable: false
           },
         });
         dialogRef.afterClosed().subscribe(() => {

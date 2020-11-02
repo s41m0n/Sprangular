@@ -30,7 +30,7 @@ export class TabStudentVmsComponent {
   }
   @Output() turnVmEvent = new EventEmitter<number>();
   @Output() addOwnerEvent = new EventEmitter<any>();
-  @Output() connectEvent = new EventEmitter<number>();
+  @Output() connectEvent = new EventEmitter<VM>();
   @Output() refreshVmList = new EventEmitter();
 
   constructor(private toastrService: ToastrService,
@@ -60,8 +60,8 @@ export class TabStudentVmsComponent {
         });
   }
 
-  connectToVm(vmId: number) {
-    this.connectEvent.emit(vmId);
+  connectToVm(vm: VM) {
+    this.connectEvent.emit(vm);
   }
 
   openDialogVmOption(id: number): void {

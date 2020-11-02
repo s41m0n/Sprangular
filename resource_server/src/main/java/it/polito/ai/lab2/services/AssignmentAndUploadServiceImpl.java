@@ -353,6 +353,24 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     return modelMapper.map(assignmentSolution, AssignmentSolutionDTO.class);
   }
 
+  @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') " +
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isUploadOfProfessorCourse(#uploadId)" +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isUploadOfStudentAssignmentSolution(#uploadId)")
+  public Resource getUploadDocument(Long uploadId) throws FileNotFoundException {
+    Upload upload = uploadRepository.findById(uploadId)
+        .orElseThrow(() -> new UploadNotFoundException("Upload " + uploadId + " does not exist"));
+    Resource file = null;
+    try {
+      file = new UrlResource(Paths.get(upload.getImagePath()).toUri());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    if (file == null)
+      throw new FileNotFoundException("Upload " + uploadId + " image not found");
+    return file;
+  }
+
   private boolean isUploadable(AssignmentStatus assignmentStatus) {
     return assignmentStatus.equals(AssignmentStatus.READ)
         || assignmentStatus.equals(AssignmentStatus.REVIEWED_UPLOADABLE);

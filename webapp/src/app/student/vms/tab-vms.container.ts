@@ -76,9 +76,9 @@ export class TabStudentVmsContComponent implements OnInit {
             .subscribe((_) => this.refreshVMs());
     }
 
-    connect(vmId: number) {
+    connect(vm: VM) {
         this.vmService
-            .getInstance(vmId)
+            .getInstance(vm.id)
             .pipe(first())
             .subscribe((instance) => {
                 if (!instance) {
@@ -87,8 +87,9 @@ export class TabStudentVmsContComponent implements OnInit {
                 const url = URL.createObjectURL(instance);
                 const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
                     data: {
-                        id: vmId,
-                        imageSrc: this.sanitizer.bypassSecurityTrustUrl(url),
+                        title: `VM: ${vm.id} -  ${vm.name}`,
+                        imageSrc: url,
+                        downloadable: false
                     },
                 });
                 dialogRef.afterClosed().subscribe(() => {

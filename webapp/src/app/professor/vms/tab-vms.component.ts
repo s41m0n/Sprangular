@@ -79,8 +79,8 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     this.wipeVmEvent.emit(id);
   }
 
-  connectToVm(id: VM) {
-    this.connectVmEvent.emit(id);
+  connectToVm(vm: VM) {
+    this.connectVmEvent.emit(vm);
   }
 
   triggerVm(id: number) {

@@ -6,7 +6,8 @@ import {first} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
 import {StudentAssignmentDetails} from '../../models/student-assignment.details';
-import {AssignmentService} from '../../services/assignment.service';
+import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
+import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 
 @Component({
   selector: 'app-tab-expandend-assignment',
@@ -23,7 +24,7 @@ export class TabExpandendAssignmentComponent {
 
   constructor(
       public dialog: MatDialog,
-      private assignmentService: AssignmentService
+      private assignmentService: AssignmentAndUploadService
   ) {}
 
   @Input() set element(element: StudentAssignmentDetails) {
@@ -69,5 +70,22 @@ export class TabExpandendAssignmentComponent {
       ' at ' +
       date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
     );
+  }
+
+  viewDocument(upload: Upload) {
+    this.assignmentService.getUploadDocument(upload.id).pipe(first()).subscribe(instance => {
+      if (!instance) { return; }
+      const url = URL.createObjectURL(instance);
+      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+        data: {title: `Upload: ${upload.id}`,
+          imageSrc: url,
+          downloadable: true,
+          dl_name: `upload_${upload.id}`
+        }
+      });
+      dialogRef.afterClosed().subscribe(() => {
+        URL.revokeObjectURL(url);
+      });
+    });
   }
 }

@@ -38,4 +38,6 @@ public interface AssignmentAndUploadService {
   Resource getAssignmentDocument(Long assignmentId) throws FileNotFoundException;
 
   AssignmentSolutionDTO assignGrade(Long assignmentSolutionId, String grade);
+
+  Resource getUploadDocument(Long uploadId) throws FileNotFoundException;
 }

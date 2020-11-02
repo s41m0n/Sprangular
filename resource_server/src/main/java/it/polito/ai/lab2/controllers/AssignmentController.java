@@ -51,7 +51,7 @@ public class AssignmentController {
     log.info("getAssignmentForStudent() called");
     try {
       return assAndUploadService.getAssignmentForStudent(assignmentId);
-    } catch (FileNotFoundException | StudentNotFoundException | AssignmentSolutionNotFoundException e) {
+    } catch (FileNotFoundException | AssignmentSolutionNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }

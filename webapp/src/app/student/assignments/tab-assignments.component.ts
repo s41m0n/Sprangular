@@ -4,7 +4,7 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import {first} from 'rxjs/operators';
 import {Upload} from '../../models/upload.model';
 import {StudentAssignmentDetails} from '../../models/student-assignment.details';
-import {AssignmentService} from '../../services/assignment.service';
+import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -41,7 +41,7 @@ export class TabStudentAssignmentsComponent {
 
   expandedElement: StudentAssignmentDetails | null;
 
-  constructor(private assignmentService: AssignmentService,
+  constructor(private assignmentService: AssignmentAndUploadService,
               private courseService: CourseService,
               public dialog: MatDialog,
               private sanitizer: DomSanitizer) {
@@ -72,7 +72,11 @@ export class TabStudentAssignmentsComponent {
       if (!instance) { return; }
       const url = URL.createObjectURL(instance);
       const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title : `Assignment: ${element.assignmentId} - ${element.name}`, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
+        data: {title: `Assignment: ${element.assignmentId} - ${element.name}`,
+          imageSrc: url,
+          downloadable: true,
+          dl_name: `assignment_${element.assignmentId}`
+        }
       });
       dialogRef.afterClosed().subscribe(() => {
         URL.revokeObjectURL(url);

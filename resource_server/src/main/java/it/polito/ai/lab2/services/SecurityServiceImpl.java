@@ -141,15 +141,6 @@ public class SecurityServiceImpl implements SecurityService {
   }
 
   @Override
-  public boolean isProfessorUploadReviewer(Long studentUploadId) {
-    Upload upload = uploadRepository.findById(studentUploadId).orElse(null);
-    if (upload == null)
-      return false;
-    return upload.getAssignmentSolution().getAssignment().getProfessor().getId()
-        .equals(SecurityContextHolder.getContext().getAuthentication().getName());
-  }
-
-  @Override
   public boolean isAssignmentSolutionOfProfessorCourse(Long assignmentSolutionId) {
     AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElse(null);
     if (assignmentSolution == null)
@@ -164,6 +155,26 @@ public class SecurityServiceImpl implements SecurityService {
     if (assignmentSolution == null)
       return false;
     return assignmentSolution.getStudent().getId().equals(
+        SecurityContextHolder.getContext().getAuthentication().getName());
+  }
+
+  @Override
+  public boolean isUploadOfProfessorCourse(Long uploadId) {
+    Upload upload = uploadRepository.findById(uploadId).orElse(null);
+    if (upload == null) {
+      return false;
+    }
+    return upload.getAssignmentSolution().getAssignment().getCourse().getProfessors().stream()
+        .anyMatch(p -> p.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
+  }
+
+  @Override
+  public boolean isUploadOfStudentAssignmentSolution(Long uploadId) {
+    Upload upload = uploadRepository.findById(uploadId).orElse(null);
+    if (upload == null) {
+      return false;
+    }
+    return upload.getAssignmentSolution().getStudent().getId().equals(
         SecurityContextHolder.getContext().getAuthentication().getName());
   }
 }

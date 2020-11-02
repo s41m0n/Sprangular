@@ -8,7 +8,7 @@ import {first} from 'rxjs/operators';
 import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {DomSanitizer} from '@angular/platform-browser';
-import {AssignmentService} from '../../services/assignment.service';
+import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AssignmentSolutionDetails} from '../../models/assignment-solution-details.model';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
@@ -50,7 +50,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   filteredStatuses: string[] = [];
 
   constructor(public dialog: MatDialog,
-              private assignmentService: AssignmentService,
+              private assignmentService: AssignmentAndUploadService,
               private sanitizer: DomSanitizer,
               private router: Router,
               private route: ActivatedRoute) {
@@ -76,7 +76,11 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
       if (!instance) { return; }
       const url = URL.createObjectURL(instance);
       const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title : `Assignment: ${assignment.id} - ${assignment.name}`, imageSrc: this.sanitizer.bypassSecurityTrustUrl(url)}
+        data: {title: `Assignment: ${assignment.id} - ${assignment.name}`,
+          imageSrc: url,
+          downloadable: true,
+          dl_name: `assignment_${assignment.id}`
+        }
       });
       dialogRef.afterClosed().subscribe(() => {
         URL.revokeObjectURL(url);

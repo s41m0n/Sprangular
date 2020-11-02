@@ -12,7 +12,7 @@ import {Upload} from '../models/upload.model';
 @Injectable({
   providedIn: 'root',
 })
-export class AssignmentService {
+export class AssignmentAndUploadService {
 
   constructor(private http: HttpClient,
               private toastrService: ToastrService) {
@@ -57,6 +57,15 @@ export class AssignmentService {
     ).pipe(
         tap(() => console.log(`evaluated assignment ${assignmentSolutionId} - evaluateAssignment()`)),
         catchError(handleError<any>(this.toastrService, `evaluateAssignment(${assignmentSolutionId})`))
+    );
+  }
+
+  getUploadDocument(uploadId: number): Observable<any> {
+    return this.http.get(`${environment.base_uploads_url}/${uploadId}/document`, {
+      responseType: 'blob',
+    }).pipe(
+        tap(() => console.log(`returned document for upload ${uploadId} - getUploadDocument()`)),
+        catchError(handleError<any>(this.toastrService, `getUploadDocument(${uploadId})`))
     );
   }
 }

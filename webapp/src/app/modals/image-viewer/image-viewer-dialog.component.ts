@@ -1,5 +1,6 @@
-import { Component, Inject, Input } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-image-viewer-dialog',
@@ -7,25 +8,26 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 })
 export class ImageViewerDialogComponent {
   title = '';
-  imageSrc = '';
+  imageSrc: SafeUrl;
+  downloadable = false;
 
   constructor(
     public dialogRef: MatDialogRef<ImageViewerDialogComponent>,
+    private sanitizer: DomSanitizer,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.imageSrc = data.imageSrc;
+    this.imageSrc = this.sanitizer.bypassSecurityTrustUrl(data.imageSrc);
     this.title = data.title;
+    this.downloadable = data.downloadable;
   }
 
-  onNoClick(): void {
-    this.dialogRef.close(this.data);
-  }
-
-  save() {
-    alert('saved');
-  }
-
-  modify() {
-    alert('modified');
+  downloadDocument() {
+    const a: any = document.createElement('a');
+    a.href = this.data.imageSrc;
+    a.download = this.data.dl_name + '.png';
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    a.click();
+    a.remove();
   }
 }

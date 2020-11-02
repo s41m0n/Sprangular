@@ -7,5 +7,11 @@
 </div>
 
 <div mat-dialog-actions style="justify-content: center">
-    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+    <button mat-button
+            color="warn"
+            (click)="dialogRef.close()">Close</button>
+    <button mat-button
+            color="primary"
+            *ngIf="downloadable"
+            (click)="downloadDocument()">Download</button>
 </div>
