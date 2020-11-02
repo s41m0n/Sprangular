@@ -49,7 +49,7 @@ export class NewAssignmentUploadDialogComponent implements OnInit {
                 .professorAssignmentUpload(formData, this.assignmentSolutionId)
                 .pipe(first())
                 .subscribe(
-                    () => this.dialogRef.close(true),
+                    (res) => this.dialogRef.close(res),
                     () => this.assignmentInvalid = true
                 );
         } else {
@@ -57,7 +57,7 @@ export class NewAssignmentUploadDialogComponent implements OnInit {
                 .studentAssignmentUpload(formData, this.assignmentSolutionId)
                 .pipe(first())
                 .subscribe(
-                    () => this.dialogRef.close(true),
+                    (res) => this.dialogRef.close(res),
                     () => this.assignmentInvalid = true
                 );
         }

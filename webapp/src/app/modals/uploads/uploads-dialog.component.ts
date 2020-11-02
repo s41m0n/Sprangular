@@ -49,7 +49,7 @@ export class UploadsDialogComponent {
         .pipe(first())
         .subscribe((result) => {
           if (result) {
-            this.dialogRef.close(true);
+            this.dialogRef.close(result);
           }
         });
   }
