@@ -145,20 +145,4 @@ public class StudentController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }
-
-  @PostMapping("/{studentId}/assignments/{assignmentId}/grade")
-  public AssignmentSolutionDTO evaluateAssignment(@PathVariable String studentId,
-                                                  @PathVariable Long assignmentId,
-                                                  @RequestBody String grade) {
-    log.info("evaluateAssignment() called");
-    try {
-      return assAndUploadService.assignGrade(studentId, assignmentId, grade);
-    } catch (AssignmentSolutionNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (DefinitiveAssignmentSolutionStatusException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-    } catch (AssignmentSolutionNotReviewedException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-  }
 }

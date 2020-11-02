@@ -22,6 +22,8 @@
             </ngx-mat-file-input>
             <mat-icon matSuffix>folder</mat-icon>
         </mat-form-field>
+
+        <mat-checkbox *ngIf="isProfessor()" formControlName="reuploadable">Allow Re-Upload</mat-checkbox>
     </form>
 </div>
 <div mat-dialog-actions style="justify-content: center">

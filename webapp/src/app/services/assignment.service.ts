@@ -49,4 +49,14 @@ export class AssignmentService {
         catchError(handleError<any>(this.toastrService, `getDocument(${assignmentId})`))
     );
   }
+
+  evaluateAssignment(assignmentSolutionId: number, grade: string): Observable<AssignmentSolution> {
+    return this.http.post<AssignmentSolution>(`${environment.base_assignmentSolutions_url}/${assignmentSolutionId}/grade`,
+        {grade},
+        environment.base_http_headers
+    ).pipe(
+        tap(() => console.log(`evaluated assignment ${assignmentSolutionId} - evaluateAssignment()`)),
+        catchError(handleError<any>(this.toastrService, `evaluateAssignment(${assignmentSolutionId})`))
+    );
+  }
 }

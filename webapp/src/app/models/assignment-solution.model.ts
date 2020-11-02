@@ -14,6 +14,7 @@ export class AssignmentSolution {
     course: Course;
     dueDate: string;
     status: AssignmentStatus;
+    statusTs: string;
     grade: string;
 
     constructor(id: number = 0, grade: string = '', status: number = 0) {

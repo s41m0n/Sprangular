@@ -99,26 +99,28 @@ export class ProfessorService {
       );
   }
 
-  uploadAssignmentCorrection(uploadDto: Upload): Observable<Upload> {
+  professorAssignmentUpload(
+      uploadDetails: FormData,
+      assignmentSolutionId: number
+  ): Observable<Upload> {
     return this.http
-      .post<Upload>(
-          `${environment.base_assignmentSolutions_url}/${uploadDto.id}/professorUpload`,
-          uploadDto,
-          environment.base_http_headers)
-      .pipe(
-        tap((x) =>
-          this.toastrService.success(
-            `Uploaded a new assignment correction`,
-            'Congratulations 😃'
-          )
-        ),
-        catchError(
-          handleError<Upload>(
-            this.toastrService,
-            `uploadAssignmentCorrection()`,
-            null,
-            false)
+        .post<Upload>(
+            `${environment.base_assignmentSolutions_url}/${assignmentSolutionId}/professorUpload`,
+            uploadDetails
         )
-      );
+        .pipe(
+            tap((x) =>
+                this.toastrService.success(
+                    `Uploaded a new assignment solution`,
+                    'Congratulations 😃'
+                )
+            ),
+            catchError(
+                handleError<Upload>(
+                    this.toastrService,
+                    `uploadAssignmentSolution(${assignmentSolutionId})`
+                )
+            )
+        );
   }
 }

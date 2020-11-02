@@ -12,6 +12,7 @@ import {AssignmentService} from '../../services/assignment.service';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AssignmentSolutionDetails} from '../../models/assignment-solution-details.model';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
+import {GradeDialogComponent} from '../../modals/grade-dialog/grade-dialog.component';
 
 /**
  * AssignmentsComponent
@@ -90,5 +91,20 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   changeFiltering(status: string) {
     this.filteredStatuses.includes(status) ?
         this.filteredStatuses = this.filteredStatuses.filter(s => s !== status) : this.filteredStatuses.push(status);
+  }
+
+  gradeAssignable(asd: AssignmentSolutionDetails): boolean {
+    return !asd.grade && (asd.status === AssignmentStatus.REVIEWED || asd.status === AssignmentStatus.REVIEWED_UPLOADABLE);
+  }
+
+  assignGrade(element: AssignmentSolutionDetails) {
+    const dialogRef = this.dialog.open(GradeDialogComponent, { data: {assignmentSolutionId: element.id.toString()}});
+    dialogRef.afterClosed().pipe(first()).subscribe(res => {
+      if (res) {
+        element.status = res.status;
+        element.statusTs = res.statusTs;
+        element.grade = res.grade;
+      }
+    });
   }
 }

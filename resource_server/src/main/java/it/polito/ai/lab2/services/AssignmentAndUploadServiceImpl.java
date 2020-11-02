@@ -328,17 +328,18 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
   @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') " +
-      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentOfProfessor(#assignmentId)")
-  public AssignmentSolutionDTO assignGrade(String studentId, Long assignmentId, String grade) {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId)
+      "or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isAssignmentSolutionOfProfessorCourse(#assignmentSolutionId)")
+  public AssignmentSolutionDTO assignGrade(Long assignmentSolutionId, String grade) {
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId)
         .orElseThrow(() -> new AssignmentSolutionNotFoundException(
-            "Assignment solution for assignment " + assignmentId + " and student " + studentId + " does not exist"));
+            "Assignment solution " + assignmentSolutionId + " does not exist"));
     if (assignmentSolution.getStatus().equals(AssignmentStatus.DEFINITIVE))
       throw new DefinitiveAssignmentSolutionStatusException(
-          "Assignment solution for assignment " + assignmentId + " and student " + studentId + " status already definitive");
-    if (!assignmentSolution.getStatus().equals(AssignmentStatus.REVIEWED))
+          "Assignment solution " + assignmentSolutionId + " status already definitive");
+    if (!assignmentSolution.getStatus().equals(AssignmentStatus.REVIEWED)
+        && !assignmentSolution.getStatus().equals(AssignmentStatus.REVIEWED_UPLOADABLE))
       throw new AssignmentSolutionNotReviewedException(
-          "Assignment solution for assignment " + assignmentId + " and student " + studentId + " not reviewed yet");
+          "Assignment solution " + assignmentSolutionId + " not reviewed yet");
     assignmentSolution.setGrade(grade);
     assignmentSolution.setStatus(AssignmentStatus.DEFINITIVE);
     Timestamp currentTs = new Timestamp(System.currentTimeMillis());

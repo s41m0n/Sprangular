@@ -1,7 +1,10 @@
 package it.polito.ai.lab2.controllers;
 
+import it.polito.ai.lab2.dtos.AssignmentSolutionDTO;
 import it.polito.ai.lab2.dtos.UploadDTO;
 import it.polito.ai.lab2.exceptions.AssignmentSolutionNotFoundException;
+import it.polito.ai.lab2.exceptions.AssignmentSolutionNotReviewedException;
+import it.polito.ai.lab2.exceptions.DefinitiveAssignmentSolutionStatusException;
 import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.services.AssignmentAndUploadService;
 import lombok.extern.java.Log;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Log(topic = "AssignmentSolutionController")
@@ -49,6 +53,21 @@ public class AssignmentSolutionController {
       return assignmentAndUploadService.uploadStudentUpload(assignmentSolutionId, details);
     } catch (AssignmentSolutionNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
+  @PostMapping("/{assignmentSolutionId}/grade")
+  public AssignmentSolutionDTO evaluateAssignment(@PathVariable Long assignmentSolutionId,
+                                                  @RequestBody Map<String, String> grade) {
+    log.info("evaluateAssignment() called");
+    try {
+      return assignmentAndUploadService.assignGrade(assignmentSolutionId, grade.get("grade"));
+    } catch (AssignmentSolutionNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (DefinitiveAssignmentSolutionStatusException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+    } catch (AssignmentSolutionNotReviewedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 }

@@ -239,9 +239,16 @@ export class AppComponent {
     dialogRef
       .afterClosed()
       .pipe(first())
-      .subscribe(() => {
-        this.router.navigate([this.router.url.split('?')[0]]);
+      .subscribe((res) => {
         this.inModal = false;
+        if (res) {
+          this.router.navigate(
+              [`/professor/courses/${this.course.acronym}/assignments`],
+              { queryParams: { refreshAssignments: true } }
+          );
+        } else {
+          this.router.navigate([this.router.url.split('?')[0]]);
+        }
       });
   }
 }

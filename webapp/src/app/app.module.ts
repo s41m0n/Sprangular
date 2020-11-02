@@ -68,6 +68,7 @@ import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dial
 import { EditTeamVmOptionsDialogComponent } from './modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 import { ConfirmationDialogComponent } from './modals/confirmation-dialog/confirmation-dialog.component';
 import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.component';
+import {GradeDialogComponent} from './modals/grade-dialog/grade-dialog.component';
 
 @NgModule({
   declarations: [
@@ -103,7 +104,8 @@ import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.componen
     EditCourseDialogComponent,
     EditTeamVmOptionsDialogComponent,
     ConfirmationDialogComponent,
-    UploadsDialogComponent
+    UploadsDialogComponent,
+    GradeDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -154,7 +156,8 @@ import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.componen
     EditCourseDialogComponent,
     EditTeamVmOptionsDialogComponent,
     ConfirmationDialogComponent,
-    UploadsDialogComponent
+    UploadsDialogComponent,
+    GradeDialogComponent
   ],
   providers: [
     MatDatepickerModule,

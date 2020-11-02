@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>Assignment Evaluation</h1>
+<div mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-error *ngIf="assignmentInvalid">Error while uploading your solution!</mat-error>
+        <mat-form-field class="full-width-input">
+            <input matInput
+                   type="text"
+                   placeholder="Assignment evaluation"
+                   formControlName="grade"
+                   required/>
+            <mat-error>Please provide a valid comment</mat-error>
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions style="justify-content: center">
+    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+    <button mat-button color="primary" (click)="onSubmit()">Evaluate</button>
+</div>
