@@ -66,35 +66,26 @@ public class SprangularBackend {
       // TODO: test!
       // Team proposals management
       List<Proposal> proposals = proposalRepository.findAllByStatus(ProposalStatus.PENDING);
-      Set<Long> deleted = new HashSet<>();
       Set<Long> scheduled = new HashSet<>();
       proposals.forEach(proposal -> {
-        if (proposal.getDeadline().before(new Timestamp(System.currentTimeMillis()))) {
+        if (proposal.getDeadline().after(new Timestamp(System.currentTimeMillis()))) {
           // Create scheduled task
-          if (!scheduled.contains(proposal.getTeamId())) {
-            scheduled.add(proposal.getTeamId());
+          Long teamId = proposal.getTeamId();
+          if (!scheduled.contains(teamId)) {
+            scheduled.add(teamId);
             Runnable proposalDeadline = () -> {
               log.info("Deadline for proposal ");
-              List<Proposal> props = proposalRepository.findAllByTeamId(proposal.getTeamId());
-              boolean toDelete = props.stream()
-                  .anyMatch(p -> p.getStatus().equals(ProposalStatus.REJECTED)
-                      || p.getStatus().equals(ProposalStatus.PENDING));
-              if (toDelete) {
-                props.forEach(prop -> {
-                  prop.setStatus(ProposalStatus.REJECTED);
-                  proposalRepository.save(prop);
-                });
-                teamRepository.deleteById(proposal.getTeamId());
-              }
+              List<Proposal> props = proposalRepository.findAllByTeamId(teamId);
+              props.stream()
+                  .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
+                  .forEach(p -> {
+                    p.setStatus(ProposalStatus.REJECTED);
+                    proposalRepository.save(p);
+                  });
             };
             scheduler.schedule(proposalDeadline, new Date(proposal.getDeadline().getTime()));
           }
         } else {
-          // Reject proposals and delete team
-          if (!deleted.contains(proposal.getTeamId())) {
-            deleted.add(proposal.getTeamId());
-            teamRepository.deleteById(proposal.getTeamId());
-          }
           proposal.setStatus(ProposalStatus.REJECTED);
           proposalRepository.save(proposal);
         }
@@ -112,6 +103,7 @@ public class SprangularBackend {
           assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
           assignmentSolution.setStatusTs(currentTs);
           Upload upload = new Upload();
+          upload.setAuthor(assignmentSolution.getStudent().getId());
           upload.setTimestamp(currentTs);
           upload.setStatus(AssignmentStatus.DELIVERED);
           upload.setComment("Assignment published");

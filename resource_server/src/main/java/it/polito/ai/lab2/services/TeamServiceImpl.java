@@ -165,16 +165,12 @@ public class TeamServiceImpl implements TeamService {
       Runnable proposalDeadline = () -> {
         log.info("Deadline for proposal ");
         List<Proposal> proposals = proposalRepository.findAllByTeamId(t.getId());
-        boolean toDelete = proposals.stream()
-            .anyMatch(p -> p.getStatus().equals(ProposalStatus.REJECTED)
-                || p.getStatus().equals(ProposalStatus.PENDING));
-        if (toDelete) {
-          proposals.forEach(proposal -> {
-            proposal.setStatus(ProposalStatus.REJECTED);
-            proposalRepository.save(proposal);
-          });
-          teamRepository.deleteById(t.getId());
-        }
+        proposals.stream()
+            .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
+            .forEach(proposal -> {
+              proposal.setStatus(ProposalStatus.REJECTED);
+              proposalRepository.save(proposal);
+            });
       };
       scheduler.schedule(proposalDeadline, new Date(deadline));
       notificationService.notifyTeam(t, memberIds, courseId);

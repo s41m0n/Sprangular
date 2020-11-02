@@ -181,6 +181,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       assignmentSolution.setStatusTs(currentTs);
       assignmentSolutionRepository.save(assignmentSolution);
       Upload upload = new Upload();
+      upload.setAuthor(SecurityContextHolder.getContext().getAuthentication().getName());
       upload.setTimestamp(currentTs);
       upload.setStatus(AssignmentStatus.NULL);
       upload.setComment("Assignment published");
@@ -203,6 +204,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           assignmentSolution.setStatusTs(innerCurrentTs);
           assignmentSolutionRepository.save(assignmentSolution);
           Upload upload = new Upload();
+          upload.setAuthor(assignmentSolution.getStudent().getId());
           upload.setTimestamp(innerCurrentTs);
           upload.setStatus(AssignmentStatus.DELIVERED);
           upload.setComment("Assignment delivered");
@@ -227,6 +229,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
 
     Timestamp currentTs = new Timestamp(System.currentTimeMillis());
     Upload upload = new Upload();
+    upload.setAuthor(SecurityContextHolder.getContext().getAuthentication().getName());
     upload.setTimestamp(currentTs);
     upload.setComment(uploadDetails.getComment());
     upload.setAssignmentSolution(assignmentSolution);
@@ -268,6 +271,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       assignmentSolution.setStatus(AssignmentStatus.READ);
       assignmentSolution.setStatusTs(currentTs);
       Upload upload = new Upload();
+      upload.setAuthor(SecurityContextHolder.getContext().getAuthentication().getName());
       upload.setTimestamp(currentTs);
       upload.setStatus(AssignmentStatus.READ);
       upload.setComment("Assignment read");
@@ -303,6 +307,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       throw new UploadNotAllowedException("Student assignment status is not DELIVERED");
     Timestamp currentTs = new Timestamp(System.currentTimeMillis());
     Upload professorUpload = new Upload();
+    professorUpload.setAuthor(SecurityContextHolder.getContext().getAuthentication().getName());
     professorUpload.setTimestamp(currentTs);
     professorUpload.setComment(details.getComment());
     professorUpload.setAssignmentSolution(assSolution);
@@ -345,6 +350,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
     Timestamp currentTs = new Timestamp(System.currentTimeMillis());
     assignmentSolution.setStatusTs(currentTs);
     Upload upload = new Upload();
+    upload.setAuthor(SecurityContextHolder.getContext().getAuthentication().getName());
     upload.setTimestamp(currentTs);
     upload.setStatus(AssignmentStatus.DEFINITIVE);
     upload.setComment("Grade registered: " + grade);

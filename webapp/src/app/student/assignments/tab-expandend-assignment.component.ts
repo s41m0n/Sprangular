@@ -20,7 +20,7 @@ export class TabExpandendAssignmentComponent {
   canUpload = false;
   dataSource = new MatTableDataSource<Upload>();
   studentId;
-  colsToDisplay = ['timestamp', 'comment', 'status', 'download'];
+  colsToDisplay = ['timestamp', 'author', 'comment', 'status', 'download'];
 
   constructor(
       public dialog: MatDialog,
