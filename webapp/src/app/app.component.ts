@@ -73,9 +73,7 @@ export class AppComponent {
    *  or not.
    */
   openLogin() {
-    const dialogRef = this.dialog.open(LoginDialogComponent, {
-      width: '20%',
-    });
+    const dialogRef = this.dialog.open(LoginDialogComponent);
     const previousUrl = this.router.url;
     dialogRef
       .afterClosed()
@@ -93,7 +91,7 @@ export class AppComponent {
 
   openRegister() {
     const dialogRef = this.dialog.open(RegisterDialogComponent, {
-      width: '25%',
+      width: '40%',
     });
     const previousUrl = this.router.url;
     dialogRef

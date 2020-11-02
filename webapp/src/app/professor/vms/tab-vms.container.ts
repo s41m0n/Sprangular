@@ -34,7 +34,7 @@ export class TabProfessorVmsContComponent {
       .getCourseVMs(this.courseService.currentCourseSubject.value)
       .pipe(first())
       .subscribe((vms) => (this.vms = vms));
-  }
+  }q
 
   wipeVm(vmId: number) {
     this.vmService

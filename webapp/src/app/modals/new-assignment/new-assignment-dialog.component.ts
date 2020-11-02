@@ -4,6 +4,7 @@ import {FormBuilder, FormGroup} from '@angular/forms';
 import {CourseService} from '../../services/course.service';
 import {MatDialogRef} from '@angular/material/dialog';
 import {first} from 'rxjs/operators';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-new-assignment',
@@ -12,6 +13,8 @@ import {first} from 'rxjs/operators';
 })
 export class NewAssignmentDialogComponent implements OnInit {
   date: string = null;
+  minDate = moment(new Date()).format('YYYY-MM-DD');
+  maxDate = moment(this.minDate).add(9, 'M').format('YYYY-MM-DD');
   form: FormGroup;
 
   constructor(private fb: FormBuilder,

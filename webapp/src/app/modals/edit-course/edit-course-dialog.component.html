@@ -4,42 +4,44 @@
   <form [formGroup]="form">
     <label>Team Min Size:</label><br />
     <mat-slider
-      formControlName="teamMinSize"
-      [thumbLabel]="true"
-      (valueChange)="adaptMin($event)"
-      min="1"
-      max="10"
-      step="1"
+            color="primary"
+            formControlName="teamMinSize"
+            [thumbLabel]="true"
+            (valueChange)="adaptMin($event)"
+            min="1"
+            max="10"
+            step="1"
     ></mat-slider>
 
     <label>Team Max Size:</label>
     <mat-slider
-      formControlName="teamMaxSize"
-      [thumbLabel]="true"
-      (valueChange)="adaptMax($event)"
-      min="1"
-      max="10"
-      step="1"
+            color="primary"
+            formControlName="teamMaxSize"
+            [thumbLabel]="true"
+            (valueChange)="adaptMax($event)"
+            min="1"
+            max="10"
+            step="1"
     ></mat-slider>
     <mat-button-toggle-group name="fontStyle" aria-label="Font Style">
       <mat-button-toggle
-        [checked]="checked"
-        [disabled]="checked"
-        (click)="courseStatusChanged(true)"
-        >Enable</mat-button-toggle
+              [checked]="checked"
+              [disabled]="checked"
+              (click)="courseStatusChanged(true)"
+      >Enable</mat-button-toggle
       >
       <mat-button-toggle
-        [checked]="!checked"
-        [disabled]="!checked"
-        (click)="courseStatusChanged(false)"
-        >Disable</mat-button-toggle
+              [checked]="!checked"
+              [disabled]="!checked"
+              (click)="courseStatusChanged(false)"
+      >Disable</mat-button-toggle
       > </mat-button-toggle-group
     ><br /><br />
     <mat-form-field>
       <ngx-mat-file-input
-        formControlName="vmModel"
-        placeholder="New VM Model"
-        accept=".txt, .yaml, .yml, .jpg, .png, .jpeg"
+              formControlName="vmModel"
+              placeholder="New VM Model"
+              accept=".txt, .yaml, .yml, .jpg, .png, .jpeg"
       ></ngx-mat-file-input>
       <mat-icon matSuffix>folder</mat-icon>
     </mat-form-field>
@@ -48,10 +50,10 @@
       <mat-list-item *ngFor="let professor of professors | async">
         {{ displayFn(professor) }}
         <button
-          mat-button
-          color="warn"
-          *ngIf="professor.id !== currentProfessorId"
-          (click)="removeProfessor(professor)"
+                mat-button
+                color="warn"
+                *ngIf="professor.id !== currentProfessorId"
+                (click)="removeProfessor(professor)"
         >
           Remove
         </button>
@@ -60,18 +62,18 @@
     <mat-form-field>
       <mat-label>Add Professor</mat-label>
       <input
-        matInput
-        type="search"
-        placeholder="Add Professor (search by surname)"
-        aria-label="Number"
-        value=""
-        [formControl]="addProfessorControl"
-        [matAutocomplete]="auto"
+              matInput
+              type="search"
+              placeholder="Add Professor (search by surname)"
+              aria-label="Number"
+              value=""
+              [formControl]="addProfessorControl"
+              [matAutocomplete]="auto"
       />
       <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
         <mat-option
-          *ngFor="let option of filteredProfessors | async"
-          [value]="option"
+                *ngFor="let option of filteredProfessors | async"
+                [value]="option"
         >
           {{ displayFn(option) }}
         </mat-option>
