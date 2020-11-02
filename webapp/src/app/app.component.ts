@@ -12,9 +12,7 @@ import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
-import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
-import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +22,6 @@ import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.componen
 export class AppComponent {
   currentUser: User; // Variable to keep track of the current user
   courseList: Observable<Course[]>; // Variable to keep track (asynchronously) of the courses
-  inModal: boolean; // Variable to check if a modal is already open
   course: Course;
 
   // Unsubscribes are not performed here since alive till this root component is always alive and must be updated
@@ -42,8 +39,6 @@ export class AppComponent {
       this.currentUser = user;
       this.refreshCourses();
     });
-
-    this.inModal = false;
 
     // Subscribe to Broadcaster selected course subject
 
@@ -65,17 +60,7 @@ export class AppComponent {
     );
 
     this.route.queryParams.subscribe((queryParam) =>
-      queryParam && queryParam.addAssignment ? this.newAssignment() : null
-    );
-
-    this.route.queryParams.subscribe((queryParam) =>
       queryParam && queryParam.editCourse ? this.editCourse() : null
-    );
-
-    this.route.queryParams.subscribe((queryParam) =>
-      queryParam && queryParam.solution
-        ? this.uploadsDialog(queryParam.solution)
-        : null
     );
   }
 
@@ -88,10 +73,10 @@ export class AppComponent {
    *  or not.
    */
   openLogin() {
-    this.inModal = true;
     const dialogRef = this.dialog.open(LoginDialogComponent, {
       width: '20%',
     });
+    const previousUrl = this.router.url;
     dialogRef
       .afterClosed()
       .pipe(first())
@@ -100,18 +85,17 @@ export class AppComponent {
           this.router.navigate([
             this.route.snapshot.queryParams.returnUrl || '/home',
           ]);
-        } else {
+        } else if (this.router.url === previousUrl) {
           this.router.navigate(['/home']);
         }
-        this.inModal = false;
       });
   }
 
   openRegister() {
-    this.inModal = true;
     const dialogRef = this.dialog.open(RegisterDialogComponent, {
       width: '25%',
     });
+    const previousUrl = this.router.url;
     dialogRef
       .afterClosed()
       .pipe(first())
@@ -120,15 +104,13 @@ export class AppComponent {
           this.router.navigate([
             this.route.snapshot.queryParams.returnUrl || '/home',
           ]);
-        } else {
+        } else if (this.router.url === previousUrl) {
           this.router.navigate(['/home']);
         }
-        this.inModal = false;
       });
   }
 
   newCourse() {
-    this.inModal = true;
     const dialogRef = this.dialog.open(NewCourseDialogComponent, {
       width: '25%',
     });
@@ -142,35 +124,10 @@ export class AppComponent {
         } else {
           this.router.navigate([this.router.url.split('?')[0]]);
         }
-        this.inModal = false;
-      });
-  }
-
-  newAssignment() {
-    this.inModal = true;
-    const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
-      width: '25%',
-    });
-    dialogRef
-      .afterClosed()
-      .pipe(first())
-      .subscribe((result) => {
-        if (result) {
-          this.router.navigate(
-            [`/professor/courses/${this.course.acronym}/assignments`],
-            { queryParams: { refreshAssignments: true } }
-          );
-        } else {
-          this.router.navigate([
-            `/professor/courses/${this.course.acronym}/assignments`,
-          ]);
-        }
-        this.inModal = false;
       });
   }
 
   editCourse() {
-    this.inModal = true;
     const dialogRef = this.dialog.open(EditCourseDialogComponent);
     dialogRef
       .afterClosed()
@@ -185,7 +142,6 @@ export class AppComponent {
         } else {
           this.router.navigate([this.router.url.split('?')[0]]);
         }
-        this.inModal = false;
       });
   }
 
@@ -212,43 +168,9 @@ export class AppComponent {
    *  the user is redirected to the webservice root
    */
   logout() {
+    this.dialog.closeAll();
     this.authService.logout();
     this.course = null;
     this.router.navigate(['/home']);
-  }
-
-  courseStatusChanged(status: boolean) {
-    if (status === this.course.enabled) {
-      return;
-    }
-    this.courseService
-      .changeCourseStatus(status)
-      .pipe(first())
-      .subscribe((x) => {
-        this.course.enabled = x;
-        this.refreshCourses();
-      });
-  }
-
-  private uploadsDialog(id: number) {
-    this.inModal = true;
-    const dialogRef = this.dialog.open(UploadsDialogComponent, {
-      width: '75%',
-      data: { id },
-    });
-    dialogRef
-      .afterClosed()
-      .pipe(first())
-      .subscribe((res) => {
-        this.inModal = false;
-        if (res) {
-          this.router.navigate(
-              [`/professor/courses/${this.course.acronym}/assignments`],
-              { queryParams: { refreshAssignments: true } }
-          );
-        } else {
-          this.router.navigate([this.router.url.split('?')[0]]);
-        }
-      });
   }
 }

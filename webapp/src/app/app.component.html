@@ -3,12 +3,10 @@
   <button
     mat-icon-button
     aria-label="Menu icon"
-    [disabled]="inModal"
-    (click)="sidebar.toggle()"
-  >
+    (click)="sidebar.toggle()">
     <mat-icon>menu</mat-icon>
   </button>
-  <button mat-button [disabled]="inModal" [routerLink]="['/home']">
+  <button mat-button (click)="dialog.closeAll()" [routerLink]="['/home']">
     <h2>VirtualLabs</h2>
   </button>
 
@@ -18,7 +16,7 @@
     <button
       mat-button
       routerLink="/home"
-      [disabled]="inModal"
+      (click)="dialog.closeAll()"
       [queryParams]="{ doLogin: true }"
     >
       Login
@@ -26,7 +24,7 @@
     <button
       mat-button
       routerLink="/home"
-      [disabled]="inModal"
+      (click)="dialog.closeAll()"
       [queryParams]="{ doRegister: true }"
     >
       Register
@@ -35,7 +33,6 @@
   <ng-template #elseBlock>
     <button
       mat-button
-      [disabled]="inModal"
       (click)="logout()"
       *ngIf="currentUser"
     >
@@ -50,7 +47,6 @@
   <span class="example-fill-remaining-space"></span>
   <button
     mat-icon-button
-    [disabled]="inModal"
     aria-label="Example icon button with a gear icon"
     *ngIf="course && this.currentUser.roles.includes('ROLE_PROFESSOR')"
     [routerLink]=""
@@ -96,7 +92,6 @@
             aria-label="Example icon button with a + icon"
             style="font-size: 25px"
             [routerLink]=""
-            [disabled]="inModal"
             [queryParams]="{ addCourse: true }"
           >
             +
