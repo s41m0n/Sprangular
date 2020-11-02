@@ -44,7 +44,7 @@ export class NewAssignmentDialogComponent implements OnInit {
 
     this.courseService.createAssignment(formData).pipe(first()).subscribe((assignment) => {
       if (assignment) {
-        this.dialogRef.close(true);
+        this.dialogRef.close(assignment);
       }
     });
   }

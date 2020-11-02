@@ -13,6 +13,9 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AssignmentSolutionDetails} from '../../models/assignment-solution-details.model';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
 import {GradeDialogComponent} from '../../modals/grade-dialog/grade-dialog.component';
+import {ActivatedRoute, Router} from '@angular/router';
+import {UploadsDialogComponent} from '../../modals/uploads/uploads-dialog.component';
+import {NewAssignmentDialogComponent} from '../../modals/new-assignment/new-assignment-dialog.component';
 
 /**
  * AssignmentsComponent
@@ -48,7 +51,18 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
 
   constructor(public dialog: MatDialog,
               private assignmentService: AssignmentService,
-              private sanitizer: DomSanitizer) {
+              private sanitizer: DomSanitizer,
+              private router: Router,
+              private route: ActivatedRoute) {
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.solution
+            ? this.uploadsDialog(queryParam.solution)
+            : null
+    );
+
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.addAssignment ? this.newAssignment() : null
+    );
   }
 
   ngAfterViewInit() {
@@ -106,5 +120,39 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
         element.grade = res.grade;
       }
     });
+  }
+
+  private uploadsDialog(id: string) {
+    const dialogRef = this.dialog.open(UploadsDialogComponent, {
+      width: '75%',
+      data: { id },
+    });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((res) => {
+          if (res) {
+            const element = this.innerDataSource.data.find(e => e.id === Number.parseInt(id, 10));
+            element.status = res.status;
+            element.statusTs = res.timestamp;
+          }
+          this.router.navigate([this.router.url.split('?')[0]]);
+        });
+  }
+
+  newAssignment() {
+    const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
+      width: '25%',
+    });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.dataSource.data.push(result);
+            this.assignments = this.dataSource.data;
+          }
+          this.router.navigate([this.router.url.split('?')[0]]);
+        });
   }
 }

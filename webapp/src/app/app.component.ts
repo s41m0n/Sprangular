@@ -12,9 +12,7 @@ import { StudentService } from './services/student.service';
 import { ProfessorService } from './services/professor.service';
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
-import { NewAssignmentDialogComponent } from './modals/new-assignment/new-assignment-dialog.component';
 import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dialog.component';
-import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -62,17 +60,7 @@ export class AppComponent {
     );
 
     this.route.queryParams.subscribe((queryParam) =>
-      queryParam && queryParam.addAssignment ? this.newAssignment() : null
-    );
-
-    this.route.queryParams.subscribe((queryParam) =>
       queryParam && queryParam.editCourse ? this.editCourse() : null
-    );
-
-    this.route.queryParams.subscribe((queryParam) =>
-      queryParam && queryParam.solution
-        ? this.uploadsDialog(queryParam.solution)
-        : null
     );
   }
 
@@ -139,27 +127,6 @@ export class AppComponent {
       });
   }
 
-  newAssignment() {
-    const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
-      width: '25%',
-    });
-    dialogRef
-      .afterClosed()
-      .pipe(first())
-      .subscribe((result) => {
-        if (result) {
-          this.router.navigate(
-            [`/professor/courses/${this.course.acronym}/assignments`],
-            { queryParams: { refreshAssignments: true } }
-          );
-        } else {
-          this.router.navigate([
-            `/professor/courses/${this.course.acronym}/assignments`,
-          ]);
-        }
-      });
-  }
-
   editCourse() {
     const dialogRef = this.dialog.open(EditCourseDialogComponent);
     dialogRef
@@ -205,25 +172,5 @@ export class AppComponent {
     this.authService.logout();
     this.course = null;
     this.router.navigate(['/home']);
-  }
-
-  private uploadsDialog(id: number) {
-    const dialogRef = this.dialog.open(UploadsDialogComponent, {
-      width: '75%',
-      data: { id },
-    });
-    dialogRef
-      .afterClosed()
-      .pipe(first())
-      .subscribe((res) => {
-        if (res) {
-          this.router.navigate(
-              [`/professor/courses/${this.course.acronym}/assignments`],
-              { queryParams: { refreshAssignments: true } }
-          );
-        } else {
-          this.router.navigate([this.router.url.split('?')[0]]);
-        }
-      });
   }
 }
