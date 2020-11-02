@@ -131,14 +131,4 @@ public class NotificationServiceImpl implements NotificationService {
               "\n\nBest Regards,\nSpringExample Team");
     });
   }
-
-  @Scheduled(fixedDelay = 60 * 60 * 1000)
-  public void fixedTokenClear() {
-    Set<Long> teamIds = new HashSet<>();
-    proposalRepository.findAllByDeadlineAfter(new Timestamp(System.currentTimeMillis())).forEach(proposal -> {
-      teamIds.add(proposal.getTeamId());
-      proposalRepository.delete(proposal);
-    });
-    teamIds.forEach(team -> teamService.evictTeam(team));
-  }
 }

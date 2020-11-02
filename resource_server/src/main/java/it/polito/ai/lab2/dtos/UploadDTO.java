@@ -17,4 +17,6 @@ public class UploadDTO {
   String comment;
 
   AssignmentStatus status;
+
+  String author;
 }

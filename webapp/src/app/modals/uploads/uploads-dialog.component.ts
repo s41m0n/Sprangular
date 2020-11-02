@@ -16,7 +16,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 export class UploadsDialogComponent {
 
   dataSource = new MatTableDataSource<Upload>();
-  colsToDisplay = ['timestamp', 'comment', 'status', 'download'];
+  colsToDisplay = ['timestamp', 'author', 'comment', 'status', 'download'];
   edits = false;
 
   constructor(

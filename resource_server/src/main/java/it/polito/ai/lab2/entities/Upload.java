@@ -23,6 +23,8 @@ public class Upload {
   @Enumerated(EnumType.STRING)
   AssignmentStatus status;
 
+  String author;
+
   @ManyToOne
   @JoinColumn(name = "assignmentSolution_id")
   AssignmentSolution assignmentSolution;
