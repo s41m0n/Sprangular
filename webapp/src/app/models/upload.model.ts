@@ -6,7 +6,7 @@ export class Upload {
     timestamp: string;
     comment: string;
     status: AssignmentStatus;
-    author: string
+    author: string;
 
     constructor(id: number = 0,
                 imagePath: string = '',
