@@ -17,6 +17,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { TeamProposal } from '../../models/team-proposal.model';
 import { Student } from '../../models/student.model';
 import { Proposal } from '../../models/proposal.model';
+import * as moment from 'moment';
 
 /**
  * TabNoTeamComponent
@@ -29,6 +30,9 @@ import { Proposal } from '../../models/proposal.model';
   styleUrls: ['./tab-no-team.component.css'],
 })
 export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
+  minDate = moment(new Date()).format('YYYY-MM-DD');
+  maxDate = moment(this.minDate).add(9, 'M').format('YYYY-MM-DD');
+
   currentUser: Student;
   date: string = null;
   chosenMembers: Student[] = [];
@@ -67,14 +71,14 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   ngOnInit() {
     /** Setting filter to autocomplete */
     this.addStudentControl.valueChanges
-      .pipe(
-        takeUntil(this.destroy$),
-        // wait 300ms after each keystroke before considering the term
-        debounceTime(300),
-        // ignore new term if same as previous term
-        distinctUntilChanged()
-      )
-      .subscribe((name: string) => this.searchStudentsEvent.emit(name));
+        .pipe(
+            takeUntil(this.destroy$),
+            // wait 300ms after each keystroke before considering the term
+            debounceTime(300),
+            // ignore new term if same as previous term
+            distinctUntilChanged()
+        )
+        .subscribe((name: string) => this.searchStudentsEvent.emit(name));
   }
 
   ngOnDestroy() {
@@ -109,16 +113,16 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
     const deadlineDate = new Date(this.date);
     deadlineDate.setDate(deadlineDate.getDate() + 1);
     if (
-      this.teamNameControl.valid &&
-      this.chosenMembers.length &&
-      deadlineDate >= new Date()
+        this.teamNameControl.valid &&
+        this.chosenMembers.length &&
+        deadlineDate >= new Date()
     ) {
       this.submitTeamEvent.emit(
-        new TeamProposal(
-          this.teamNameControl.value,
-          this.chosenMembers.map((x) => x.id),
-          deadlineDate.getTime().toString(10)
-        )
+          new TeamProposal(
+              this.teamNameControl.value,
+              this.chosenMembers.map((x) => x.id),
+              deadlineDate.getTime().toString(10)
+          )
       );
       this.chosenMembers = [];
     }
@@ -132,9 +136,9 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
     return (
-      date.toLocaleDateString('en-GB') +
-      ' at ' +
-      date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        date.toLocaleDateString('en-GB') +
+        ' at ' +
+        date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
     );
   }
 
@@ -154,9 +158,9 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
 
   accepted(members: string[]): boolean {
     if (
-      members.includes(
-        `${this.currentUser.name} ${this.currentUser.surname} (${this.currentUser.id}) : ACCEPTED`
-      )
+        members.includes(
+            `${this.currentUser.name} ${this.currentUser.surname} (${this.currentUser.id}) : ACCEPTED`
+        )
     ) {
       return true;
     }

@@ -24,6 +24,8 @@
                    disabled
                    required
                    formControlName="date"
+                   [min]="minDate"
+                   [max]="maxDate"
                    [matDatepicker]="picker"
                    (dateChange)="selectDate($event.value.toString())"/>
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
