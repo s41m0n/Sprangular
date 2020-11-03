@@ -10,10 +10,8 @@ import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.CourseWithModelDetails;
 import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
-import it.polito.ai.lab2.repositories.CourseRepository;
-import it.polito.ai.lab2.repositories.ProfessorRepository;
-import it.polito.ai.lab2.repositories.StudentRepository;
-import it.polito.ai.lab2.repositories.VmModelRepository;
+import it.polito.ai.lab2.repositories.*;
+import it.polito.ai.lab2.utility.AssignmentStatus;
 import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +25,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +55,12 @@ public class CourseServiceImpl implements CourseService {
 
   @Autowired
   TeamService teamService;
+
+  @Autowired
+  AssignmentSolutionRepository assignmentSolutionRepository;
+
+  @Autowired
+  UploadRepository uploadRepository;
 
   @Override
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
@@ -271,6 +276,25 @@ public class CourseServiceImpl implements CourseService {
     }
     if (student.isVerified()) {
       student.addCourse(course);
+      Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+      course.getAssignments().stream()
+          .filter(a -> a.getDueDate().after(currentTs))
+          .forEach(a -> {
+            AssignmentSolution assignmentSolution = new AssignmentSolution();
+            assignmentSolution.setAssignment(a);
+            a.getSolutions().add(assignmentSolution);
+            assignmentSolution.setStudent(student);
+            assignmentSolution.setStatus(AssignmentStatus.NULL);
+            assignmentSolution.setStatusTs(currentTs);
+            assignmentSolutionRepository.save(assignmentSolution);
+            Upload upload = new Upload();
+            upload.setAuthor(SecurityContextHolder.getContext().getAuthentication().getName());
+            upload.setTimestamp(currentTs);
+            upload.setStatus(AssignmentStatus.NULL);
+            upload.setComment("Assignment published");
+            upload.setAssignmentSolution(assignmentSolution);
+            uploadRepository.save(upload);
+          });
       return true;
     }
     throw new UserNotVerifiedException("Student " + studentId + " is not verified");
