@@ -1,7 +1,7 @@
 <script src="../../modals/new-vm/new-vm.component.ts"></script>
 <script src="tab-expandend-assignment.component.ts"></script>
 <div class="container">
-    <h2>Next Assignments</h2>
+    <h2>Active Assignments</h2>
     <!-- Assignments -->
     <table mat-table [dataSource]="regularDataSource" class="mat-elevation-z8" multiTemplateDataRows>
 
@@ -78,7 +78,7 @@
         <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
     </table>
 
-    <h2 style="margin-top: 20px">Expired Assignments</h2>
+    <h2 style="margin-top: 20px">Expired and Definitive Assignments</h2>
     <table mat-table [dataSource]="expiredDataSource" class="mat-elevation-z8" multiTemplateDataRows>
 
         <ng-container matColumnDef="name">

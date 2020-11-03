@@ -7,7 +7,6 @@ import {StudentAssignmentDetails} from '../../models/student-assignment.details'
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import {DomSanitizer} from '@angular/platform-browser';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
 import {CourseService} from '../../services/course.service';
 
@@ -35,16 +34,19 @@ export class TabStudentAssignmentsComponent {
   assignmentUploads: Upload[];
 
   @Input() set assignments(assignments: StudentAssignmentDetails[]) {
-    this.regularDataSource.data = assignments.filter(assignment => Date.now() < Date.parse(assignment.dueDate));
-    this.expiredDataSource.data = assignments.filter(assignment => Date.now() > Date.parse(assignment.dueDate));
+    this.regularDataSource.data = assignments.filter(
+        assignment => (Date.now() < Date.parse(assignment.dueDate) && assignment.status !== AssignmentStatus.DEFINITIVE)
+        || assignment.status === AssignmentStatus.REVIEWED_UPLOADABLE);
+    this.expiredDataSource.data = assignments.filter(
+        assignment => (Date.now() >= Date.parse(assignment.dueDate) || assignment.status === AssignmentStatus.DEFINITIVE)
+        && assignment.status !== AssignmentStatus.REVIEWED_UPLOADABLE);
   }
 
   expandedElement: StudentAssignmentDetails | null;
 
   constructor(private assignmentService: AssignmentAndUploadService,
               private courseService: CourseService,
-              public dialog: MatDialog,
-              private sanitizer: DomSanitizer) {
+              public dialog: MatDialog) {
   }
 
   showUploads(element) {

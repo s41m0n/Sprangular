@@ -94,7 +94,7 @@ public class SprangularBackend {
       // TODO: test!
       // Assignment delivery management
       List<AssignmentSolution> assignmentSolutions = assignmentSolutionRepository.findAllByStatusIn(
-          Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ));
+          Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ, AssignmentStatus.REVIEWED_UPLOADABLE));
       Set<Long> programmed = new HashSet<>();
       assignmentSolutions.forEach(assignmentSolution -> {
         if (assignmentSolution.getAssignment().getDueDate().before(new Timestamp(System.currentTimeMillis()))) {
@@ -106,7 +106,7 @@ public class SprangularBackend {
           upload.setAuthor(assignmentSolution.getStudent().getId());
           upload.setTimestamp(currentTs);
           upload.setStatus(AssignmentStatus.DELIVERED);
-          upload.setComment("Assignment published");
+          upload.setComment("Assignment automatically delivered");
           upload.setAssignmentSolution(assignmentSolution);
           uploadRepository.save(upload);
           assignmentSolutionRepository.save(assignmentSolution);
@@ -118,8 +118,16 @@ public class SprangularBackend {
             Assignment assignment = assignmentSolution.getAssignment();
             Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
                 solution -> {
+                  Timestamp currentTs = new Timestamp(System.currentTimeMillis());
                   solution.setStatus(AssignmentStatus.DELIVERED);
-                  solution.setStatusTs(new Timestamp(System.currentTimeMillis()));
+                  solution.setStatusTs(currentTs);
+                  Upload upload = new Upload();
+                  upload.setAuthor(assignmentSolution.getStudent().getId());
+                  upload.setTimestamp(currentTs);
+                  upload.setStatus(AssignmentStatus.DELIVERED);
+                  upload.setComment("Assignment automatically delivered");
+                  upload.setAssignmentSolution(assignmentSolution);
+                  uploadRepository.save(upload);
                   assignmentSolutionRepository.save(solution);
                 }
             );

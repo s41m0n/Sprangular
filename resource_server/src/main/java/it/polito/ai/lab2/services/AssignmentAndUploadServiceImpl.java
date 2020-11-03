@@ -207,7 +207,7 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
           upload.setAuthor(assignmentSolution.getStudent().getId());
           upload.setTimestamp(innerCurrentTs);
           upload.setStatus(AssignmentStatus.DELIVERED);
-          upload.setComment("Assignment delivered");
+          upload.setComment("Assignment automatically delivered");
           upload.setAssignmentSolution(assignmentSolution);
           uploadRepository.save(upload);
         }
