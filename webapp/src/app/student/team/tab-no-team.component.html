@@ -2,6 +2,8 @@
   <!-- Add student input field with autocomplete -->
   <div class="container part1">
     <h2>Pick colleagues to forge your team</h2>
+    <p>Minimum members limit = {{course ? course.teamMinSize : ''}}</p>
+    <p>Maximum members limit = {{course ? course.teamMaxSize : ''}}</p>
     <mat-form-field style="width: 40%">
       <mat-label>Add Student</mat-label>
       <input
@@ -9,7 +11,6 @@
         type="search"
         placeholder="Add Student (search by surname)"
         aria-label="Number"
-        matInput
         value=""
         [formControl]="addStudentControl"
         [matAutocomplete]="auto"
@@ -32,7 +33,9 @@
       <ng-container matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
-          <button mat-button color="primary" (click)="addWishMember(row)">
+          <button mat-button color="primary"
+                  (click)="addWishMember(row)"
+                  *ngIf="isPickable(row.id)">
             Pick
           </button>
         </td>
