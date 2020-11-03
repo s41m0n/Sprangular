@@ -8,18 +8,15 @@
 export class VmModel {
   id: number;
   name: string;
-  path: string;
-  courseId: number;
+  courseId: string;
 
-  constructor(id: number = 0, name: string = '', path: string = '', courseId: number) {
+  constructor(id: number = 0, name: string = '', courseId: string) {
     this.id = id;
     this.name = name;
-    this.path = path;
     this.courseId = courseId;
   }
 
   static displayFn(model: VmModel): string {
     return model.name + ' (' + model.id + ')';
   }
-
 }

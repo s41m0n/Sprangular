@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)

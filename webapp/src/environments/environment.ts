@@ -2,23 +2,27 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import {HttpHeaders} from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 
-const BASE_API = '/api';
+const BASE_API = '/API';
 
 export const environment = {
   production: false,
   base_api_url: BASE_API,
+  base_vms_url: `${BASE_API}/vms`,
   base_courses_url: `${BASE_API}/courses`,
   base_students_url: `${BASE_API}/students`,
   base_professors_url: `${BASE_API}/professors`,
   base_teams_url: `${BASE_API}/teams`,
-  base_vms_url: `${BASE_API}/vms`,
-  base_vm_models_url: `${BASE_API}/vmmodels`,
   base_assignments_url: `${BASE_API}/assignments`,
-  login_url: `${BASE_API}/login`,
-  register_url: `${BASE_API}/register`,
-  base_http_headers: {headers: new HttpHeaders({'Content-Type': 'application/json'})} // Header to be used in POST/PUT
+  base_assignmentSolutions_url: `${BASE_API}/assignmentSolutions`,
+  base_uploads_url: `${BASE_API}/uploads`,
+  login_url: `${BASE_API}/authentication/login`,
+  register_url: `${BASE_API}/authentication/register`,
+  confirm_url: `${BASE_API}/authentication/`,
+  base_http_headers: {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+  } // Header to be used in POST/PUT
 };
 
 /*

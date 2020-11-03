@@ -1,9 +1,12 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {VM} from '../../models/vm.model';
-import {Course} from '../../models/course.model';
-import {CourseService} from '../../services/course.service';
-import {first, takeUntil} from 'rxjs/operators';
-import {Subject} from 'rxjs';
+import { Component } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { VM } from '../../models/vm.model';
+import { CourseService } from '../../services/course.service';
+import { first } from 'rxjs/operators';
+import { VmService } from 'src/app/services/vm.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ImageViewerDialogComponent } from 'src/app/modals/image-viewer/image-viewer-dialog.component';
+import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 
 /**
  * VmsContainer
@@ -12,41 +15,60 @@ import {Subject} from 'rxjs';
  */
 @Component({
   selector: 'app-tab-professor-vms-cont',
-  templateUrl: './tab-vms.container.html'
+  templateUrl: './tab-vms.container.html',
 })
-export class TabProfessorVmsContComponent implements OnInit, OnDestroy {
+export class TabProfessorVmsContComponent {
+  vmBundle: VmProfessorDetails[] = []; // The current vms
 
-  private course: Course;                                      // The current selected course
-  vms: VM[] = [];                             // The current vms
-  private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
-
-  constructor(private courseService: CourseService) {
+  constructor(
+    public dialog: MatDialog,
+    private courseService: CourseService,
+    private vmService: VmService
+  ) {
+    this.refreshVmList();
   }
 
-  ngOnInit(): void {
-    // Subscribe to the Broadcaster course selected, to update the current rendered course
-    this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
-      this.course = course;
-      this.refreshAssignments();
-    });
+  refreshVmList() {
+    this.courseService
+      .getCourseVMs(this.courseService.currentCourseSubject.value)
+      .pipe(first())
+      .subscribe((vms) => (this.vmBundle = vms));
   }
 
-  ngOnDestroy() {
-    /** Destroying subscription */
-    this.destroy$.next(true);
-    this.destroy$.unsubscribe();
+  wipeVm(vmId: number) {
+    this.vmService
+      .removeVm(vmId)
+      .pipe(first())
+      .subscribe(() => this.refreshVmList());
   }
 
-
-  /** Private function to refresh the list of enrolled students */
-  private refreshAssignments() {
-    // Check if already received the current course
-    if (!this.course) {
-      this.vms = [];
-      return;
-    }
-    this.courseService.getCourseVMs(this.course).pipe(first()).subscribe(vms => this.vms = vms);
+  triggerVm(event: any) {
+    this.vmService
+      .triggerVm(event.vmId, this.vmBundle.find((vdp) => vdp.team.id === event.teamId).vms
+          .find(vm => vm.id === event.vmId).active)
+      .pipe(first())
+      .subscribe(() => this.refreshVmList());
   }
 
+  connect(vm: VM) {
+    this.vmService
+      .getInstance(vm.id)
+      .pipe(first())
+      .subscribe((instance) => {
+        if (!instance) {
+          return;
+        }
+        const url = URL.createObjectURL(instance);
+        const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+          data: {
+            title: `VM: ${vm.id} - ${vm.name}`,
+            imageSrc: url,
+            downloadable: false
+          },
+        });
+        dialogRef.afterClosed().subscribe(() => {
+          URL.revokeObjectURL(url);
+        });
+      });
+  }
 }
-

@@ -1,4 +1,4 @@
-import {Professor} from './professor.model';
+import { Professor } from './professor.model';
 
 /**
  * Model for Course resource
@@ -8,16 +8,23 @@ import {Professor} from './professor.model';
  * @param(path) the path of the course (remote path)
  */
 export class Course {
-  id: number;
+  acronym: string; // id
   name: string;
-  path: string;
-  professorId: number;
-  professor?: Professor;
+  teamMinSize: number;
+  teamMaxSize: number;
+  enabled: boolean;
 
-  constructor(id: number = 0, name: string = '', path: string = '', professorId: number = 0) {
-    this.id = id;
+  constructor(
+    acronym: string,
+    name: string,
+    teamMinSize: number,
+    teamMaxSize: number,
+    enabled: boolean
+  ) {
+    this.acronym = acronym;
     this.name = name;
-    this.path = path;
-    this.professorId = professorId;
+    this.teamMinSize = teamMinSize;
+    this.teamMaxSize = teamMaxSize;
+    this.enabled = enabled;
   }
 }

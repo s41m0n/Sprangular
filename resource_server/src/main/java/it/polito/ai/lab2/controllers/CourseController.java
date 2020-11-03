@@ -2,10 +2,7 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
-import it.polito.ai.lab2.pojos.AssignmentDetails;
-import it.polito.ai.lab2.pojos.TeamProposalRequest;
-import it.polito.ai.lab2.pojos.UpdateCourseDetails;
-import it.polito.ai.lab2.pojos.VmModelDetails;
+import it.polito.ai.lab2.pojos.*;
 import it.polito.ai.lab2.services.*;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
@@ -59,19 +56,6 @@ public class CourseController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course `" + courseId + "` does not exist"));
   }
 
-  @GetMapping("/{courseId}/enrolled")
-  public List<StudentDTO> enrolledStudents(@PathVariable String courseId) {
-    log.info("enrolledStudents(" + courseId + ") called");
-    try {
-      return courseService.getEnrolledStudents(courseId)
-          .stream()
-          .map(ModelHelper::enrich)
-          .collect(Collectors.toList());
-    } catch (CourseNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
   @GetMapping("/{courseId}/professors")
   public List<ProfessorDTO> getProfessors(@PathVariable String courseId) {
     log.info("getProfessor(" + courseId + ") called");
@@ -98,12 +82,18 @@ public class CourseController {
   }
 
   @GetMapping("/{courseId}/availableStudents")
-  public List<StudentDTO> getAvailableStudents(@PathVariable String courseId) {
+  public List<StudentDTO> getAvailableStudents(@PathVariable String courseId, @RequestParam(required = false, name = "surname_like") String pattern) {
     log.info("getAvailableStudents(" + courseId + ") called");
     try {
-      return teamService.getAvailableStudents(courseId).stream()
-          .map(ModelHelper::enrich)
-          .collect(Collectors.toList());
+      if (pattern == null || pattern.isEmpty()) {
+        return teamService.getAvailableStudents(courseId).stream()
+            .map(ModelHelper::enrich)
+            .collect(Collectors.toList());
+      } else {
+        return teamService.getAvailableStudentsLike(courseId, pattern).stream()
+            .map(ModelHelper::enrich)
+            .collect(Collectors.toList());
+      }
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
@@ -130,25 +120,27 @@ public class CourseController {
   }
 
   @PostMapping({"", "/"})
-  public CourseDTO add(@RequestBody CourseDTO courseDTO) {
-    log.info("add(" + courseDTO + ") called");
+  public CourseDTO add(@ModelAttribute CourseWithModelDetails courseDTO) {
     try {
-      if (!courseService.addCourse(courseDTO))
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Course " + courseDTO.getAcronym() + " already exists");
-      return ModelHelper.enrich(courseDTO);
+      return ModelHelper.enrich(courseService.addCourse(courseDTO));
+    } catch (DuplicatedCourseException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+    } catch (TeamSizesNotCoherentException e ) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     } catch (DataIntegrityViolationException e) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "A course with the same name (" + courseDTO.getName() + ") already exists");
     }
   }
 
-  @PutMapping("/{courseId}/enabled")
-  public void enableDisable(@PathVariable String courseId, @RequestBody Map<String, Boolean> reqBody) {
+  @PutMapping("/{courseId}/toggle")
+  public boolean enableDisable(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
     log.info("enableDisable(" + courseId + ", " + reqBody + ") called");
-    Boolean enable = reqBody.get("enabled");
-    if (enable == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "enabled {true,false} required");
+    String enable = reqBody.get("enabled");
+    if (!enable.equals("true") && !enable.equals("false"))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "enabled {true,false} required");
     try {
-      if (enable) courseService.enableCourse(courseId);
-      else courseService.disableCourse(courseId);
+      if (Boolean.parseBoolean(enable)) return courseService.enableCourse(courseId);
+      else return courseService.disableCourse(courseId);
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (CourseProfessorNotAssigned e) {
@@ -215,28 +207,18 @@ public class CourseController {
     }
   }
 
-  @PostMapping("/{courseId}/vmModel")
-  public VmModelDTO createVmModel(@PathVariable String courseId, @RequestBody VmModelDetails vmModelDetails) {
+  @GetMapping("/{courseId}/students")
+  public List<StudentWithTeamDetails> getStudentsOfCourse(@PathVariable String courseId, @RequestParam(required = false, name = "surname_like") String pattern) {
+    log.info("getStudents() called");
     try {
-      return vmService.createVmModel(vmModelDetails, courseId);
-    } catch (CourseNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (VmModelAlreadyPresentException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-    }
-  }
-
-  @PutMapping("/{courseId}/vmModel")
-  public VmModelDTO updateVmModel(@PathVariable String courseId, @RequestBody VmModelDetails vmModelDetails) {
-    try {
-      return vmService.updateVmModel(vmModelDetails, courseId);
+        return courseService.getStudentsOfCourse(courseId, pattern);
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }
 
   @GetMapping("/{courseId}/vms")
-  public List<VmDTO> getVmsOfCourse(@PathVariable String courseId) {
+  public List<VmProfessorDetails> getVmsOfCourse(@PathVariable String courseId) {
     try {
       return vmService.getVmsOfCourse(courseId);
     } catch (CourseNotFoundException e) {
@@ -248,7 +230,20 @@ public class CourseController {
   public StudentDTO removeStudentFromCourse(@PathVariable String courseId, @RequestBody Map<String, String> reqBody) {
     try {
       String studentId = reqBody.get("studentId");
+      log.info("removeStudentFromCourse(" + studentId + ", " + courseId + ") called");
       return courseService.removeStudentFromCourse(studentId, courseId);
+    } catch (StudentNotFoundException | CourseNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (StudentNotInCourseException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  @PutMapping("/{courseId}/removeStudents")
+  public List<StudentDTO> removeStudentsFromCourse(@PathVariable String courseId, @RequestBody List<String> reqBody) {
+    try {
+      log.info("removeStudentsFromCourse(" + courseId + ") called");
+      return courseService.removeStudentsFromCourse(reqBody, courseId);
     } catch (StudentNotFoundException | CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (StudentNotInCourseException e) {
@@ -278,15 +273,13 @@ public class CourseController {
   }
 
   @PutMapping("/{courseId}")
-  public CourseDTO updateCourse(@PathVariable String courseId, @RequestBody UpdateCourseDetails updateCourseDetails) {
+  public CourseDTO updateCourse(@PathVariable String courseId, @ModelAttribute CourseWithModelDetails courseDTO) {
     try {
-      CourseDTO c = courseService.updateCourse(courseId, updateCourseDetails);
-      if (c == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TeamMaxSize has to be greater than TeamMinSize");
-      }
-      return c;
+      return ModelHelper.enrich(courseService.updateCourse(courseId, courseDTO));
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (CannotUpdateCourseException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 
@@ -299,9 +292,19 @@ public class CourseController {
     }
   }
 
+  @GetMapping("/{courseId}/studentAssignments")
+  public List<StudentAssignmentDetails> getStudentAssignments(@PathVariable String courseId) {
+    try {
+      return assAndUploadService.getStudentAssignmentsDetails(courseId);
+    } catch (CourseNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
   @PostMapping("/{courseId}/assignments")
-  public AssignmentDTO getSolutionsForAssignment(@PathVariable String courseId,
+  public AssignmentDTO createAssignmentForCourse(@PathVariable String courseId,
                                                  @ModelAttribute AssignmentDetails assignmentDetails) {
+    log.info("createAssignmentForCourse() called");
     try {
       return assAndUploadService.createAssignment(assignmentDetails, courseId,
           SecurityContextHolder.getContext().getAuthentication().getName());

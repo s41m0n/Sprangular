@@ -1,10 +1,16 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
-import {MatTableDataSource} from '@angular/material/table';
-
-import {VM} from '../../models/vm.model';
-import {VmOptionsModalComponent} from '../../modals/vm-options-modal/vm-options-modal.component';
-import {MatDialog} from '@angular/material/dialog';
-import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
+import { VM } from '../../models/vm.model';
+import { MatDialog } from '@angular/material/dialog';
+import { NewVmDialogComponent } from '../../modals/new-vm/new-vm.component';
+import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
+import {first} from 'rxjs/operators';
+import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 
 /**
  * VmsComponent
@@ -13,72 +19,67 @@ import {NewVmComponent} from '../../modals/new-vm/new-vm.component';
  */
 @Component({
   selector: 'app-tab-professor-vms',
-  templateUrl: './tab-vms.component.html'
+  templateUrl: './tab-vms.component.html',
+  styleUrls: ['./tab-vms.component.css'],
 })
 export class TabProfessorVmsComponent implements AfterViewInit {
+  dataSources: VmProfessorDetails[];
 
-  dataSource = new MatTableDataSource<VM>();                     // Table datasource dynamically modified
-  @Input() set vms(vms: VM[]) {              // VMs to be displayed in the table
-    this.dataSource.data = vms;
+  @Input() set vms(vms: VmProfessorDetails[]) {
+    this.dataSources = vms;
   }
+  @Output() wipeVmEvent = new EventEmitter<number>();
+  @Output() connectVmEvent = new EventEmitter<VM>();
+  @Output() triggerVmEvent = new EventEmitter<{teamId: number, vmId: number}>();
+  @Output() refreshVmList = new EventEmitter();
 
-  constructor(public dialog: MatDialog) {
-  }
+  constructor(public dialog: MatDialog) {}
 
-  ngAfterViewInit() {
-  }
+  ngAfterViewInit() {}
 
-  openDialog(id: number): void {
-    const selectedVm = this.dataSource.data.find(vm => vm.id === id);
-    const index = this.dataSource.data.findIndex(vm => vm === selectedVm);
-    const dialogRef = this.dialog.open(VmOptionsModalComponent, {
-      width: '300px',
-      data: {vCpu: selectedVm.vCpu, ram: selectedVm.ram, disk: selectedVm.disk}
+  openDialogTeamOption(vpd: VmProfessorDetails): void {
+    const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
+      data: {
+        teamId: vpd.team.id,
+        maxTotalInstances: vpd.team.maxTotalInstances,
+        currentMaxTotalInstances: vpd.vms.length,
+        maxActiveInstances: vpd.team.maxActiveInstances,
+        currentMaxActiveInstances: vpd.vms.filter((vm) => vm.active).length,
+        maxVCpu: vpd.team.maxVCpu,
+        currentMaxVCpu: vpd.vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0),
+        maxRam: vpd.team.maxRam,
+        currentMaxRam: vpd.vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0),
+        maxDiskStorage: vpd.team.maxDiskStorage,
+        currentMaxDiskStorage: vpd.vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0)
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('The dialog was closed', result);
-        selectedVm.vCpu = Number(result.vCpu);
-        selectedVm.ram = Number(result.ram);
-        selectedVm.disk = Number(result.disk);
-        this.dataSource.data[index] = selectedVm;
-        // TODO - da pushare la modifica
-      }
-    });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.refreshVmList.emit();
+          }
+        });
   }
 
   killVm(id: number) {
-    console.log('Method to implent');
+    this.wipeVmEvent.emit(id);
   }
 
-  connectToVm(id: number) {
-    console.log('Method to implement');
+  connectToVm(vm: VM) {
+    this.connectVmEvent.emit(vm);
+  }
+
+  triggerVm(teamId: number, vmId: number) {
+    this.triggerVmEvent.emit({teamId, vmId});
   }
 
   newVm() {
-    const newVmDialog = this.dialog.open(NewVmComponent, {
+    const newVmDialog = this.dialog.open(NewVmDialogComponent, {
       width: '300px',
-      data: {teams: ['aggiungere', 'dati'], courses: ['aggiungere', 'dati']}
-    });
-
-    newVmDialog.afterClosed().subscribe(result => {
-      if (result) {
-        console.log('The dialog was closed', result);
-        const vm = new VM(
-            // TODO - l'id dove lo prendiamo?
-            100,
-            result.vmName,
-            result.vmPath,
-            new Date().toDateString(),
-            Number(result.vmVCpu),
-            Number(result.vmRam),
-            Number(result.vmDisk)
-        );
-        vm.team = result.vmTeam;
-        this.dataSource.data.push(vm);
-      }
-      // TODO - pushare la nuova vm sul db
+      data: { teams: ['aggiungere', 'dati'], courses: ['aggiungere', 'dati'] },
     });
   }
 }

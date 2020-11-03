@@ -1,46 +1,108 @@
 <!-- First toolbar with menu icon and app name -->
-<mat-toolbar color='primary' class="header">
-    <button mat-icon-button aria-label="Menu icon" (click)="sidebar.toggle()">
-        <mat-icon>menu</mat-icon>
+<mat-toolbar color="primary" class="header">
+  <button
+    mat-icon-button
+    aria-label="Menu icon"
+    (click)="sidebar.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <button mat-button (click)="dialog.closeAll()" [routerLink]="['/home']">
+    <h2>VirtualLabs</h2>
+  </button>
+
+  <span class="example-fill-remaining-space"></span>
+  <span *ngIf="currentUser">Welcome back, {{ currentUser.id }}</span>
+  <div *ngIf="!currentUser; else elseBlock">
+    <button
+      mat-button
+      routerLink="/home"
+      (click)="dialog.closeAll()"
+      [queryParams]="{ doLogin: true }"
+    >
+      Login
     </button>
-    <a mat-button [routerLink]="['/']"><h2>VirtualLabs</h2></a>
-
-    <span class="example-fill-remaining-space"></span>
-    <span *ngIf="currentUser">Welcome back, {{currentUser.email}}</span>
-    <div *ngIf="!currentUser; else elseBlock">
-        <button mat-button (click)="openLogin()">Login</button>
-        <button mat-button (click)="openRegister()">Register</button>
-    </div>
-    <ng-template #elseBlock>
-        <button mat-button (click)="logout()" *ngIf="currentUser">Logout</button>
-    </ng-template>
+    <button
+      mat-button
+      routerLink="/home"
+      (click)="dialog.closeAll()"
+      [queryParams]="{ doRegister: true }"
+    >
+      Register
+    </button>
+  </div>
+  <ng-template #elseBlock>
+    <button
+      mat-button
+      (click)="logout()"
+      *ngIf="currentUser"
+    >
+      Logout
+    </button>
+  </ng-template>
 </mat-toolbar>
-
 
 <!-- Second toolbar with current selected course name -->
 <mat-toolbar class="subheader">
-    Course: {{selectedCourseName || '❓'}}
+  Course: {{ course ? course.name : '❓' }}
+  <span class="example-fill-remaining-space"></span>
+  <button
+    mat-icon-button
+    aria-label="Example icon button with a gear icon"
+    *ngIf="course && this.currentUser.roles.includes('ROLE_PROFESSOR')"
+    [routerLink]=""
+    [queryParams]="{ editCourse: true }"
+  >
+    <mat-icon>settings</mat-icon>
+  </button>
 </mat-toolbar>
 
 <!-- Application views area -->
-<mat-sidenav-container [autosize]="true">
-
-    <!-- Left sidenav to choose current view course -->
-    <mat-sidenav #sidebar class="navbar" mode="side" opened="true" position="start">
-        <div class="container">
-            <mat-nav-list>
-                <h3 matSubheader>Your available courses &nbsp;</h3>
-                <mat-divider></mat-divider>
-                <mat-list-item *ngFor="let course of courseList | async"
-                               [routerLink]="[currentUser.role + '/course/' + course.path]">
-                    {{course.name}}
-                </mat-list-item>
-            </mat-nav-list>
+<mat-sidenav-container>
+  <!-- Left sidenav to choose current view course -->
+  <mat-sidenav
+    #sidebar
+    class="navbar"
+    mode="side"
+    opened="true"
+    position="start"
+  >
+    <div class="container">
+      <mat-nav-list>
+        <h3 matSubheader style="margin: auto">
+          Your available courses: &nbsp;
+        </h3>
+        <mat-divider></mat-divider>
+        <mat-list-item
+          *ngFor="let course of courseList | async"
+          [ngClass]="course.enabled ? 'enabled' : 'disabled'"
+          [routerLink]="[
+            currentUser.roles[0].toLowerCase().replace('role_', '') +
+              '/courses/' +
+              course.acronym
+          ]"
+          >{{ course.name }}
+        </mat-list-item>
+        <div
+          *ngIf="currentUser && currentUser.roles[0] === 'ROLE_PROFESSOR'"
+          class="plus-button-container"
+        >
+          <button
+            mat-fab
+            color="primary"
+            aria-label="Example icon button with a + icon"
+            style="font-size: 25px"
+            [routerLink]=""
+            [queryParams]="{ addCourse: true }"
+          >
+            +
+          </button>
         </div>
-    </mat-sidenav>
+      </mat-nav-list>
+    </div>
+  </mat-sidenav>
 
-    <!-- Current view content -->
-    <mat-sidenav-content>
-        <router-outlet></router-outlet>
-    </mat-sidenav-content>
+  <!-- Current view content -->
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
 </mat-sidenav-container>

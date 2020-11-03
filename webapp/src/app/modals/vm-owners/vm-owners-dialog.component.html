@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Add an owner to the VM</h1>
+
+<div mat-dialog-content>
+
+    <ul>
+      <li *ngFor="let student of members">
+        <button mat-button [color]="selectColor(student.id)"
+                (click)="dialogRef.close(student.id)">{{student.surname + " " + student.name}}</button>
+      </li>
+    </ul>
+
+</div>
+
+<div mat-dialog-actions style="justify-content: center">
+    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+</div>

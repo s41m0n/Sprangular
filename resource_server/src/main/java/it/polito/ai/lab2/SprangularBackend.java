@@ -1,7 +1,9 @@
 package it.polito.ai.lab2;
 
-import it.polito.ai.lab2.entities.Role;
-import it.polito.ai.lab2.repositories.RoleRepository;
+import it.polito.ai.lab2.entities.*;
+import it.polito.ai.lab2.repositories.*;
+import it.polito.ai.lab2.utility.AssignmentStatus;
+import it.polito.ai.lab2.utility.ProposalStatus;
 import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
@@ -10,10 +12,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.TaskScheduler;
 
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Log
 @SpringBootApplication
@@ -21,6 +26,21 @@ public class SprangularBackend {
 
   @Autowired
   RoleRepository roleRepository;
+
+  @Autowired
+  ProposalRepository proposalRepository;
+
+  @Autowired
+  TeamRepository teamRepository;
+
+  @Autowired
+  TaskScheduler scheduler;
+
+  @Autowired
+  AssignmentSolutionRepository assignmentSolutionRepository;
+
+  @Autowired
+  UploadRepository uploadRepository;
 
   @Bean
   ModelMapper modelMapper() {
@@ -43,25 +63,79 @@ public class SprangularBackend {
         log.info("Uploads directory already exists");
       }
 
-      // Insert roles in the DB
-      if (!roleRepository.existsByName(Utility.ADMIN_ROLE)) {
-        log.info("Creating Role " + Utility.ADMIN_ROLE);
-        Role role = new Role();
-        role.setName(Utility.ADMIN_ROLE);
-        roleRepository.save(role);
-      }
-      if (!roleRepository.existsByName(Utility.PROFESSOR_ROLE)) {
-        log.info("Creating Role " + Utility.PROFESSOR_ROLE);
-        Role role = new Role();
-        role.setName(Utility.PROFESSOR_ROLE);
-        roleRepository.save(role);
-      }
-      if (!roleRepository.existsByName(Utility.STUDENT_ROLE)) {
-        log.info("Creating Role " + Utility.STUDENT_ROLE);
-        Role role = new Role();
-        role.setName(Utility.STUDENT_ROLE);
-        roleRepository.save(role);
-      }
+      // TODO: test!
+      // Team proposals management
+      List<Proposal> proposals = proposalRepository.findAllByStatus(ProposalStatus.PENDING);
+      Set<Long> scheduled = new HashSet<>();
+      proposals.forEach(proposal -> {
+        if (proposal.getDeadline().after(new Timestamp(System.currentTimeMillis()))) {
+          // Create scheduled task
+          Long teamId = proposal.getTeamId();
+          if (!scheduled.contains(teamId)) {
+            scheduled.add(teamId);
+            Runnable proposalDeadline = () -> {
+              log.info("Deadline for proposal ");
+              List<Proposal> props = proposalRepository.findAllByTeamId(teamId);
+              props.stream()
+                  .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
+                  .forEach(p -> {
+                    p.setStatus(ProposalStatus.REJECTED);
+                    proposalRepository.save(p);
+                  });
+            };
+            scheduler.schedule(proposalDeadline, new Date(proposal.getDeadline().getTime()));
+          }
+        } else {
+          proposal.setStatus(ProposalStatus.REJECTED);
+          proposalRepository.save(proposal);
+        }
+      });
+
+      // TODO: test!
+      // Assignment delivery management
+      List<AssignmentSolution> assignmentSolutions = assignmentSolutionRepository.findAllByStatusIn(
+          Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ, AssignmentStatus.REVIEWED_UPLOADABLE));
+      Set<Long> programmed = new HashSet<>();
+      assignmentSolutions.forEach(assignmentSolution -> {
+        if (assignmentSolution.getAssignment().getDueDate().before(new Timestamp(System.currentTimeMillis()))) {
+          // Deliver assignment
+          Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+          assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
+          assignmentSolution.setStatusTs(currentTs);
+          Upload upload = new Upload();
+          upload.setAuthor(assignmentSolution.getStudent().getId());
+          upload.setTimestamp(currentTs);
+          upload.setStatus(AssignmentStatus.DELIVERED);
+          upload.setComment("Assignment automatically delivered");
+          upload.setAssignmentSolution(assignmentSolution);
+          uploadRepository.save(upload);
+          assignmentSolutionRepository.save(assignmentSolution);
+        } else {
+          // Schedule assignment delivery
+          Long assId = assignmentSolution.getAssignment().getId();
+          if (!programmed.contains(assId)) {
+            programmed.add(assId);
+            Assignment assignment = assignmentSolution.getAssignment();
+            Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
+                solution -> {
+                  Timestamp currentTs = new Timestamp(System.currentTimeMillis());
+                  solution.setStatus(AssignmentStatus.DELIVERED);
+                  solution.setStatusTs(currentTs);
+                  Upload upload = new Upload();
+                  upload.setAuthor(assignmentSolution.getStudent().getId());
+                  upload.setTimestamp(currentTs);
+                  upload.setStatus(AssignmentStatus.DELIVERED);
+                  upload.setComment("Assignment automatically delivered");
+                  upload.setAssignmentSolution(assignmentSolution);
+                  uploadRepository.save(upload);
+                  assignmentSolutionRepository.save(solution);
+                }
+            );
+            scheduler.schedule(automaticDelivery,
+                new Date(assignment.getDueDate().getTime()));
+          }
+        }
+      });
     };
   }
 

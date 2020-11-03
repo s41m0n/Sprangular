@@ -1,6 +1,15 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
-import {MatTableDataSource} from '@angular/material/table';
-import {VM} from '../../models/vm.model';
+import { EventEmitter, Component, Input, Output } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
+import { first } from 'rxjs/operators';
+import { VmOwnersDialogComponent } from 'src/app/modals/vm-owners/vm-owners-dialog.component';
+import { VM } from '../../models/vm.model';
+import {VmOptionsDialogComponent} from '../../modals/vm-options/vm-options-dialog.component';
+import {ToastrService} from 'ngx-toastr';
+import {AuthService} from '../../services/auth.service';
+import {TeamService} from '../../services/team.service';
+import {VmStudentDetails} from '../../models/vm-student-details.model';
+import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 
 /**
  * StudentsComponent
@@ -9,20 +18,83 @@ import {VM} from '../../models/vm.model';
  */
 @Component({
   selector: 'app-tab-student-vms',
-  templateUrl: './tab-vms.component.html'
+  templateUrl: './tab-vms.component.html',
+  styleUrls: ['./tab-vms.component.css'],
 })
-export class TabStudentVmsComponent implements AfterViewInit {
+export class TabStudentVmsComponent {
+  dataSource: VmStudentDetails[]; // Table datasource dynamically modified
 
-  dataSource = new MatTableDataSource<VM>();                     // Table datasource dynamically modified
+  @Input() set vms(vms: VmStudentDetails[]) {
+    this.dataSource = vms;
+  }
+  @Output() turnVmEvent = new EventEmitter<number>();
+  @Output() editOwnerEvent = new EventEmitter<any>();
+  @Output() connectEvent = new EventEmitter<VM>();
+  @Output() refreshVmList = new EventEmitter();
 
-  ngAfterViewInit(): void {
+  constructor(private toastrService: ToastrService,
+              private authService: AuthService,
+              private teamService: TeamService,
+              public dialog: MatDialog) {}
+
+  triggerTurn(vmId: number, enable: boolean) {
+    if (enable && this.dataSource.filter(vm => vm.vm.active).length + 1 > this.teamService.currentTeamSubject.value.maxActiveInstances) {
+      this.toastrService.info(
+          `Reached max numbers of active VMs`,
+          'Ops! 😅'
+      );
+      return;
+    }
+    this.turnVmEvent.emit(vmId);
   }
 
-  @Input() set vms(vms: VM[]) {
-    this.dataSource.data = vms;
+  editOwners(vsd: VmStudentDetails) {
+    const dialogRef = this.dialog.open(VmOwnersDialogComponent, {
+      data: {vmDetails: vsd}
+    });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.editOwnerEvent.emit({ vmId: vsd.vm.id, studentId: result });
+          }
+        });
   }
 
-  connectToVm(id: number) {
-    console.log('Method to implement');
+  connectToVm(vm: VM) {
+    this.connectEvent.emit(vm);
+  }
+
+  openDialogVmOption(id: number): void {
+    const selectedVm = this.dataSource.find((vm) => vm.vm.id === id);
+    const dialogRef = this.dialog.open(VmOptionsDialogComponent, {
+      data: {
+        vmId: selectedVm.vm.id,
+        vCpu: selectedVm.vm.vcpu,
+        currentVCpu: this.dataSource.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0),
+        maxVCpu: this.teamService.currentTeamSubject.value.maxVCpu,
+        ram: selectedVm.vm.ram,
+        currentRam: this.dataSource.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0),
+        maxRam: this.teamService.currentTeamSubject.value.maxRam,
+        disk: selectedVm.vm.diskStorage,
+        currentDisk: this.dataSource.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0),
+        maxDisk: this.teamService.currentTeamSubject.value.maxDiskStorage
+      },
+    });
+
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.refreshVmList.emit();
+          }
+        });
+  }
+
+  isOwner(vmId: number) {
+    return this.dataSource.find((vm) => vm.vm.id === vmId).owners
+        .find(stud => stud.id.toString() === this.authService.currentUserValue.id.toString());
   }
 }

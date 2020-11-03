@@ -2,6 +2,7 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
+import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.services.*;
@@ -39,11 +40,17 @@ public class StudentController {
   AssignmentAndUploadService assAndUploadService;
 
   @GetMapping({"", "/"})
-  public List<StudentDTO> all() {
+  public List<StudentDTO> all(@RequestParam(required = false, name = "surname_like") String pattern) {
     log.info("all() called");
-    return studentService.getAllStudents().stream()
-        .map(ModelHelper::enrich)
-        .collect(Collectors.toList());
+    if (pattern == null || pattern.isEmpty()) {
+      return studentService.getAllStudents().stream()
+          .map(ModelHelper::enrich)
+          .collect(Collectors.toList());
+    } else {
+      return studentService.getStudentsLike(pattern).stream()
+          .map(ModelHelper::enrich)
+          .collect(Collectors.toList());
+    }
   }
 
   @GetMapping("/{id}")
@@ -78,6 +85,15 @@ public class StudentController {
     }
   }
 
+  @GetMapping("/{studentId}/teams/{courseId}")
+  public TeamDetails getTeamOfStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
+    try {
+      return teamService.getTeamOfStudentOfCourse(studentId, courseId);
+    } catch (StudentNotFoundException | TeamNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
   @GetMapping("/{studentId}/vmsOfCourse/{courseId}")
   public List<VmDTO> getVmsOfStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
     try {
@@ -100,10 +116,9 @@ public class StudentController {
     }
   }
 
-  @GetMapping("/{studentId}/teamProposalsOfCourse")
-  public List<TeamProposalDetails> getProposalsForStudentOfCourse(@PathVariable String studentId, @RequestBody Map<String, String> reqBody) {
+  @GetMapping("/{studentId}/teamProposalsOfCourse/{courseId}")
+  public List<TeamProposalDetails> getProposalsForStudentOfCourse(@PathVariable String studentId, @PathVariable String courseId) {
     try {
-      String courseId = reqBody.get("courseId");
       return studentService.getProposalsForStudentOfCourse(studentId, courseId);
     } catch (CourseNotFoundException | StudentNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -120,29 +135,6 @@ public class StudentController {
     }
   }
 
-  @GetMapping("/{studentId}/assignments/{assignmentId}/uploads")
-  public List<UploadDTO> getUploadsForAssignment(@PathVariable String studentId,
-                                                 @PathVariable Long assignmentId) {
-    log.info("getUploadsForAssignment() called");
-    try {
-      return assAndUploadService.getStudentUploadsForAssignmentSolution(assignmentId, studentId);
-    } catch (StudentNotFoundException | AssignmentNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
-  @PostMapping("/{studentId}/assignments/{assignmentId}/uploads")
-  public UploadDTO uploadAssignmentUpload(@PathVariable String studentId,
-                                          @PathVariable Long assignmentId,
-                                          @ModelAttribute UploadDetails details) {
-    log.info("uploadAssignmentUpload() called");
-    try {
-      return assAndUploadService.uploadStudentUpload(details, studentId, assignmentId);
-    } catch (AssignmentSolutionNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
   @GetMapping("/{studentId}/assignments/{assignmentId}")
   public AssignmentSolutionDTO getAssignmentSolution(@PathVariable String studentId,
                                                      @PathVariable Long assignmentId) {
@@ -151,33 +143,6 @@ public class StudentController {
       return assAndUploadService.getAssignmentSolutionForAssignmentOfStudent(assignmentId, studentId);
     } catch (StudentNotFoundException | AssignmentSolutionNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
-  @GetMapping("/{studentId}/assignments/{assignmentId}/document")
-  public Resource getAssignment(@PathVariable String studentId,
-                                @PathVariable Long assignmentId) {
-    log.info("getAssignment() called");
-    try {
-      return assAndUploadService.getAssignmentForStudent(assignmentId, studentId);
-    } catch (FileNotFoundException | StudentNotFoundException | AssignmentSolutionNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
-  @PostMapping("/{studentId}/assignments/{assignmentId}/grade")
-  public AssignmentSolutionDTO evaluateAssignment(@PathVariable String studentId,
-                                                  @PathVariable Long assignmentId,
-                                                  @RequestBody String grade) {
-    log.info("evaluateAssignment() called");
-    try {
-      return assAndUploadService.assignGrade(studentId, assignmentId, grade);
-    } catch (AssignmentSolutionNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (DefinitiveAssignmentSolutionStatusException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-    } catch (AssignmentSolutionNotReviewedException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 }

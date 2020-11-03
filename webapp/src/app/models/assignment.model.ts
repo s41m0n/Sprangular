@@ -1,3 +1,5 @@
+import { Course } from './course.model';
+
 /**
  * Model for Assignment resource
  *
@@ -9,10 +11,18 @@ export class Assignment {
   id: number;
   name: string;
   path: string;
+  releaseDate: string;
+  dueDate: string;
 
-  constructor(id: number = 0, name: string = '', path: string = '') {
+  constructor(id: number = 0, name: string = '', dueDate: string) {
     this.id = id;
     this.name = name;
-    this.path = path;
+    this.path = '';
+    this.releaseDate = '';
+    this.dueDate = dueDate;
+  }
+
+  static compare(a: Assignment, b: Assignment) {
+    return a.dueDate.localeCompare(b.dueDate);
   }
 }

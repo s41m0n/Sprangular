@@ -1,44 +1,89 @@
-<h1 mat-dialog-title>Register into VirtualLabs</h1>
+<h1 mat-dialog-title>Register to VirtualLabs</h1>
 
 <div mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        placeholder="Email"
+        type="email"
+        formControlName="email"
+        required
+      />
+      <mat-error>Please provide a valid email address</mat-error>
+    </mat-form-field>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <mat-error *ngIf="registerInvalid">Error while registering</mat-error>
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        placeholder="Name"
+        type="text"
+        formControlName="name"
+        required
+      />
+      <mat-error>Please provide a valid name</mat-error>
+    </mat-form-field>
 
-        <mat-form-field class="full-width-input">
-            <input matInput placeholder="Email" type="email" formControlName="email" required>
-            <mat-error>Please provide a valid email address</mat-error>
-        </mat-form-field>
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        placeholder="Surname"
+        type="text"
+        formControlName="surname"
+        required
+      />
+      <mat-error>Please provide a valid surname</mat-error>
+    </mat-form-field>
 
-        <mat-form-field class="full-width-input">
-            <input matInput placeholder="Name" type="text" formControlName="name" required>
-            <mat-error>Please provide a valid name address</mat-error>
-        </mat-form-field>
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        placeholder="Id"
+        type="text"
+        formControlName="id"
+        required
+      />
+      <mat-error>Please provide a valid id (sXXXXXX or dXXXXXX)</mat-error>
+    </mat-form-field>
 
-        <mat-form-field class="full-width-input">
-            <input matInput placeholder="Surname" type="text" formControlName="surname" required>
-            <mat-error>Please provide a valid surname address</mat-error>
-        </mat-form-field>
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        type="password"
+        placeholder="Password"
+        formControlName="password"
+        required
+      />
+      <mat-error
+        >Please provide a valid password (minLength: 8, 1 capital letter, 1
+        symbol)</mat-error
+      >
+    </mat-form-field>
 
-        <mat-form-field class="full-width-input">
-            <input matInput placeholder="Id" type="text" formControlName="id" required>
-            <mat-error>Please provide a valid id address</mat-error>
-        </mat-form-field>
+    <mat-form-field class="full-width-input">
+      <input
+        matInput
+        type="password"
+        placeholder="Repeat Password"
+        formControlName="passwordConfirm"
+        required
+      />
+      <mat-error>The two password must match</mat-error>
+    </mat-form-field>
 
-        <mat-form-field class="full-width-input">
-            <input matInput type="password" placeholder="Password" formControlName="password" required>
-            <mat-error>Please provide a valid password</mat-error>
-        </mat-form-field>
+    <mat-form-field>
+      <ngx-mat-file-input
+        formControlName="pic"
+        placeholder="Profile Picture"
+        accept=".png, .pdf, .jpg, .jpeg"
+        required
+      ></ngx-mat-file-input>
+      <mat-icon matSuffix>folder</mat-icon>
+    </mat-form-field>
 
-        <mat-form-field>
-            <ngx-mat-file-input formControlName="pic" placeholder="Basic Input"
-                                accept=".png, .pdf, .jpg, .jpeg"></ngx-mat-file-input>
-            <mat-icon matSuffix>folder</mat-icon>
-        </mat-form-field>
-
-        <div mat-dialog-actions align="end">
-            <button mat-raised-button color="primary" (click)="onSubmit()">Register</button>
-            <button mat-button mat-dialog-close color="warn">Cancel</button>
-        </div>
-    </form>
+    <div mat-dialog-actions>
+      <button mat-raised-button color="primary">Register</button>
+      <button mat-button mat-dialog-close color="warn">Cancel</button>
+    </div>
+  </form>
 </div>

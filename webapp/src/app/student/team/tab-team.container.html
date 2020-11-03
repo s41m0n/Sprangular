@@ -1,0 +1,13 @@
+<app-tab-team *ngIf="team; else elseBlock" [team]="team"></app-tab-team>
+<ng-template #elseBlock>
+  <app-tab-no-team
+    [availableStudents]="availableStudents"
+    [filteredStudents]="filteredStudents"
+    [proposals]="proposals"
+    (submitTeamEvent)="submitTeam($event)"
+    (searchStudentsEvent)="searchStudents($event)"
+    (proposalAcceptedEvent)="proposalAccepted($event)"
+    (proposalRejectedEvent)="proposalRejected($event)"
+    (proposalDeletedEvent)="proposalDeleted($event)"
+  ></app-tab-no-team>
+</ng-template>

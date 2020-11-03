@@ -3,7 +3,7 @@
  *    - set privileges to routes
  */
 export enum Role {
-  Student = 'student',
-  Professor = 'professor',
-  Admin = 'admin'
+  Student = 'ROLE_STUDENT',
+  Professor = 'ROLE_PROFESSOR',
+  Admin = 'ROLE_ADMIN',
 }

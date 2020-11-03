@@ -4,6 +4,7 @@ import it.polito.ai.lab2.utility.AssignmentStatus;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,9 @@ public class AssignmentSolution {
   AssignmentStatus status;
 
   @OneToMany(mappedBy = "assignmentSolution")
-  List<StudentUpload> studentUploads = new ArrayList<>();
+  List<Upload> uploads = new ArrayList<>();
 
   String grade;
+
+  Timestamp statusTs;
 }

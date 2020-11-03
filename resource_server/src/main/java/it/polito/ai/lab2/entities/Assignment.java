@@ -24,7 +24,7 @@ public class Assignment {
   Course course;
 
   @ManyToOne
-  @JoinColumn(name = "professor_acronym")
+  @JoinColumn(name = "professor_id")
   Professor professor;
 
   @OneToMany(mappedBy = "assignment")

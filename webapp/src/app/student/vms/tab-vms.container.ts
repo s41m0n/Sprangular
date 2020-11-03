@@ -1,14 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {VM} from '../../models/vm.model';
-import {Course} from '../../models/course.model';
-import {CourseService} from '../../services/course.service';
+import { VM } from '../../models/vm.model';
 import {first, takeUntil} from 'rxjs/operators';
+import { TeamService } from 'src/app/services/team.service';
+import { MatDialog } from '@angular/material/dialog';
+import { NewVmDialogComponent } from 'src/app/modals/new-vm/new-vm.component';
+import { VmService } from 'src/app/services/vm.service';
+import { ImageViewerDialogComponent } from '../../modals/image-viewer/image-viewer-dialog.component';
+import {VmStudentDetails} from '../../models/vm-student-details.model';
 import {Subject} from 'rxjs';
-import {TeamService} from 'src/app/services/team.service';
-import {Team} from 'src/app/models/team.model';
-import {MatDialog} from '@angular/material/dialog';
-import {NewVmComponent} from 'src/app/modals/new-vm/new-vm.component';
-import {VmService} from 'src/app/services/vm.service';
 
 /**
  * VmsContainer
@@ -17,58 +16,122 @@ import {VmService} from 'src/app/services/vm.service';
  */
 @Component({
   selector: 'app-tab-student-vms-cont',
-  templateUrl: './tab-vms.container.html'
+  templateUrl: './tab-vms.container.html',
+  styleUrls: ['./tab-vms.container.css'],
 })
 export class TabStudentVmsContComponent implements OnInit, OnDestroy {
+  vsd: VmStudentDetails[] = []; // The current vms
+  destroy$: Subject<boolean> = new Subject<boolean>();
+  inTeam: boolean;
 
-  private course: Course;                                      // The current selected course
-  team: Team;
-  vms: VM[] = [];                             // The current vms
-  private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
-
-  constructor(public dialog: MatDialog,
-              private teamService: TeamService,
-              private vmService: VmService,
-              private courseService: CourseService) {
+  constructor(
+      public dialog: MatDialog,
+      private teamService: TeamService,
+      private vmService: VmService) {
   }
 
-  ngOnInit(): void {
-    // Subscribe to the Broadcaster course selected, to update the current rendered course
-    this.courseService.currentCourseSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(course => {
-      this.course = course;
-    });
-    this.teamService.currentTeamSubject.asObservable().pipe(takeUntil(this.destroy$)).subscribe(team => {
-      this.team = team;
-      this.refreshVMs();
+  ngOnInit() {
+    this.teamService.currentTeamSubject
+        .asObservable()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(t => {
+          this.inTeam = t !== null;
+          if (this.inTeam) {
+            this.refreshVMs();
+          }
     });
   }
 
   ngOnDestroy() {
-    /** Destroying subscription */
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
   }
 
-
-  /** Private function to refresh the list of enrolled students */
-  private refreshVMs() {
+  /** Private function to refresh the list of vms */
+  refreshVMs() {
     // Check if already received the current course
-    if (!this.course || !this.team) {
-      this.vms = [];
-      return;
-    }
-    this.vmService.getTeamVms(this.team).pipe(first()).subscribe(vms => this.vms = vms);
+    this.vmService
+        .getTeamVms()
+        .pipe(first())
+        .subscribe((vms) => {
+          this.vsd = vms;
+        });
+  }
+
+  turnVm(vmId: number) {
+    this.vmService
+        .triggerVm(vmId, this.vsd.find((vm) => vm.vm.id === vmId).vm.active)
+        .pipe(first())
+        .subscribe((_) => this.refreshVMs());
+  }
+
+  editOwner(object: any) {
+    this.vmService
+        .editOwner(object.vmId, object.studentId)
+        .pipe(first())
+        .subscribe(() => this.refreshVMs());
+  }
+
+  connect(vm: VM) {
+    this.vmService
+        .getInstance(vm.id)
+        .pipe(first())
+        .subscribe((instance) => {
+          if (!instance) {
+            return;
+          }
+          const url = URL.createObjectURL(instance);
+          const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+            data: {
+              title: `VM: ${vm.id} -  ${vm.name}`,
+              imageSrc: url,
+              downloadable: false
+            },
+          });
+          dialogRef.afterClosed().subscribe(() => {
+            URL.revokeObjectURL(url);
+          });
+        });
   }
 
   newVm() {
-    const dialogRef = this.dialog.open(NewVmComponent);
-    dialogRef.afterClosed()
+    const dialogRef = this.dialog.open(NewVmDialogComponent, {
+      data: {
+        currentActiveInstances: this.vsd.filter((vm) => vm.vm.active).length,
+        maxActiveInstances: this.teamService.currentTeamSubject.value.maxActiveInstances,
+        currentVCpu: this.vsd.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0),
+        maxVCpu: this.teamService.currentTeamSubject.value.maxVCpu,
+        currentRam: this.vsd.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0),
+        maxRam: this.teamService.currentTeamSubject.value.maxRam,
+        currentDisk: this.vsd.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0),
+        maxDisk: this.teamService.currentTeamSubject.value.maxDiskStorage
+      }
+    });
+
+    dialogRef
+        .afterClosed()
         .pipe(first())
-        .subscribe(result => {
+        .subscribe((result) => {
           if (result) {
             this.refreshVMs();
           }
         });
   }
-}
 
+  checkResourceAvailability() {
+    if (!this.vsd) {
+      return true;
+    }
+    if (this.vsd.length >= this.teamService.currentTeamSubject.value.maxTotalInstances) {
+      return true;
+    }
+
+    const currentMaxVCpu = this.vsd.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0);
+    const currentMaxRam = this.vsd.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0);
+    const currentMaxDiskStorage = this.vsd.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0);
+
+    return !(currentMaxVCpu < this.teamService.currentTeamSubject.value.maxVCpu &&
+        currentMaxRam < this.teamService.currentTeamSubject.value.maxRam &&
+        currentMaxDiskStorage < this.teamService.currentTeamSubject.value.maxDiskStorage);
+  }
+}

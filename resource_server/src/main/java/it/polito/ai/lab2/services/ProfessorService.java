@@ -10,6 +10,8 @@ public interface ProfessorService {
 
   List<ProfessorDTO> getProfessors();
 
+  List<ProfessorDTO> getProfessorsLike(String pattern);
+
   Optional<ProfessorDTO> getProfessor(String professorId);
 
   List<CourseDTO> getProfessorCourses(String professorId);

@@ -1,58 +1,163 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import {BehaviorSubject, Observable, of} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
-import {ToastrService} from 'ngx-toastr';
-import {Team} from '../models/team.model';
-import {catchError, tap} from 'rxjs/operators';
-import {environment} from 'src/environments/environment';
-import {Course} from '../models/course.model';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
+import { Team } from '../models/team.model';
+import { catchError, tap } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
+import { TeamProposal } from '../models/team-proposal.model';
+import { CourseService } from './course.service';
+import { AuthService } from './auth.service';
+import { Student } from '../models/student.model';
+import { handleError } from '../helpers/handle.error';
 
 /** Team service
  *
  *  This service is responsible of all the interaction with teams resources through Rest api.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TeamService {
-  // Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
   public currentTeamSubject: BehaviorSubject<Team>;
 
-  constructor(private http: HttpClient,
-              private toastrService: ToastrService) {
+  constructor(
+      private http: HttpClient,
+      private toastrService: ToastrService,
+      private courseService: CourseService,
+      private authService: AuthService
+  ) {
     this.currentTeamSubject = new BehaviorSubject<Team>(null);
   }
 
-  public createTeam(name: string, course: Course): Observable<Team> {
-    return this.http.post<Team>(environment.base_teams_url, {name, courseId: course.id}, environment.base_http_headers).pipe(
-        tap(() => console.log(`created team ${name} - createTeam()`)),
-        catchError(this.handleError<Team>(`createTeam(${name}`))
-    );
+  public createTeam(
+      proposal: TeamProposal,
+      courseId: string = this.courseService.currentCourseSubject.value
+  ): Observable<Team> {
+    return this.http
+        .post<Team>(
+            `${environment.base_courses_url}/${courseId}/teams`,
+            proposal,
+            environment.base_http_headers
+        )
+        .pipe(
+            tap(() =>
+                console.log(`created team ${proposal.teamName} - createTeam()`)
+            ),
+            catchError(
+                handleError<Team>(
+                    this.toastrService,
+                    `createTeam(${proposal.teamName}`
+                )
+            )
+        );
   }
 
-  /**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   * @param show - is it visible
-   * @param message - error message
-   */
-  private handleError<T>(operation = 'operation',
-                         result?: T,
-                         show: boolean = true,
-                         message: string = 'An error occurred while performing') {
-    return (error: any): Observable<T> => {
-      const why = `${message} ${operation}: ${error}`;
+  public updateTeamVmResources(teamId: number, formData: FormData): Observable<Team> {
+    return this.http
+        .put<Team>(
+            `${environment.base_teams_url}/${teamId}/updateVmsResourceLimits`,
+            formData
+        ).pipe(
+            tap((team: Team) => {
+              this.toastrService.success(
+                  `Team ${team.name} successfully updated!`,
+                  'Awesome 😃'
+              );
+              this.currentTeamSubject.next(team);
+            }),
+            catchError(
+                handleError<Team>(
+                    this.toastrService,
+                    `updateTeam(${teamId})`
+                )
+            )
+        );
+  }
 
-      if (show) {
-        this.toastrService.error(why, 'Error 😅');
-      }
-      console.log(why);
+  public getStudentTeam(
+      courseId: string = this.courseService.currentCourseSubject.value,
+      studentId: string = this.authService.currentUserValue.id
+  ): Observable<Team> {
+    return this.http
+        .get<Team>(
+            `${environment.base_students_url}/${studentId}/teams/${courseId}`
+        )
+        .pipe(
+            tap(() =>
+                console.log(
+                    `retrieved team of ${studentId} for course ${courseId} - getStudentTeam()`
+                )
+            ),
+            catchError(
+                handleError<Team>(
+                    this.toastrService,
+                    `getStudentTeam(${courseId}, ${studentId})`,
+                    null,
+                    false
+                )
+            )
+        );
+  }
 
-      // Let the app keep running by returning an empty result.
-      return of(result as T);
-    };
+  public getStudentsInTeam(teamId: number = this.currentTeamSubject.value.id) {
+    return this.http
+        .get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
+        .pipe(
+            tap(() =>
+                console.log(
+                    `retrieved members of team ${teamId} - getStudentsInTeam()`
+                )
+            ),
+            catchError(
+                handleError<Student[]>(
+                    this.toastrService,
+                    `getStudentsInTeam(${teamId})`
+                )
+            )
+        );
+  }
+
+  public acceptProposal(token: string): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        `${environment.base_teams_url}/confirmInvitation/${token}`,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() => console.log(`accepted proposal ${token} - acceptProposal()`)),
+        catchError(
+          handleError<boolean>(this.toastrService, `acceptProposal(${token})`)
+        )
+      );
+  }
+
+  public rejectProposal(token: string): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        `${environment.base_teams_url}/rejectInvitation/${token}`,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() => console.log(`rejected proposal ${token} - rejectProposal()`)),
+        catchError(
+          handleError<boolean>(this.toastrService, `rejectProposal(${token})`)
+        )
+      );
+  }
+
+  public deleteProposal(token: string): Observable<boolean> {
+    return this.http
+      .get<boolean>(
+        `${environment.base_teams_url}/deleteProposal/${token}`,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() => console.log(`deleted proposal ${token} - deleteProposal()`)),
+        catchError(
+          handleError<boolean>(this.toastrService, `deleteProposal(${token})`)
+        )
+      );
   }
 }

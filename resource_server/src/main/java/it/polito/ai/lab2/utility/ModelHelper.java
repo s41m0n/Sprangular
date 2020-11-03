@@ -4,10 +4,7 @@ import it.polito.ai.lab2.controllers.CourseController;
 import it.polito.ai.lab2.controllers.ProfessorController;
 import it.polito.ai.lab2.controllers.StudentController;
 import it.polito.ai.lab2.controllers.TeamController;
-import it.polito.ai.lab2.dtos.CourseDTO;
-import it.polito.ai.lab2.dtos.ProfessorDTO;
-import it.polito.ai.lab2.dtos.StudentDTO;
-import it.polito.ai.lab2.dtos.TeamDTO;
+import it.polito.ai.lab2.dtos.*;
 
 import java.util.Arrays;
 
@@ -18,11 +15,12 @@ public class ModelHelper {
 
   static public CourseDTO enrich(CourseDTO courseDTO) {
     courseDTO.add(Arrays.asList(
-        linkTo(methodOn(CourseController.class).enrolledStudents(courseDTO.getAcronym())).withRel("enrolled"),
+        linkTo(methodOn(CourseController.class).getStudentsOfCourse(courseDTO.getAcronym(), "")).withRel("enrolled"),
         linkTo(CourseController.class).slash(courseDTO.getAcronym()).withSelfRel(),
         linkTo(methodOn(CourseController.class).getProfessors(courseDTO.getAcronym())).withRel("professors"),
+        linkTo(methodOn(CourseController.class).getStudentsOfCourse(courseDTO.getAcronym(), "")).withRel("students"),
         linkTo(methodOn(CourseController.class).getTeams(courseDTO.getAcronym())).withRel("teams"),
-        linkTo(methodOn(CourseController.class).getAvailableStudents(courseDTO.getAcronym())).withRel("availableStudents"),
+        linkTo(methodOn(CourseController.class).getAvailableStudents(courseDTO.getAcronym(), "")).withRel("availableStudents"),
         linkTo(methodOn(CourseController.class).getUnavailableStudents(courseDTO.getAcronym())).withRel("unavailableStudents"),
         linkTo(methodOn(CourseController.class).getVmsOfCourse(courseDTO.getAcronym())).withRel("vms")
     ));

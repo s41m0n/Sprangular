@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean registerStudent(RegistrationDetails sDetails) {
-    if (!sDetails.getEmail().substring(0, 7).equals(sDetails.getId())
+    if (!sDetails.getEmail().substring(0, sDetails.getEmail().indexOf("@")).equals(sDetails.getId())
         || !sDetails.getEmail().matches("^s[1-9][0-9]*@studenti.polito.it$"))
       throw new InvalidIdEmailException("Student format: id -> s<numbers>, email -> <id>@studenti.polito.it");
     if (userRepository.existsById(sDetails.getId()))
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean registerProfessor(RegistrationDetails pDetails) {
-    if (!pDetails.getEmail().substring(0, 7).equals(pDetails.getId())
+    if (!pDetails.getEmail().substring(0, pDetails.getEmail().indexOf("@")).equals(pDetails.getId())
         || !pDetails.getEmail().matches("^d[1-9][0-9]*@polito.it$"))
       throw new InvalidIdEmailException("Professor format: id -> d<numbers>, email -> <id>@polito.it");
     if (userRepository.existsById(pDetails.getId()))
@@ -130,12 +130,12 @@ public class UserServiceImpl implements UserService {
   }
 
   private String getPredefinedRegisterMessage(String id, ConfirmEmailToken confirmEmailToken) {
-    String url = "http://localhost:8080/API/authentication/" + id + "/confirmEmail/" + confirmEmailToken.getToken();
+    String url = "https://localhost:4200/user/" + id + "/confirmEmail/" + confirmEmailToken.getToken();
 
     return "Welcome to SpringExample app!\n\n" +
         "Your username to access the system is: " + id +
         "\n\nConfirm your email address clicking this link:\n" + url +
-        "\n\nAuthenticate through:\nhttp://localhost:8080/API/authentication/login" +
+        "\n\nAuthenticate through:\nhttps://localhost:4200/home?doLogin=true" +
         "\n\nBest Regards,\nSpringExample Team";
   }
 }

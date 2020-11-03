@@ -1,0 +1,13 @@
+.full-width-input {
+    width: 100%;
+}
+
+.button-centered {
+    display: block;
+    margin: auto;
+}
+
+.mat-dialog-actions {
+    display: flex;
+    justify-content: center;
+}

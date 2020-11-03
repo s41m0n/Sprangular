@@ -16,4 +16,6 @@ public interface StudentService {
   List<CourseDTO> getStudentCourses(String studentId);
 
   List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId);
+
+  List<StudentDTO> getStudentsLike(String pattern);
 }

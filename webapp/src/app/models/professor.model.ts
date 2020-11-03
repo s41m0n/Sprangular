@@ -1,4 +1,3 @@
-import {Student} from './student.model';
+import { Student } from './student.model';
 
-export class Professor extends Student {
-}
+export class Professor extends Student {}

@@ -31,7 +31,10 @@ public class SecurityServiceImpl implements SecurityService {
   AssignmentRepository assignmentRepository;
 
   @Autowired
-  StudentUploadRepository studentUploadRepository;
+  UploadRepository uploadRepository;
+
+  @Autowired
+  AssignmentSolutionRepository assignmentSolutionRepository;
 
   @Override
   public boolean isStudentSelf(String id) {
@@ -50,7 +53,7 @@ public class SecurityServiceImpl implements SecurityService {
   @Override
   public boolean isProfessorCourseOwner(String courseId) {
 
-    if (!courseRepository.existsById(courseId) || courseRepository.getOne(courseId).getProfessors().isEmpty()) { //the course does not exists or there are no professors
+    if (!courseRepository.existsById(courseId) || courseRepository.getOne(courseId).getProfessors().isEmpty()) {
       return false;
     }
 
@@ -87,61 +90,45 @@ public class SecurityServiceImpl implements SecurityService {
   @Override
   public boolean isStudentOwnerOfVm(Long vmId) {
     Vm vm = vmRepository.findById(vmId).orElse(null);
-    Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
-
-    if (vm == null || student == null) {
+    if (vm == null)
       return false;
-    }
-
-    return vm.getOwners().contains(student);
+    return vm.getOwners().stream()
+        .anyMatch(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
   }
 
   @Override
   public boolean isVmOfStudentTeam(Long vmId) {
     Vm vm = vmRepository.findById(vmId).orElse(null);
-    Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
-
-    if (vm == null || student == null) {
+    if (vm == null)
       return false;
-    }
-
-    return vm.getTeam().getMembers().contains(student);
+    return vm.getTeam().getMembers().stream()
+        .anyMatch(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
   }
 
   @Override
   public boolean isStudentInTeam(Long teamId) {
-    Student student = studentRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
     Team team = teamRepository.findById(teamId).orElse(null);
-
-    if (student == null || team == null) {
+    if (team == null)
       return false;
-    }
-
-    return team.getMembers().contains(student);
+    return team.getMembers().stream()
+        .anyMatch(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
   }
 
   @Override
   public boolean isAssignmentOfProfessorCourse(Long assignmentId) {
     Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
-    Professor professor = professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
-
-    if (assignment == null || professor == null) {
+    if (assignment == null)
       return false;
-    }
-
-    return professor.getCourses().contains(assignment.getCourse());
+    return assignment.getCourse().getProfessors().stream()
+        .anyMatch(p -> p.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
   }
 
   @Override
   public boolean isAssignmentOfProfessor(Long assignmentId) {
     Assignment assignment = assignmentRepository.findById(assignmentId).orElse(null);
-    Professor professor = professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).orElse(null);
-
-    if (assignment == null || professor == null) {
+    if (assignment == null)
       return false;
-    }
-
-    return assignment.getProfessor().getId().equals(professor.getId());
+    return assignment.getProfessor().getId().equals(SecurityContextHolder.getContext().getAuthentication().getName());
   }
 
   @Override
@@ -154,13 +141,40 @@ public class SecurityServiceImpl implements SecurityService {
   }
 
   @Override
-  public boolean isProfessorUploadReviewer(Long studentUploadId) {
-    StudentUpload studentUpload = studentUploadRepository.findById(studentUploadId).orElse(null);
-    if (studentUpload == null)
+  public boolean isAssignmentSolutionOfProfessorCourse(Long assignmentSolutionId) {
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElse(null);
+    if (assignmentSolution == null)
       return false;
-    return studentUpload.getAssignmentSolution().getAssignment().getProfessor().getId()
-        .equals(SecurityContextHolder.getContext().getAuthentication().getName());
+    return assignmentSolution.getAssignment().getCourse().getProfessors().stream()
+        .anyMatch(p -> p.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
   }
 
+  @Override
+  public boolean isAssignmentSolutionOfStudent(Long assignmentSolutionId) {
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElse(null);
+    if (assignmentSolution == null)
+      return false;
+    return assignmentSolution.getStudent().getId().equals(
+        SecurityContextHolder.getContext().getAuthentication().getName());
+  }
 
+  @Override
+  public boolean isUploadOfProfessorCourse(Long uploadId) {
+    Upload upload = uploadRepository.findById(uploadId).orElse(null);
+    if (upload == null) {
+      return false;
+    }
+    return upload.getAssignmentSolution().getAssignment().getCourse().getProfessors().stream()
+        .anyMatch(p -> p.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()));
+  }
+
+  @Override
+  public boolean isUploadOfStudentAssignmentSolution(Long uploadId) {
+    Upload upload = uploadRepository.findById(uploadId).orElse(null);
+    if (upload == null) {
+      return false;
+    }
+    return upload.getAssignmentSolution().getStudent().getId().equals(
+        SecurityContextHolder.getContext().getAuthentication().getName());
+  }
 }

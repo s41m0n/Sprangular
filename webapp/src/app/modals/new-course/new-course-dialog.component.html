@@ -1,0 +1,64 @@
+<h1 mat-dialog-title>Create a new Course</h1>
+
+<div mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field class="full-width-input">
+      <input
+              matInput
+              placeholder="Course Acronym"
+              type="text"
+              formControlName="acronym"
+              required
+      />
+      <mat-error>Please provide a valid Acronym</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="full-width-input">
+      <input
+              matInput
+              placeholder="Course Name"
+              type="text"
+              formControlName="name"
+              required
+      />
+      <mat-error>Please provide a valid Name</mat-error>
+    </mat-form-field>
+
+    <label>Team Min Size:</label>
+    <mat-slider
+            color="primary"
+            formControlName="teamMinSize"
+            [thumbLabel]="true"
+            (valueChange)="adaptMin($event)"
+            min="1"
+            max="10"
+            step="1"
+    ></mat-slider>
+
+    <label>Team Max Size:</label>
+    <mat-slider
+            color="primary"
+            formControlName="teamMaxSize"
+            [thumbLabel]="true"
+            (valueChange)="adaptMax($event)"
+            min="1"
+            max="10"
+            step="1"
+    ></mat-slider>
+
+    <mat-form-field>
+      <ngx-mat-file-input
+              formControlName="vmModel"
+              placeholder="VM Model"
+              accept=".txt, .yaml, .yml, .jpg, .jpeg, .png"
+              required
+      ></ngx-mat-file-input>
+      <mat-icon matSuffix>folder</mat-icon>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions class="centered-buttons">
+  <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
+  <button mat-button color="primary" (click)="onSubmit()">Create</button>
+</div>

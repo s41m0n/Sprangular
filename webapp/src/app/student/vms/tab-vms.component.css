@@ -1,0 +1,7 @@
+.active {
+    border: solid greenyellow;
+}
+
+.inactive {
+    border: solid #ff4d51;
+}

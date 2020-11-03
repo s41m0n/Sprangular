@@ -14,6 +14,8 @@ public class Vm {
   @GeneratedValue
   Long id;
 
+  String name;
+
   @ManyToOne
   @JoinColumn(name = "vmModel_id")
   VmModel vmModel;
@@ -49,5 +51,10 @@ public class Vm {
   public void addOwner(Student student) {
     this.getOwners().add(student);
     student.getOwnedVms().add(this);
+  }
+
+  public void removeOwner(Student student) {
+    this.getOwners().remove(student);
+    student.getOwnedVms().remove(this);
   }
 }

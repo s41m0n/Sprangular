@@ -1,16 +1,18 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import {BehaviorSubject, from, Observable, of} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
-import {catchError, map, mergeMap, tap, toArray} from 'rxjs/operators';
-import {ToastrService} from 'ngx-toastr';
-import {Course} from '../models/course.model';
-import {Assignment} from '../models/assignment.model';
-import {Student} from '../models/student.model';
-import {VM} from '../models/vm.model';
-import {Professor} from '../models/professor.model';
-import {ProfessorService} from './professor.service';
-import {environment} from 'src/environments/environment';
+import { BehaviorSubject, from, Observable, of, forkJoin } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { catchError, first, mergeMap, tap, toArray } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
+import { Course } from '../models/course.model';
+import { Assignment } from '../models/assignment.model';
+import { Student } from '../models/student.model';
+import { VM } from '../models/vm.model';
+import { Professor } from '../models/professor.model';
+import { environment } from 'src/environments/environment';
+import { handleError } from '../helpers/handle.error';
+import {StudentAssignmentDetails} from '../models/student-assignment-details.model';
+import {VmProfessorDetails} from '../models/vm-professor-details.model';
 
 /**
  * CourseService service
@@ -19,16 +21,27 @@ import {environment} from 'src/environments/environment';
  *
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CourseService {
   // Current Course Subject: keeps hold of the current value and emits it to any new subscribers as soon as they subscribe
-  public currentCourseSubject: BehaviorSubject<Course>;
+  public currentCourseSubject: BehaviorSubject<string>;
+  public course: BehaviorSubject<Course>;
 
-  constructor(private http: HttpClient,
-              private toastrService: ToastrService,
-              private professorService: ProfessorService) {
-    this.currentCourseSubject = new BehaviorSubject<Course>(null);
+  constructor(private http: HttpClient, private toastrService: ToastrService) {
+    this.currentCourseSubject = new BehaviorSubject<string>(null);
+    this.course = new BehaviorSubject<Course>(null);
+  }
+
+  setNext(acronym: string) {
+    this.currentCourseSubject.next(acronym);
+    if (!acronym) {
+      this.course.next(null);
+      return;
+    }
+    this.getCourse(acronym)
+      .pipe(first())
+      .subscribe((x) => this.course.next(x));
   }
 
   /**
@@ -36,15 +49,17 @@ export class CourseService {
    *
    * @param(path) the requested path
    */
-  getCourseByPath(path: string): Observable<Course> {
-    return this.http.get<Course[]>(`${environment.base_courses_url}?path_like=${path}&_limit=1`)
-        .pipe(
-            // If I don't know a priori which data the server sends me --> map(res => Object.assign(new Course(), res)),
-            // Take the first one (json-server does not support direct search, but we have to use _like query)
-            map(x => x.shift()),
-            tap(() => console.log(`fetched course by path ${path} - getCourses()`)),
-            catchError(this.handleError<Course>(`getCourseByPath(${path})`))
-        );
+  getCourse(acronym: string): Observable<Course> {
+    return this.http
+      .get<Course>(`${environment.base_courses_url}/${acronym}`)
+      .pipe(
+        tap(() =>
+          console.log(`fetched course by path ${acronym} - getCourse()`)
+        ),
+        catchError(
+          handleError<Course>(this.toastrService, `getCourse(${acronym})`)
+        )
+      );
   }
 
   /**
@@ -52,128 +67,454 @@ export class CourseService {
    *
    * @param(course) the objective course
    */
-  getEnrolledStudents(course: Course): Observable<Student[]> {
-    return this.http.get<Student[]>(`${environment.base_courses_url}/${course.id}/students?_expand=team`)
-        .pipe(
-            // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Student(), r))),
-            tap(() => console.log(`fetched enrolled ${course.name} students - getEnrolledStudents()`)),
-            catchError(this.handleError<Student[]>(`getEnrolledStudents(${course.name})`))
-        );
+  getEnrolledStudents(
+    courseId: string = this.currentCourseSubject.value
+  ): Observable<Student[]> {
+    return this.http
+      .get<Student[]>(`${environment.base_courses_url}/${courseId}/students`)
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched enrolled ${courseId} students - getEnrolledStudents()`
+          )
+        ),
+        catchError(
+          handleError<Student[]>(
+            this.toastrService,
+            `getEnrolledStudents(${courseId})`
+          )
+        )
+      );
   }
 
   /**
    * Function to retrieve the list of Courses available
    */
   getCourses(): Observable<Course[]> {
-    return this.http.get<Course[]>(environment.base_courses_url)
-        .pipe(
-            // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Course(), r))),
-            tap(() => console.log(`fetched courses - getCourses()`)),
-            catchError(this.handleError<Course[]>(`getCourses()`))
-        );
+    return this.http.get<Course[]>(environment.base_courses_url).pipe(
+      // If I don't know a priori which data the server sends me --> map(res => res.map(r => Object.assign(new Course(), r))),
+      tap(() => console.log(`fetched courses - getCourses()`)),
+      catchError(handleError<Course[]>(this.toastrService, `getCourses()`))
+    );
   }
 
-  getCourseVMs(course: Course): Observable<VM[]> {
-    return this.http.get<VM[]>(`${environment.base_courses_url}/${course.id}/vms?_expand=team`)
-        .pipe(
-            tap(() => console.log(`fetched course ${course.name} vms - getCourseVMs()`)),
-            catchError(this.handleError<VM[]>(`getCourseVMs(${course.name})`))
-        );
+  getCourseVMs(courseId: string): Observable<VmProfessorDetails[]> {
+    return this.http
+      .get<VmProfessorDetails[]>(`${environment.base_courses_url}/${courseId}/vms`)
+      .pipe(
+        tap(() =>
+          console.log(`fetched course ${courseId} vms - getCourseVMs()`)
+        ),
+        catchError(
+          handleError<VmProfessorDetails[]>(this.toastrService, `getCourseVMs(${courseId})`)
+        )
+      );
   }
 
-  getAvailableStudents(course: Course, currentUser: string): Observable<Student[]> {
-    return this.http.get<Student[]>(`${environment.base_courses_url}/${course.id}/students?teamId_like=0&email_ne=${currentUser}`)
-        .pipe(
-            tap(() => console.log(`fetched available students in course ${course.name} - getAvailableStudents()`)),
-            catchError(this.handleError<Student[]>(`getAvailableStudents(${course.name})`))
-        );
+  getAvailableStudents(
+    courseId: string = this.currentCourseSubject.value
+  ): Observable<Student[]> {
+    return this.http
+      .get<Student[]>(
+        `${environment.base_courses_url}/${courseId}/availableStudents`
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched available students in course ${courseId} - getAvailableStudents()`
+          )
+        ),
+        catchError(
+          handleError<Student[]>(
+            this.toastrService,
+            `getAvailableStudents(${courseId})`
+          )
+        )
+      );
   }
 
-  getCourseAssignments(course: Course): Observable<Assignment[]> {
-    return this.http.get<Assignment[]>(`${environment.base_assignments_url}?courseId=${course.id}&_expand=professor`)
-        .pipe(
-            tap(() => console.log(`fetched assignments in course ${course.name} - getCourseAssignments()`)),
-            catchError(this.handleError<Assignment[]>(`getCourseAssignments(${course.name})`))
-        );
+  getCourseAssignments(courseId: string): Observable<Assignment[]> {
+    return this.http
+      .get<Assignment[]>(
+        `${environment.base_courses_url}/${courseId}/assignments`
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched assignments in course ${courseId} - getCourseAssignments()`
+          )
+        ),
+        catchError(
+          handleError<Assignment[]>(
+            this.toastrService,
+            `getCourseAssignments(${courseId})`
+          )
+        )
+      );
   }
 
   getCourseProfessors(course: Course): Observable<Professor[]> {
-    return this.http.get<Course>(`${environment.base_courses_url}/${course.id}?_expand=professor`)
-        .pipe(
-            map(mappedCourse => mappedCourse.professor ? [mappedCourse.professor] : []),
-            tap(() => console.log(`fetched professors in course ${course.name} - getCourseProfessors()`)),
-            catchError(this.handleError<Professor[]>(`getCourseProfessors(${course.name})`))
-        );
+    return this.http
+      .get<Professor[]>(
+        `${environment.base_courses_url}/${course.acronym}/professors`
+      )
+      .pipe(
+        tap(() =>
+          console.log(
+            `fetched professors in course ${course.name} - getCourseProfessors()`
+          )
+        ),
+        catchError(
+          handleError<Professor[]>(
+            this.toastrService,
+            `getCourseProfessors(${course.name})`
+          )
+        )
+      );
   }
 
-  assignProfessorsToCourse(professors: Professor[], course: Course): Observable<Professor[]> {
-    return from(professors).pipe(
-        mergeMap((professor: Professor) => {
-          // Checking if ADD has been pressed without selecting a professor (or modifying the selected one)
-          if (typeof professor === 'string') {
-            this.toastrService.error(`${professor} is not a valid Professor, please select one from the options`, 'Error 😅');
-            return of(null);
+  addProfessorToCourse(
+    professor: Professor,
+    course: Course
+  ): Observable<Professor> {
+    return this.http
+      .put<any>(
+        `${environment.base_courses_url}/${course.acronym}/addProfessor`,
+        { professorId: professor.id },
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((p) => {
+          if (p) {
+            this.toastrService.success(
+              `Added ${professor.id} to ${course.acronym}`,
+              'Congratulations 😃'
+            );
+          } else {
+            this.toastrService.info(
+              `Professor ${professor.id} already teaches ${course.acronym}`
+            );
           }
-          // Faking enroll
-          // professor.courseId = course.id;
-          // Faking change professor
-          course.professorId = professor.id;
-          /** this.professorService.updateProfessor(professor) */
-          return this.updateCourse(course);
         }),
-        toArray()
-    );
-  }
-
-  removeProfessorsFromCourse(professors: Professor[], course: Course): Observable<Professor[]> {
-    return from(professors).pipe(
-        mergeMap((professor: Professor) => {
-          // Checking if ADD has been pressed without selecting a professor (or modifying the selected one)
-          if (typeof professor === 'string') {
-            this.toastrService.error(`${professor} is not a valid Professor, please select one from the options`, 'Error 😅');
-            return of(null);
-          }
-          // Faking unenroll
-          // professor.courseId = course.id;
-          // Faking change professor
-          course.professorId = 0;
-          /** this.professorService.updateProfessor(professor) */
-          return this.updateCourse(course);
-        }),
-        toArray()
-    );
-  }
-
-  private updateCourse(course: Course): Observable<Course> {
-    return this.http.put<Course>(`${environment.base_courses_url}/${course.id}`, course, environment.base_http_headers)
-        .pipe(
-            tap(() => console.log(`updated course ${course.name} - updateCourse()`)),
-            catchError(this.handleError<Course>(`updateCourse(${course.name})`))
-        );
+        catchError(
+          handleError<Professor>(
+            this.toastrService,
+            `addProfessor(${professor.id}, ${course.acronym})`
+          )
+        )
+      );
   }
 
   /**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   * @param show - is it visible or not
-   * @param message - error message
+   * Function to enroll students to a specific Course
+   * Return value is ignored, since the we reload the entire list
+   *
+   * @param(students) the list of students to be enrolled
+   * @param(course) the objective course
    */
-  private handleError<T>(operation = 'operation',
-                         result?: T,
-                         show: boolean = true,
-                         message: string = 'An error occurred while performing') {
-    return (error: any): Observable<T> => {
-      const why = `${message} ${operation}: ${error}`;
+  enrollStudents(
+    students: Student[],
+    courseId: string = this.currentCourseSubject.value
+  ): Observable<Student[]> {
+    return from(students).pipe(
+      mergeMap((student: Student) => {
+        // Checking if ADD has been pressed without selecting a student (or modifying the selected one)
+        if (typeof student === 'string') {
+          this.toastrService.error(
+            `${student} is not a valid Student, please select one from the options`,
+            'Error 😅'
+          );
+          return of(null);
+        }
+        return this.http
+          .put<Student>(
+            `${environment.base_courses_url}/${courseId}/enrollOne`,
+            { studentId: student.id },
+            environment.base_http_headers
+          )
+          .pipe(
+            tap(() => {
+              this.toastrService.success(
+                `Enrolled ${Student.displayFn(student)} to ${courseId}`,
+                'Congratulations 😃'
+              );
+              console.log(
+                `enrolled ${Student.displayFn(student)} - enrollStudents()`
+              );
+            }),
+            catchError(
+              handleError<Student>(
+                this.toastrService,
+                `enrollStudents(${Student.displayFn(student)}, ${courseId})`
+              )
+            )
+          );
+      }),
+      toArray()
+    );
+  }
 
-      if (show) {
-        this.toastrService.error(why, 'Error 😅');
-      }
-      console.log(why);
+  enrollWithCsv(
+    formData: FormData,
+    courseId: string = this.currentCourseSubject.value
+  ) {
+    return this.http
+      .put<boolean[]>(
+        `${environment.base_courses_url}/${courseId}/enrollMany`,
+        formData
+      )
+      .pipe(
+        tap((p) => {
+          if (p.includes(false)) {
+            this.toastrService.info(
+              `One or more students were already enrolled in ${courseId}`
+            );
+          } else {
+            this.toastrService.success(
+              `Successfully enrolled one or more students in ${courseId}`,
+              'Congratulations 😃'
+            );
+          }
+        }),
+        catchError(
+          handleError<Professor>(
+            this.toastrService,
+            `enrollWithCsv(csv, ${courseId})`
+          )
+        )
+      );
+  }
 
-      // Let the app keep running by returning an empty result.
-      return of(result as T);
-    };
+  unenrollStudent(student: Student, courseId: string) {
+    return this.http
+      .put<Student>(
+        `${environment.base_courses_url}/${courseId}/removeStudent`,
+        { studentId: student.id },
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((s) => {
+          this.toastrService.success(
+            `Unenrolled ${Student.displayFn(s)} from ${courseId}`,
+            'Congratulations 😃'
+          );
+          console.log(
+            `unenrolled ${Student.displayFn(s)} - unenrollStudents()`
+          );
+        }),
+        catchError(
+          handleError<Student>(
+            this.toastrService,
+            `unenrollStudents(${Student.displayFn(student)}, ${courseId})`
+          )
+        )
+      );
+  }
+
+  /**
+   * Function to unenroll students from a specific course.
+   * Return value is ignored, since the we reload the entire list
+   *
+   * @param(students) the list of students to be unenrolled
+   * @param(course) the objective course
+   */
+  unenrollStudents(
+    students: Student[],
+    courseId: string = this.currentCourseSubject.value
+  ): Observable<Student[]> {
+    return from(students).pipe(
+      mergeMap((student) => {
+        return this.http
+          .put<Student>(
+            `${environment.base_courses_url}/${courseId}/removeStudent`,
+            { studentId: student.id },
+            environment.base_http_headers
+          )
+          .pipe(
+            tap((s) => {
+              this.toastrService.success(
+                `Unenrolled ${Student.displayFn(s)} from ${courseId}`,
+                'Congratulations 😃'
+              );
+              console.log(
+                `unenrolled ${Student.displayFn(s)} - unenrollStudents()`
+              );
+            }),
+            catchError(
+              handleError<Student>(
+                this.toastrService,
+                `unenrollStudents(${Student.displayFn(student)}, ${courseId})`
+              )
+            )
+          );
+      }),
+      toArray()
+    );
+  }
+
+  unenrollStudents2(
+    students: Student[],
+    courseId: string = this.currentCourseSubject.value
+  ) {
+    const studentsString: string[] = [];
+    students.forEach((el) => studentsString.push(el.id));
+    return this.http
+      .put<Student>(
+        `${environment.base_courses_url}/${courseId}/removeStudents`,
+        studentsString,
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((s) => {
+          this.toastrService.success(
+            `Successfully unenrolled one ore more students from ${courseId}`,
+            'Congratulations 😃'
+          );
+        }),
+        catchError(
+          handleError<Student>(this.toastrService, `unenrollStudents failed`)
+        )
+      );
+  }
+
+  removeProfessorFromCourse(
+    professor: Professor,
+    course: Course
+  ): Observable<Professor> {
+    return this.http
+      .put<Professor>(
+        `${environment.base_courses_url}/${course.acronym}/removeProfessor`,
+        { professorId: professor.id },
+        environment.base_http_headers
+      )
+      .pipe(
+        tap((p) => {
+          this.toastrService.success(
+            `Removed ${Professor.displayFn(p)} from ${course.acronym}`,
+            'Congratulations 😃'
+          );
+        }),
+        catchError(
+          handleError<Professor>(
+            this.toastrService,
+            `removeProfessor(${Professor.displayFn(professor)}, ${
+              course.acronym
+            })`
+          )
+        )
+      );
+  }
+
+  createCourse(formData: FormData): Observable<Course> {
+    return this.http.post<Course>(environment.base_courses_url, formData).pipe(
+      tap(() =>
+        this.toastrService.success(
+          `Course ${formData.get('name')} successfully created!`,
+          'Awesome 😃'
+        )
+      ),
+      catchError(
+        handleError<Course>(
+          this.toastrService,
+          `createCourse(${formData.get('name')})`
+        )
+      )
+    );
+  }
+
+  updateCourse(formData: FormData): Observable<Course> {
+    return this.http
+      .put<Course>(
+        `${environment.base_courses_url}/${this.course.value.acronym}`,
+        formData
+      )
+      .pipe(
+        tap((course) => {
+          this.toastrService.success(
+            `Course ${this.course.value.name} successfully updated!`,
+            'Awesome 😃'
+          );
+          this.course.next(course);
+        }),
+        catchError(
+          handleError<Course>(
+            this.toastrService,
+            `updateCourse(${this.course.value.name})`
+          )
+        )
+      );
+  }
+
+  changeCourseStatus(statusRequested: boolean): Observable<boolean> {
+    const enabled = statusRequested ? 'true' : 'false';
+    return this.http
+      .put<any>(
+        `${environment.base_courses_url}/${this.currentCourseSubject.value}/toggle`,
+        { enabled },
+        environment.base_http_headers
+      )
+      .pipe(
+        tap(() =>
+          console.log(`set course to ${statusRequested} - changeCourseStatus()`)
+        ),
+        catchError(
+          handleError<Course>(
+            this.toastrService,
+            `changeCourseStatus(${statusRequested})`
+          )
+        )
+      );
+  }
+
+  deleteCourse(courseAcronym: string = this.course.value.acronym) {
+    return this.http
+      .delete<Course>(`${environment.base_courses_url}/${courseAcronym}`)
+      .pipe(
+        tap(() => console.log(`Course ${courseAcronym} deleted`)),
+        catchError(handleError<Course>(this.toastrService))
+      );
+  }
+
+  createAssignment(formData: FormData): Observable<Assignment> {
+    return this.http
+      .post<Assignment>(
+        `${environment.base_courses_url}/${this.currentCourseSubject.value}/assignments`,
+        formData
+      )
+      .pipe(
+        tap(
+          () =>
+            this.toastrService.success(
+              `Assignment successfully created`,
+              `Awesome 😃`
+            ),
+          catchError(
+            handleError<Assignment>(
+              this.toastrService,
+              `Assignment Creation Failed`
+            )
+          )
+        )
+      );
+  }
+
+  getStudentCourseAssignments(courseAcronym: string): Observable<StudentAssignmentDetails[]> {
+    return this.http
+        .get<StudentAssignmentDetails[]>(
+            `${environment.base_courses_url}/${courseAcronym}/studentAssignments`
+        )
+        .pipe(
+            tap(() =>
+                console.log(
+                    `fetched assignments in course ${courseAcronym} - getCourseAssignments()`
+                )
+            ),
+            catchError(
+                handleError<StudentAssignmentDetails[]>(
+                    this.toastrService,
+                    `getCourseAssignments(${courseAcronym})`
+                )
+            )
+        );
   }
 }

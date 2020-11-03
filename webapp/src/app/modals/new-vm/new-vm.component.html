@@ -1,33 +1,63 @@
 <h1 mat-dialog-title>Create a new VM</h1>
 
 <div mat-dialog-content>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <mat-error *ngIf="vmInvalid">Error while creating VM</mat-error>
+  <form [formGroup]="form">
+    <mat-form-field>
+      <input
+              matInput
+              placeholder="VM Name"
+              type="text"
+              formControlName="name"
+              required
+      />
+      <mat-error>Cannot be empty</mat-error>
+    </mat-form-field>
 
-        <mat-form-field class="full-width-input" hintLabel="Max 40 characters">
-            <input matInput placeholder="Name" type="text" formControlName="name" required>
-            <mat-error>Please provide a valid name</mat-error>
-        </mat-form-field>
+    <label>CPUs:</label>
+    <mat-slider
+            color="primary"
+            formControlName="vCpu"
+            min="1"
+            max="4"
+            step="1"
+            thumbLabel="true"
+            (valueChange)="compareWithCurrentValue($event, 'vCpu')"
+    ></mat-slider>
 
-        <mat-form-field class="full-width-input" hintLabel="Only letters and numbers, no spaces or special characters">
-            <input matInput placeholder="Path" type="text" formControlName="path" required>
-            <mat-error>Please provide a valid path</mat-error>
-        </mat-form-field>
+    <label>RAM (GB):</label>
+    <mat-slider
+            color="primary"
+            formControlName="ram"
+            min="1"
+            max="8"
+            step="1"
+            thumbLabel="true"
+            (valueChange)="compareWithCurrentValue($event, 'ram')"
+    ></mat-slider>
 
-        <label>CPUs:</label>
-        <mat-slider formControlName="cpu" [thumbLabel]="true" min="1" max="6" step="1"></mat-slider>
+    <label>Disk (GB):</label>
+    <mat-slider
+            color="primary"
+            formControlName="disk"
+            min="1"
+            max="20"
+            step="1"
+            thumbLabel="true"
+            (valueChange)="compareWithCurrentValue($event, 'disk')"
+    ></mat-slider>
 
-        <label>RAM (GB):</label>
-        <mat-slider formControlName="ram" [thumbLabel]="true" min="1" max="6" step="0.5"></mat-slider>
-
-        <label>Disk (GB):</label>
-        <mat-slider formControlName="disk" [thumbLabel]="true" min="1" max="15" step="1"></mat-slider>
-
-    </form>
+    <label>
+      <mat-checkbox
+              formControlName="active"
+              (change)="checkActivation()"
+      >
+        Activate new vm?
+      </mat-checkbox>
+    </label>
+  </form>
 </div>
 
 <div mat-dialog-actions align="end">
-    <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
-    <button mat-button color="primary" (click)="onSubmit()">Create</button>
+  <button mat-raised-button color="primary" (click)="createNewVm()">Create</button>
+  <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
 </div>
-

@@ -1,38 +1,43 @@
 <div class="container">
-    <button mat-raised-button color="primary" (click)="newVm()">New VM</button>
-    <mat-divider></mat-divider>
-    <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
-        <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vm of dataSource.data">
-            <mat-card class="mat-elevation-z4">
-                <mat-card-header>
-                    <mat-card-title>VM{{vm.id}} {{vm.name}}</mat-card-title>
-                </mat-card-header>
-                <!--        <img mat-card-image src="./../assets/images/mountains.jpg" />-->
-                <mat-card-content>
-                    VM configuration:
-                    <ul>
-                        <li>
-                            <span class="badge">Path:</span> {{vm.path}}
-                        </li>
-                        <li>
-                            <span class="badge">vCPU:</span> {{vm.vCpu}} in use
-                        </li>
-                        <li>
-                            <span class="badge">RAM:</span> {{vm.ram}}GB
-                        </li>
-                        <li>
-                            <span class="badge">Disk:</span> {{vm.disk}}GB
-                        </li>
-                    </ul>
-                </mat-card-content>
-                <mat-card-actions align="end">
-                    <button mat-raised-button color="primary" (click)="connectToVm(vm.id)">CONNECT</button>
-                    <button mat-raised-button color="warn" (click)="killVm(vm.id)">KILL</button>
-                    <button mat-icon-button (click)="openDialog(vm.id)">
-                        <mat-icon>more_vert</mat-icon>
-                    </button>
-                </mat-card-actions>
-            </mat-card>
+    <div *ngIf="dataSources.length > 0; then list else noList" ></div>
+    <ng-template #list>
+        <div *ngFor="let vpd of dataSources; let i = index">
+            <div class="section-title">
+                <h2>VMs for team: {{vpd.team.name}}</h2>
+                <button mat-raised-button class="centered-button" color="primary" (click)="openDialogTeamOption(vpd)">
+                    Change Team Settings
+                </button>
+            </div>
+
+            <div *ngIf="vpd.vms.length > 0; then vmList else noVm"></div>
+            <ng-template #vmList>
+                <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
+                    <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vm of vpd.vms">
+                        <mat-card class="mat-elevation-z4" [ngClass]="vm.active ? 'active' : 'inactive'">
+                            <mat-card-content>
+                                VM "{{vm.id}} - {{vm.name}}" configuration:
+                                <ul>
+                                    <li>
+                                        <span class="badge">vCPU:</span> {{vm.vcpu}} in use
+                                    </li>
+                                    <li>
+                                        <span class="badge">RAM:</span> {{vm.ram}}GB
+                                    </li>
+                                    <li>
+                                        <span class="badge">Disk:</span> {{vm.diskStorage}}GB
+                                    </li>
+                                </ul>
+                            </mat-card-content>
+                            <mat-card-actions align="end">
+                                <button mat-raised-button [disabled]="!vm.active" color="primary" (click)="connectToVm(vm)">CONNECT</button>
+                            </mat-card-actions>
+                        </mat-card>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template #noVm>This team hasn't created any virtual machine yet</ng-template>
+            <mat-divider></mat-divider>
         </div>
-    </div>
+    </ng-template>
+    <ng-template #noList>No teams have been created for this course yet</ng-template>
 </div>

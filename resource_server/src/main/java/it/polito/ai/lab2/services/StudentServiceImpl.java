@@ -17,7 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,22 +93,46 @@ public class StudentServiceImpl implements StudentService {
     List<TeamProposalDetails> proposalsDetails = new ArrayList<>();
 
     for (Proposal p : proposals) {
+
+      if (p.getStatus() == ProposalStatus.DELETED) {
+        continue;
+      }
+
       TeamProposalDetails tpd = new TeamProposalDetails();
       tpd.setTeamName(teamRepository.getOne(p.getTeamId()).getName());
-      tpd.setProposalCreator(studentRepository.getOne(p.getProposalCreatorId()));
+      Student creator = studentRepository.getOne(p.getProposalCreatorId());
+      tpd.setProposalCreator(creator.getName() + " " + creator.getSurname() + " (" + creator.getId() + ")");
       tpd.setToken(p.getId());
 
-      Map<Student, ProposalStatus> teamApprovalDetails = new HashMap<>();
+      List<String> teamApprovalDetails = new ArrayList<>();
 
       for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
-        teamApprovalDetails.put(studentRepository.getOne(pr.getInvitedUserId()), pr.getStatus());
+        Student s = studentRepository.getOne(pr.getInvitedUserId());
+        if (pr.getStatus() == ProposalStatus.DELETED) {
+          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : REJECTED");
+        } else {
+          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : " + pr.getStatus().name());
+        }
       }
 
       tpd.setMembersAndStatus(teamApprovalDetails);
+      tpd.setDeadline(p.getDeadline());
 
       proposalsDetails.add(tpd);
     }
 
     return proposalsDetails;
+  }
+
+  @Override
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  public List<StudentDTO> getStudentsLike(String pattern) {
+    List<StudentDTO> returnedList = new ArrayList<>();
+    for (StudentDTO s : this.getAllStudents()) {
+      if (s.getSurname().toLowerCase().contains(pattern.toLowerCase())) {
+        returnedList.add(s);
+      }
+    }
+    return returnedList;
   }
 }

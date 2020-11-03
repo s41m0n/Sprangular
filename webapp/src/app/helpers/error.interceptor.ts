@@ -35,8 +35,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         this.authService.logout(false);
         this.router.navigate(['/'], {queryParams: {returnUrl: location.pathname, doLogin: true}});
       }
-      const error = err.error.message || err.statusText;
-      return throwError(error);
+      return throwError(err);
     }));
   }
 }

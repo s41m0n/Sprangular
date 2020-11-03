@@ -22,4 +22,5 @@ public class ProfessorDTO extends RepresentationModel<ProfessorDTO> {
   String surname;
 
   String photoPath;
+
 }

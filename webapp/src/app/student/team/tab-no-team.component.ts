@@ -1,14 +1,23 @@
-import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {MatSort} from '@angular/material/sort';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatTableDataSource} from '@angular/material/table';
-import {FormControl} from '@angular/forms';
-import {Observable, Subject} from 'rxjs';
-import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
-
-import {TeamProposal} from '../../models/team-proposal.model';
-
-import {Student} from '../../models/student.model';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import { FormControl } from '@angular/forms';
+import { Observable, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { TeamProposal } from '../../models/team-proposal.model';
+import { Student } from '../../models/student.model';
+import { Proposal } from '../../models/proposal.model';
+import * as moment from 'moment';
 
 /**
  * TabNoTeamComponent
@@ -18,23 +27,45 @@ import {Student} from '../../models/student.model';
 @Component({
   selector: 'app-tab-no-team',
   templateUrl: './tab-no-team.component.html',
-  styleUrls: ['./tab-no-team.component.css']
+  styleUrls: ['./tab-no-team.component.css'],
 })
 export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
+  minDate = moment(new Date()).format('YYYY-MM-DD');
+  maxDate = moment(this.minDate).add(9, 'M').format('YYYY-MM-DD');
 
+  currentUser: Student;
+  date: string = null;
   chosenMembers: Student[] = [];
-  dataSource = new MatTableDataSource<Student>();                     // Table datasource dynamically modified
-  colsToDisplay = ['select', 'id', 'name', 'surname'];                // Columns to be displayed in the table
-  addStudentControl = new FormControl();                              // Form control to input the user to be enrolled
+  dataSource = new MatTableDataSource<Student>(); // Table datasource dynamically modified
+  dataSourceProposals = new MatTableDataSource<Proposal>();
+  colsToDisplay = ['select', 'id', 'name', 'surname']; // Columns to be displayed in the table
+  colsToDisplayProposals = [
+    'cancel',
+    'proposalCreator',
+    'teamName',
+    'membersAndStatus',
+    'deadline',
+    'select',
+  ];
+  addStudentControl = new FormControl(); // Form control to input the user to be enrolled
   teamNameControl = new FormControl();
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
-  @Output() searchStudentsEvent = new EventEmitter<string>();         // Event emitter for the search students (autocompletions)
-  @Output() submitTeamEvent = new EventEmitter<TeamProposal>();         // Event emitter for the search students (autocompletions)
-  @ViewChild(MatSort, {static: true}) sort: MatSort;                  // Mat sort for the table
-  @ViewChild(MatPaginator) paginator: MatPaginator;                   // Mat paginator for the table
-  @Input() filteredStudents: Observable<Student[]>;                  // List of students matching search criteria
-  @Input() set availableStudents(students: Student[]) {              // Enrolled students to be displayed in the table
-    this.dataSource.data = students;
+  @Output() searchStudentsEvent = new EventEmitter<string>(); // Event emitter for the search students (autocompletions)
+  @Output() submitTeamEvent = new EventEmitter<TeamProposal>(); // Event emitter for the search students (autocompletions)
+  @Output() proposalAcceptedEvent = new EventEmitter<string>();
+  @Output() proposalRejectedEvent = new EventEmitter<string>();
+  @Output() proposalDeletedEvent = new EventEmitter<string>();
+  @ViewChild(MatSort, { static: true }) sort: MatSort; // Mat sort for the table
+  @ViewChild(MatPaginator) paginator: MatPaginator; // Mat paginator for the table
+  @Input() filteredStudents: Observable<Student[]>; // List of students matching search criteria
+  @Input() set availableStudents(students: Student[]) {
+    // Enrolled students to be displayed in the table
+    const userInfo = JSON.parse(localStorage.getItem('currentUser'));
+    this.currentUser = students.find((s) => s.id === userInfo.id);
+    this.dataSource.data = students.filter((s) => s.id !== userInfo.id);
+  }
+  @Input() set proposals(proposals: Proposal[]) {
+    this.dataSourceProposals.data = proposals;
   }
 
   ngOnInit() {
@@ -46,7 +77,8 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
             debounceTime(300),
             // ignore new term if same as previous term
             distinctUntilChanged()
-        ).subscribe((name: string) => this.searchStudentsEvent.emit(name));
+        )
+        .subscribe((name: string) => this.searchStudentsEvent.emit(name));
   }
 
   ngOnDestroy() {
@@ -61,24 +93,89 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
     this.dataSource.sort = this.sort;
   }
 
+  selectDate(date: string) {
+    this.date = date;
+  }
+
   removeWishMember(student: Student) {
-    this.chosenMembers = this.chosenMembers.filter(x => x.id !== student.id);
+    this.chosenMembers = this.chosenMembers.filter((x) => x.id !== student.id);
   }
 
   addWishMember(student: Student) {
-    if (!this.chosenMembers.find(x => x.id === student.id)) {
+    if (!this.chosenMembers.find((x) => x.id === student.id)) {
       this.chosenMembers.push(student);
+      this.addStudentControl.setValue('');
     }
   }
 
   submitTeam() {
-    if (this.teamNameControl.valid && this.chosenMembers.length) {
-      this.submitTeamEvent.emit(new TeamProposal(this.teamNameControl.value, this.chosenMembers));
+    this.chosenMembers.push(this.currentUser);
+    const deadlineDate = new Date(this.date);
+    deadlineDate.setDate(deadlineDate.getDate() + 1);
+    if (
+        this.teamNameControl.valid &&
+        this.chosenMembers.length &&
+        deadlineDate >= new Date()
+    ) {
+      this.submitTeamEvent.emit(
+          new TeamProposal(
+              this.teamNameControl.value,
+              this.chosenMembers.map((x) => x.id),
+              deadlineDate.getTime().toString(10)
+          )
+      );
+      this.chosenMembers = [];
     }
   }
 
   /** Function to set the value displayed in input and mat-options */
   displayFn(student: Student): string {
     return student ? Student.displayFn(student) : '';
+  }
+
+  dateString(statusTs: string): string {
+    const date = new Date(statusTs);
+    return (
+        date.toLocaleDateString('en-GB') +
+        ' at ' +
+        date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    );
+  }
+
+  displayFnMembers(members: string[]): string {
+    let returnedString = '';
+    members.forEach((s) => (returnedString += s + '\n'));
+    return returnedString;
+  }
+
+  acceptProposal(token: string) {
+    this.proposalAcceptedEvent.emit(token);
+  }
+
+  rejectProposal(token: string) {
+    this.proposalRejectedEvent.emit(token);
+  }
+
+  accepted(members: string[]): boolean {
+    if (
+        members.includes(
+            `${this.currentUser.name} ${this.currentUser.surname} (${this.currentUser.id}) : ACCEPTED`
+        )
+    ) {
+      return true;
+    }
+  }
+
+  disabled(members: string[]): boolean {
+    let member: string;
+    for (member of members) {
+      if (member.includes('REJECTED')) {
+        return true;
+      }
+    }
+  }
+
+  deleteProposal(token: string) {
+    this.proposalDeletedEvent.emit(token);
   }
 }

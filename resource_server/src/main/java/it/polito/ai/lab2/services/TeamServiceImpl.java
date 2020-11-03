@@ -6,14 +6,13 @@ import it.polito.ai.lab2.dtos.TeamDTO;
 import it.polito.ai.lab2.entities.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
+import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
-import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,6 +72,22 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
+  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
+  public TeamDetails getTeamOfStudentOfCourse(String studentId, String courseId) {
+    Team team = studentRepository.findById(studentId)
+        .map(student -> student.getTeams().stream()
+            .filter(x -> x.getCourse().getAcronym().equals(courseId))
+            .findFirst()
+            .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+
+    if (team.isActive()) {
+      return modelMapper.map(team, TeamDetails.class);
+    } else {
+      throw new TeamNotFoundException("No team for student" + studentId + " in course " + courseId);
+    }
+  }
+
+  @Override
   @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#teamId))")
   public List<StudentDTO> getTeamMembers(Long teamId) {
     return teamRepository.findById(teamId)
@@ -83,8 +99,8 @@ public class TeamServiceImpl implements TeamService {
 
   @Override
   @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
-  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Timestamp deadline) {
-    if (System.currentTimeMillis() >= deadline.getTime())
+  public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Long deadline) {
+    if (new Timestamp(System.currentTimeMillis()).after(new Timestamp(deadline)))
       throw new InvalidTimestampException("Timestamp before current date");
 
     if (memberIds.stream().distinct().count() != memberIds.size())
@@ -102,7 +118,7 @@ public class TeamServiceImpl implements TeamService {
 
     List<Student> members = studentRepository.findAllById(memberIds);
 
-    if (members.stream().anyMatch(User::isVerified)) {
+    if (members.stream().anyMatch(x -> !x.isVerified())) {
       throw new UserNotVerifiedException("Some student's account is not verified");
     }
 
@@ -114,7 +130,7 @@ public class TeamServiceImpl implements TeamService {
 
     if (members.stream()
         .anyMatch(student -> student.getTeams().stream()
-            .anyMatch(team -> team.getCourse().getAcronym().equals(courseId))))
+            .anyMatch(team -> team.getCourse().getAcronym().equals(courseId) && team.isActive())))
       throw new StudentAlreadyInTeam("Some student is already in a team for the course " + courseId);
 
     Student creator = members.stream()
@@ -137,23 +153,26 @@ public class TeamServiceImpl implements TeamService {
             proposal.setInvitedUserId(member.getId());
             proposal.setTeamId(t.getId());
             proposal.setCourseId(courseId);
-            proposal.setDeadline(deadline);
-            proposal.setStatus(ProposalStatus.PENDING);
+            proposal.setDeadline(new Timestamp(deadline));
+            if(member.getId().equals(creator.getId())) {
+              proposal.setStatus(ProposalStatus.ACCEPTED);
+            } else {
+              proposal.setStatus(ProposalStatus.PENDING);
+            }
             proposalRepository.save(proposal);
           }
       );
       Runnable proposalDeadline = () -> {
         log.info("Deadline for proposal ");
         List<Proposal> proposals = proposalRepository.findAllByTeamId(t.getId());
-        boolean toDelete = proposals.stream()
-            .anyMatch(p -> p.getStatus().equals(ProposalStatus.REJECTED)
-                || p.getStatus().equals(ProposalStatus.PENDING));
-        if (toDelete) {
-          proposals.forEach(proposal -> proposal.setStatus(ProposalStatus.REJECTED));
-          teamRepository.deleteById(t.getId());
-        }
+        proposals.stream()
+            .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
+            .forEach(proposal -> {
+              proposal.setStatus(ProposalStatus.REJECTED);
+              proposalRepository.save(proposal);
+            });
       };
-      scheduler.schedule(proposalDeadline, new CronTrigger(Utility.timestampToCronTrigger(deadline)));
+      scheduler.schedule(proposalDeadline, new Date(deadline));
       notificationService.notifyTeam(t, memberIds, courseId);
     }
     return t;
@@ -182,6 +201,14 @@ public class TeamServiceImpl implements TeamService {
   public List<StudentDTO> getAvailableStudents(String courseId) {
     return courseRepository.getStudentsNotInTeams(courseId).stream()
         .map(student -> modelMapper.map(student, StudentDTO.class))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<StudentDTO> getAvailableStudentsLike(String courseId, String pattern) {
+    return courseRepository.getStudentsNotInTeams(courseId).stream()
+        .map(student -> modelMapper.map(student, StudentDTO.class))
+        .filter(s -> s.getSurname().toLowerCase().contains(pattern.toLowerCase()))
         .collect(Collectors.toList());
   }
 

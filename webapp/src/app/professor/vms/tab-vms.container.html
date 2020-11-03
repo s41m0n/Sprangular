@@ -1,1 +1,7 @@
-<app-tab-professor-vms [vms]="vms"></app-tab-professor-vms>
+<app-tab-professor-vms
+        [vms]="vmBundle"
+        (wipeVmEvent)="wipeVm($event)"
+        (connectVmEvent)="connect($event)"
+        (triggerVmEvent)="triggerVm($event)"
+        (refreshVmList)="refreshVmList()"
+></app-tab-professor-vms>

@@ -1,10 +1,11 @@
 package it.polito.ai.lab2.utility;
 
+import lombok.extern.java.Log;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.util.Calendar;
 
+@Log(topic = "Utility")
 public class Utility {
 
   // File storage directories
@@ -19,15 +20,4 @@ public class Utility {
   public static final String ADMIN_ROLE = "ROLE_ADMIN";
   public static final String PROFESSOR_ROLE = "ROLE_PROFESSOR";
   public static final String STUDENT_ROLE = "ROLE_STUDENT";
-
-  public static String timestampToCronTrigger(Timestamp timestamp) {
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(timestamp.getTime());
-    return calendar.get(Calendar.MINUTE)
-        + " " + calendar.get(Calendar.HOUR)
-        + " " + calendar.get(Calendar.DAY_OF_MONTH)
-        + " " + (calendar.get(Calendar.MONTH) + 1)
-        + " *"
-        + " " + calendar.get(Calendar.YEAR);
-  }
 }

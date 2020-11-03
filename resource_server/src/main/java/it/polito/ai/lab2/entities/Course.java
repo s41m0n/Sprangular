@@ -22,7 +22,6 @@ public class Course {
 
   boolean enabled;
 
-  //@ManyToMany(mappedBy = "courses")
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JoinTable(name = "professor_course", joinColumns = @JoinColumn(name = "course_acronym"), inverseJoinColumns = @JoinColumn(name = "professor_id"))
   List<Professor> professors = new ArrayList<>();
@@ -34,7 +33,7 @@ public class Course {
   @OneToMany(mappedBy = "course")
   List<Team> teams = new ArrayList<>();
 
-  @OneToOne
+  @OneToOne(cascade = {CascadeType.ALL})
   @JoinColumn(name = "vmModel_id")
   VmModel vmModel;
 
