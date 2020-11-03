@@ -131,7 +131,12 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
     this.chosenMembers.push(this.currentUser);
-    const deadlineDate = new Date(this.date);
+    let deadlineDate: Date;
+    if (this.date) {
+      deadlineDate = new Date(this.date);
+    } else {
+      deadlineDate = new Date();
+    }
     deadlineDate.setDate(deadlineDate.getDate() + 1);
     if (
         this.teamNameControl.valid &&
@@ -141,7 +146,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
       this.submitTeamEvent.emit(
           new TeamProposal(
               this.teamNameControl.value,
-              this.chosenMembers.map((x) => x.id),
+              this.chosenMembers.map(x => x.id),
               deadlineDate.getTime().toString(10)
           )
       );

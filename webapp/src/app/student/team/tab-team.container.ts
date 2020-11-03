@@ -79,14 +79,19 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
     this.teamService
       .createTeam(proposal)
       .pipe(first())
-      .subscribe(() => this.refreshProposals());
+      .subscribe(t => {
+        t.members = [];
+        t.members.push(this.availableStudents.find(s => s.id === JSON.parse(localStorage.getItem('currentUser')).id));
+        this.teamService.currentTeamSubject.next(t);
+        this.refreshProposals();
+      });
   }
 
   proposalAccepted(token: string) {
     this.teamService
       .acceptProposal(token)
       .pipe(first())
-      .subscribe((result) => {
+      .subscribe(result => {
         if (result) {
           this.teamService
             .getStudentTeam()

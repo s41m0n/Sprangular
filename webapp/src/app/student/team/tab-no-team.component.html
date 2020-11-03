@@ -200,8 +200,8 @@
       mat-flat-button
       color="primary"
       class="submitter"
-      (click)="submitTeam()"
-    >
+      [disabled]="!teamNameControl.valid || (!this.date && chosenMembers.length > 0) || chosenMembers.length + 1 < course.teamMinSize"
+      (click)="submitTeam()">
       Submit Now
     </button>
     <h2>Colleagues (preview):</h2>

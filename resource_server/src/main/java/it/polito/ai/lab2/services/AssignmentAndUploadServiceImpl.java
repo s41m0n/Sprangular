@@ -197,7 +197,10 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
       throw new RuntimeException("Cannot store the file: " + e.getMessage());
     }
 
-    Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
+    Runnable automaticDelivery = () -> assignment.getSolutions().stream()
+        .filter(as -> as.getStatus().equals(AssignmentStatus.NULL)
+            || as.getStatus().equals(AssignmentStatus.READ)
+            || as.getStatus().equals(AssignmentStatus.REVIEWED_UPLOADABLE)).forEach(
         assignmentSolution -> {
           Timestamp innerCurrentTs = new Timestamp(System.currentTimeMillis());
           assignmentSolution.setStatus(AssignmentStatus.DELIVERED);
