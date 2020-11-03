@@ -58,7 +58,7 @@ import { NewAssignmentUploadDialogComponent } from './modals/new-assignment-uplo
 
 import { RegisterDialogComponent } from './modals/register/register-dialog.component';
 import { MatNativeDateModule } from '@angular/material/core';
-import { VmOwnerDialogComponent } from './modals/vm-owner/vm-owner-dialog.component';
+import { VmOwnersDialogComponent } from './modals/vm-owners/vm-owners-dialog.component';
 import { ImageViewerDialogComponent } from './modals/image-viewer/image-viewer-dialog.component';
 import { NewCourseDialogComponent } from './modals/new-course/new-course-dialog.component';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -95,7 +95,7 @@ import {GradeDialogComponent} from './modals/grade-dialog/grade-dialog.component
     NewVmDialogComponent,
     NewAssignmentUploadDialogComponent,
     RegisterDialogComponent,
-    VmOwnerDialogComponent,
+    VmOwnersDialogComponent,
     ImageViewerDialogComponent,
     NewCourseDialogComponent,
     TabExpandendAssignmentComponent,
@@ -151,7 +151,7 @@ import {GradeDialogComponent} from './modals/grade-dialog/grade-dialog.component
     NewAssignmentUploadDialogComponent,
     NewVmDialogComponent,
     VmOptionsDialogComponent,
-    VmOwnerDialogComponent,
+    VmOwnersDialogComponent,
     ImageViewerDialogComponent,
     EditCourseDialogComponent,
     EditTeamVmOptionsDialogComponent,

@@ -2,11 +2,14 @@ import { EventEmitter, Component, Input, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { first } from 'rxjs/operators';
-import { VmOwnerDialogComponent } from 'src/app/modals/vm-owner/vm-owner-dialog.component';
+import { VmOwnersDialogComponent } from 'src/app/modals/vm-owners/vm-owners-dialog.component';
 import { VM } from '../../models/vm.model';
 import {VmOptionsDialogComponent} from '../../modals/vm-options/vm-options-dialog.component';
 import {ToastrService} from 'ngx-toastr';
 import {AuthService} from '../../services/auth.service';
+import {TeamService} from '../../services/team.service';
+import {VmStudentDetails} from '../../models/vm-student-details.model';
+import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 
 /**
  * StudentsComponent
@@ -19,26 +22,23 @@ import {AuthService} from '../../services/auth.service';
   styleUrls: ['./tab-vms.component.css'],
 })
 export class TabStudentVmsComponent {
-  dataSource = new MatTableDataSource<VM>(); // Table datasource dynamically modified
-  team;
+  dataSource: VmStudentDetails[]; // Table datasource dynamically modified
 
-  @Input() set vms(vms: VM[]) {
-    this.dataSource.data = vms;
-    if (vms && vms.length > 0) {
-      this.team = vms[0].team;
-    }
+  @Input() set vms(vms: VmStudentDetails[]) {
+    this.dataSource = vms;
   }
   @Output() turnVmEvent = new EventEmitter<number>();
-  @Output() addOwnerEvent = new EventEmitter<any>();
+  @Output() editOwnerEvent = new EventEmitter<any>();
   @Output() connectEvent = new EventEmitter<VM>();
   @Output() refreshVmList = new EventEmitter();
 
   constructor(private toastrService: ToastrService,
               private authService: AuthService,
+              private teamService: TeamService,
               public dialog: MatDialog) {}
 
   triggerTurn(vmId: number, enable: boolean) {
-    if (enable && this.dataSource.data.filter((vm) => vm.active).length + 1 > this.team.maxActiveInstances) {
+    if (enable && this.dataSource.filter(vm => vm.vm.active).length + 1 > this.teamService.currentTeamSubject.value.maxActiveInstances) {
       this.toastrService.info(
           `Reached max numbers of active VMs`,
           'Ops! 😅'
@@ -48,14 +48,16 @@ export class TabStudentVmsComponent {
     this.turnVmEvent.emit(vmId);
   }
 
-  addOwner(vm: VM) {
-    const dialogRef = this.dialog.open(VmOwnerDialogComponent);
+  editOwners(vsd: VmStudentDetails) {
+    const dialogRef = this.dialog.open(VmOwnersDialogComponent, {
+      data: {vmDetails: vsd}
+    });
     dialogRef
         .afterClosed()
         .pipe(first())
         .subscribe((result) => {
           if (result) {
-            this.addOwnerEvent.emit({ vmId: vm.id, studentId: result });
+            this.editOwnerEvent.emit({ vmId: vsd.vm.id, studentId: result });
           }
         });
   }
@@ -65,19 +67,19 @@ export class TabStudentVmsComponent {
   }
 
   openDialogVmOption(id: number): void {
-    const selectedVm = this.dataSource.data.find((vm) => vm.id === id);
+    const selectedVm = this.dataSource.find((vm) => vm.vm.id === id);
     const dialogRef = this.dialog.open(VmOptionsDialogComponent, {
       data: {
-        vmId: selectedVm.id,
-        vCpu: selectedVm.vcpu,
-        currentVCpu: this.dataSource.data.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0),
-        maxVCpu: this.team.maxVCpu,
-        ram: selectedVm.ram,
-        currentRam: this.dataSource.data.map(vm => vm.ram).reduce((acc, val) => acc + val, 0),
-        maxRam: this.team.maxRam,
-        disk: selectedVm.diskStorage,
-        currentDisk: this.dataSource.data.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0),
-        maxDisk: this.team.maxDiskStorage
+        vmId: selectedVm.vm.id,
+        vCpu: selectedVm.vm.vcpu,
+        currentVCpu: this.dataSource.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0),
+        maxVCpu: this.teamService.currentTeamSubject.value.maxVCpu,
+        ram: selectedVm.vm.ram,
+        currentRam: this.dataSource.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0),
+        maxRam: this.teamService.currentTeamSubject.value.maxRam,
+        disk: selectedVm.vm.diskStorage,
+        currentDisk: this.dataSource.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0),
+        maxDisk: this.teamService.currentTeamSubject.value.maxDiskStorage
       },
     });
 
@@ -92,8 +94,7 @@ export class TabStudentVmsComponent {
   }
 
   isOwner(vmId: number) {
-    const selectedVm = this.dataSource.data.find((vm) => vm.id === vmId);
-    const currentStudent = this.authService.currentUserValue.id;
-    return !selectedVm.owners.find(stud => stud.id.toString() === currentStudent.toString());
+    return this.dataSource.find((vm) => vm.vm.id === vmId).owners
+        .find(stud => stud.id.toString() === this.authService.currentUserValue.id.toString());
   }
 }

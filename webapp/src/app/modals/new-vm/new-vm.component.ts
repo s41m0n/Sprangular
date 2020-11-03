@@ -5,7 +5,6 @@ import { VmService } from 'src/app/services/vm.service';
 import { VM } from 'src/app/models/vm.model';
 import { first } from 'rxjs/operators';
 import {ToastrService} from 'ngx-toastr';
-import {Subject} from 'rxjs';
 
 @Component({
   selector: 'app-new-vm',
@@ -14,7 +13,6 @@ import {Subject} from 'rxjs';
 })
 export class NewVmDialogComponent implements OnInit {
   form: FormGroup;
-  private destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
       private fb: FormBuilder,
@@ -70,9 +68,7 @@ export class NewVmDialogComponent implements OnInit {
         this.form.get('vCpu').value,
         this.form.get('ram').value,
         this.form.get('disk').value,
-        this.form.get('active').value,
-        {},
-        []
+        this.form.get('active').value
     );
 
     console.log(vm);

@@ -88,10 +88,10 @@ public class VmController {
   }
 
   @ResponseStatus(HttpStatus.OK)
-  @PostMapping("/{vmId}/addOwner")
+  @PostMapping("/{vmId}/editOwner")
   public void addVmOwner(@PathVariable Long vmId, @RequestBody Map<String, String> reqBody) {
     try {
-      vmService.addVmOwner(vmId, reqBody.get("studentId"));
+      vmService.editVmOwner(vmId, reqBody.get("studentId"));
     } catch (VmNotFoundException | TeamNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (VmNotOfTeamException e) {

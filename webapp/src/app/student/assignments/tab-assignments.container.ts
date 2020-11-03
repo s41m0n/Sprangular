@@ -6,7 +6,7 @@ import {StudentService} from '../../services/student.service';
 import {AssignmentSolution} from '../../models/assignment-solution.model';
 import {AuthService} from '../../services/auth.service';
 import {User} from "../../models/user.model";
-import {StudentAssignmentDetails} from '../../models/student-assignment.details';
+import {StudentAssignmentDetails} from '../../models/student-assignment-details.model';
 
 /**
  * AssignmentsContainer

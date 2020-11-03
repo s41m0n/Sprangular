@@ -52,4 +52,9 @@ public class Vm {
     this.getOwners().add(student);
     student.getOwnedVms().add(this);
   }
+
+  public void removeOwner(Student student) {
+    this.getOwners().remove(student);
+    student.getOwnedVms().remove(this);
+  }
 }

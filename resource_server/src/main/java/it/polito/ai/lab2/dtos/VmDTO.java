@@ -23,10 +23,4 @@ public class VmDTO extends RepresentationModel<VmDTO> {
   boolean active;
 
   String imagePath;
-
-  TeamDTO team;
-
-  List<StudentDTO> owners;
-
-  Long teamId;
 }

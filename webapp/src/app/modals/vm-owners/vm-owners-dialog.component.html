@@ -4,12 +4,13 @@
 
     <ul>
       <li *ngFor="let student of members">
-        <button mat-button color="primary" (click)="dialogRef.close(student.id)">{{student.surname + " " + student.name}}</button>
+        <button mat-button [color]="selectColor(student.id)"
+                (click)="dialogRef.close(student.id)">{{student.surname + " " + student.name}}</button>
       </li>
     </ul>
 
 </div>
 
-<div mat-dialog-actions align="end">
+<div mat-dialog-actions style="justify-content: center">
     <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
 </div>

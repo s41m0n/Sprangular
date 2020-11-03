@@ -1,18 +1,18 @@
 <div class="container">
     <div *ngIf="dataSources.length > 0; then list else noList" ></div>
     <ng-template #list>
-        <div *ngFor="let team of teams; let i = index">
+        <div *ngFor="let vpd of dataSources; let i = index">
             <div class="section-title">
-                <h2>VMs for team: {{team.name}}</h2>
-                <button mat-raised-button class="centered-button" color="primary" (click)="openDialogTeamOption(team, i)">
+                <h2>VMs for team: {{vpd.team.name}}</h2>
+                <button mat-raised-button class="centered-button" color="primary" (click)="openDialogTeamOption(vpd)">
                     Change Team Settings
                 </button>
             </div>
 
-            <div *ngIf="dataSources[i] !== undefined && dataSources[i].data.length > 0; then vmList else noVm"></div>
+            <div *ngIf="vpd.vms.length > 0; then vmList else noVm"></div>
             <ng-template #vmList>
                 <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
-                    <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vm of dataSources[i].data">
+                    <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vm of vpd.vms">
                         <mat-card class="mat-elevation-z4" [ngClass]="vm.active ? 'active' : 'inactive'">
                             <mat-card-content>
                                 VM "{{vm.id}} - {{vm.name}}" configuration:
@@ -35,7 +35,7 @@
                     </div>
                 </div>
             </ng-template>
-            <ng-template #noVm>This team hasn't created any virtual machines yet</ng-template>
+            <ng-template #noVm>This team hasn't created any virtual machine yet</ng-template>
             <mat-divider></mat-divider>
         </div>
     </ng-template>

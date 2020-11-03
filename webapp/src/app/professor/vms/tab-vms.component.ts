@@ -5,13 +5,12 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
 import { VM } from '../../models/vm.model';
-import { VmOptionsDialogComponent } from '../../modals/vm-options/vm-options-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { NewVmDialogComponent } from '../../modals/new-vm/new-vm.component';
 import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 import {first} from 'rxjs/operators';
+import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 
 /**
  * VmsComponent
@@ -24,44 +23,34 @@ import {first} from 'rxjs/operators';
   styleUrls: ['./tab-vms.component.css'],
 })
 export class TabProfessorVmsComponent implements AfterViewInit {
-  dataSources = new Array<MatTableDataSource<VM>>();
-  teams = new Set();
-  @Input() set vms(vms: VM[]) {
-    this.dataSources = new Array<MatTableDataSource<VM>>();
-    this.teams = new Set();
-    // VMs to be displayed in the table
-    vms.forEach((vm) => this.teams.add(vm.team.id));
-    this.teams.forEach((team) => {
-      const data = new MatTableDataSource<VM>();
-      data.data = vms.filter((vm) => vm.team.id === team);
-      this.dataSources.push(data);
-    });
+  dataSources: VmProfessorDetails[];
+
+  @Input() set vms(vms: VmProfessorDetails[]) {
+    this.dataSources = vms;
   }
   @Output() wipeVmEvent = new EventEmitter<number>();
   @Output() connectVmEvent = new EventEmitter<VM>();
-  @Output() triggerVmEvent = new EventEmitter<number>();
+  @Output() triggerVmEvent = new EventEmitter<{teamId: number, vmId: number}>();
   @Output() refreshVmList = new EventEmitter();
 
   constructor(public dialog: MatDialog) {}
 
   ngAfterViewInit() {}
 
-  openDialogTeamOption(teamId: number, index: number): void {
-    const vms = this.dataSources[index].data;
-    const teamToChange = vms[0].team;
+  openDialogTeamOption(vpd: VmProfessorDetails): void {
     const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
       data: {
-        teamId: teamToChange.id,
-        maxTotalInstances: teamToChange.maxTotalInstances,
-        currentMaxTotalInstances: vms.length,
-        maxActiveInstances: teamToChange.maxActiveInstances,
-        currentMaxActiveInstances: vms.filter((vm) => vm.active).length,
-        maxVCpu: teamToChange.maxVCpu,
-        currentMaxVCpu: vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0),
-        maxRam: teamToChange.maxRam,
-        currentMaxRam: vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0),
-        maxDiskStorage: teamToChange.maxDiskStorage,
-        currentMaxDiskStorage: vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0)
+        teamId: vpd.team.id,
+        maxTotalInstances: vpd.team.maxTotalInstances,
+        currentMaxTotalInstances: vpd.vms.length,
+        maxActiveInstances: vpd.team.maxActiveInstances,
+        currentMaxActiveInstances: vpd.vms.filter((vm) => vm.active).length,
+        maxVCpu: vpd.team.maxVCpu,
+        currentMaxVCpu: vpd.vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0),
+        maxRam: vpd.team.maxRam,
+        currentMaxRam: vpd.vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0),
+        maxDiskStorage: vpd.team.maxDiskStorage,
+        currentMaxDiskStorage: vpd.vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0)
       },
     });
 
@@ -83,8 +72,8 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     this.connectVmEvent.emit(vm);
   }
 
-  triggerVm(id: number) {
-    this.triggerVmEvent.emit(id);
+  triggerVm(teamId: number, vmId: number) {
+    this.triggerVmEvent.emit({teamId, vmId});
   }
 
   newVm() {

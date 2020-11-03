@@ -7,6 +7,7 @@ import it.polito.ai.lab2.dtos.VmDTO;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.pojos.UpdateVmDetails;
+import it.polito.ai.lab2.pojos.VmStudentDetails;
 import it.polito.ai.lab2.services.NotificationService;
 import it.polito.ai.lab2.services.TeamService;
 import it.polito.ai.lab2.services.VmService;
@@ -87,7 +88,7 @@ public class TeamController {
   }
 
   @GetMapping("/{teamId}/vms")
-  public List<VmDTO> getVmsOfTeam(@PathVariable Long teamId) {
+  public List<VmStudentDetails> getVmsOfTeam(@PathVariable Long teamId) {
     try {
       return vmService.getVmsOfTeam(teamId);
     } catch (TeamNotFoundException e) {

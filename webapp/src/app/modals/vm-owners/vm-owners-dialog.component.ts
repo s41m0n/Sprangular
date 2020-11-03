@@ -7,22 +7,21 @@ import { TeamService } from 'src/app/services/team.service';
 
 @Component({
   selector: 'app-vm-options-modal',
-  templateUrl: './vm-owner-dialog.component.html',
+  templateUrl: './vm-owners-dialog.component.html',
 })
-export class VmOwnerDialogComponent implements OnDestroy {
+export class VmOwnersDialogComponent implements OnDestroy {
   members: Student[];
   private destroy$: Subject<boolean> = new Subject<boolean>(); // Private subject to perform the unsubscriptions when component is destroyed
 
   constructor(
-    public dialogRef: MatDialogRef<VmOwnerDialogComponent>,
+    public dialogRef: MatDialogRef<VmOwnersDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private teamService: TeamService
   ) {
-    console.log(this.teamService.currentTeamSubject.value);
     this.teamService.currentTeamSubject
       .asObservable()
       .pipe(takeUntil(this.destroy$))
-      .subscribe((x) => (this.members = x.members));
+      .subscribe((x) => (this.members = x.members.filter(s => s.id !== JSON.parse(localStorage.getItem('currentUser')).id)));
   }
 
   onNoClick(): void {
@@ -32,5 +31,9 @@ export class VmOwnerDialogComponent implements OnDestroy {
   ngOnDestroy() {
     this.destroy$.next(null);
     this.destroy$.unsubscribe();
+  }
+
+  selectColor(studentId: string) {
+    return this.data.vmDetails.owners.map(s => s.id.toString()).includes(studentId) ? 'warn' : 'primary';
   }
 }

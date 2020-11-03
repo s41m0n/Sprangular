@@ -218,7 +218,7 @@ public class CourseController {
   }
 
   @GetMapping("/{courseId}/vms")
-  public List<VmDTO> getVmsOfCourse(@PathVariable String courseId) {
+  public List<VmProfessorDetails> getVmsOfCourse(@PathVariable String courseId) {
     try {
       return vmService.getVmsOfCourse(courseId);
     } catch (CourseNotFoundException e) {

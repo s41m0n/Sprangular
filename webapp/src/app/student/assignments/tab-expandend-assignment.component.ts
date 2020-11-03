@@ -5,7 +5,7 @@ import {AssignmentStatus} from '../../models/assignment-solution.model';
 import {first} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
-import {StudentAssignmentDetails} from '../../models/student-assignment.details';
+import {StudentAssignmentDetails} from '../../models/student-assignment-details.model';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 

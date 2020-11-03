@@ -9,6 +9,7 @@ import { Course } from '../models/course.model';
 import { VM } from '../models/vm.model';
 import { TeamService } from './team.service';
 import { handleError } from '../helpers/handle.error';
+import {VmStudentDetails} from '../models/vm-student-details.model';
 
 /** Vm service
  *
@@ -100,13 +101,13 @@ export class VmService {
 
     public getTeamVms(
         teamId: number = this.teamService.currentTeamSubject.value.id
-    ): Observable<VM[]> {
+    ): Observable<VmStudentDetails[]> {
         return this.http
-            .get<VM[]>(`${environment.base_teams_url}/${teamId}/vms`)
+            .get<VmStudentDetails[]>(`${environment.base_teams_url}/${teamId}/vms`)
             .pipe(
                 tap(() => console.log(`fetched team ${teamId} vms - getTeamVms()`)),
                 catchError(
-                    handleError<VM[]>(this.toastrService, `getTeamVms(${teamId}`)
+                    handleError<VmStudentDetails[]>(this.toastrService, `getTeamVms(${teamId}`)
                 )
             );
     }
@@ -126,10 +127,10 @@ export class VmService {
             );
     }
 
-    public addOwner(vmId: number, studentId: string): Observable<VM> {
+    public editOwner(vmId: number, studentId: string): Observable<VM> {
         return this.http
             .post<VM>(
-                `${environment.base_vms_url}/${vmId}/addOwner`,
+                `${environment.base_vms_url}/${vmId}/editOwner`,
                 { studentId },
                 environment.base_http_headers
             )
@@ -163,11 +164,12 @@ export class VmService {
         );
     }
 
-    public updateVm(vmId: number, formData: FormData) {
+    public updateVm(vmId: number, vcpu: string, ram: string, diskStorage: string) {
         return this.http
             .put<VM>(
                 `${environment.base_vms_url}/${vmId}`,
-                formData
+                {vcpu, ram, diskStorage},
+                environment.base_http_headers
             ).pipe(
                 tap((vm: VM) => {
                     this.toastrService.success(

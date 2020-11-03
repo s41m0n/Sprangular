@@ -6,6 +6,7 @@ import { first } from 'rxjs/operators';
 import { VmService } from 'src/app/services/vm.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageViewerDialogComponent } from 'src/app/modals/image-viewer/image-viewer-dialog.component';
+import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 
 /**
  * VmsContainer
@@ -17,14 +18,12 @@ import { ImageViewerDialogComponent } from 'src/app/modals/image-viewer/image-vi
   templateUrl: './tab-vms.container.html',
 })
 export class TabProfessorVmsContComponent {
-  mySrc = null;
-  vms: VM[] = []; // The current vms
+  vmBundle: VmProfessorDetails[] = []; // The current vms
 
   constructor(
     public dialog: MatDialog,
     private courseService: CourseService,
-    private vmService: VmService,
-    private sanitizer: DomSanitizer
+    private vmService: VmService
   ) {
     this.refreshVmList();
   }
@@ -33,21 +32,22 @@ export class TabProfessorVmsContComponent {
     this.courseService
       .getCourseVMs(this.courseService.currentCourseSubject.value)
       .pipe(first())
-      .subscribe((vms) => (this.vms = vms));
-  }q
+      .subscribe((vms) => (this.vmBundle = vms));
+  }
 
   wipeVm(vmId: number) {
     this.vmService
       .removeVm(vmId)
       .pipe(first())
-      .subscribe((x) => this.refreshVmList());
+      .subscribe(() => this.refreshVmList());
   }
 
-  triggerVm(id: number) {
+  triggerVm(event: any) {
     this.vmService
-      .triggerVm(id, this.vms.find((vm) => vm.id === id).active)
+      .triggerVm(event.vmId, this.vmBundle.find((vdp) => vdp.team.id === event.teamId).vms
+          .find(vm => vm.id === event.vmId).active)
       .pipe(first())
-      .subscribe((x) => this.refreshVmList());
+      .subscribe(() => this.refreshVmList());
   }
 
   connect(vm: VM) {

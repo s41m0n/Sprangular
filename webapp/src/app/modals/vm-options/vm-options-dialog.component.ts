@@ -35,13 +35,9 @@ export class VmOptionsDialogComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    const formData = new FormData();
-    formData.append('vCpu', this.form.get('vCpu').value);
-    formData.append('ram', this.form.get('ram').value);
-    formData.append('diskStorage', this.form.get('disk').value);
 
     this.vmService
-        .updateVm(this.data.vmId, formData)
+        .updateVm(this.data.vmId, this.form.get('vCpu').value, this.form.get('ram').value, this.form.get('disk').value)
         .pipe(first())
         .subscribe((res) => {
           if (res) {

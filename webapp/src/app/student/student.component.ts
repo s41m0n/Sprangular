@@ -33,12 +33,13 @@ export class StudentComponent implements OnDestroy {
       this.teamService
         .getStudentTeam()
         .pipe(first())
-        .subscribe((team) => this.teamService.currentTeamSubject.next(team));
+        .subscribe(team => team ? this.teamService.currentTeamSubject.next(team) : this.teamService.currentTeamSubject.next(null));
     });
   }
 
   ngOnDestroy(): void {
     this.courseService.setNext(null);
+    this.teamService.currentTeamSubject.next(null);
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
   }

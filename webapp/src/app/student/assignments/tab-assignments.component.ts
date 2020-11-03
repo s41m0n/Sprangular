@@ -3,7 +3,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {first} from 'rxjs/operators';
 import {Upload} from '../../models/upload.model';
-import {StudentAssignmentDetails} from '../../models/student-assignment.details';
+import {StudentAssignmentDetails} from '../../models/student-assignment-details.model';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';

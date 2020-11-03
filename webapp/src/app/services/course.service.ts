@@ -11,7 +11,8 @@ import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
 import { handleError } from '../helpers/handle.error';
-import {StudentAssignmentDetails} from '../models/student-assignment.details';
+import {StudentAssignmentDetails} from '../models/student-assignment-details.model';
+import {VmProfessorDetails} from '../models/vm-professor-details.model';
 
 /**
  * CourseService service
@@ -97,15 +98,15 @@ export class CourseService {
     );
   }
 
-  getCourseVMs(courseId: string): Observable<VM[]> {
+  getCourseVMs(courseId: string): Observable<VmProfessorDetails[]> {
     return this.http
-      .get<VM[]>(`${environment.base_courses_url}/${courseId}/vms`)
+      .get<VmProfessorDetails[]>(`${environment.base_courses_url}/${courseId}/vms`)
       .pipe(
         tap(() =>
           console.log(`fetched course ${courseId} vms - getCourseVMs()`)
         ),
         catchError(
-          handleError<VM[]>(this.toastrService, `getCourseVMs(${courseId})`)
+          handleError<VmProfessorDetails[]>(this.toastrService, `getCourseVMs(${courseId})`)
         )
       );
   }
