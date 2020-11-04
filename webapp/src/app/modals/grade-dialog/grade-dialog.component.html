@@ -10,9 +10,9 @@
                    required/>
             <mat-error>Please provide a valid comment</mat-error>
         </mat-form-field>
+        <div mat-dialog-actions align="center">
+            <button mat-button color="warn" mat-dialog-close>Close</button>
+            <button mat-button color="primary" [disabled]="form.invalid">Evaluate</button>
+        </div>
     </form>
-</div>
-<div mat-dialog-actions style="justify-content: center">
-    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-    <button mat-button color="primary" (click)="onSubmit()">Evaluate</button>
 </div>

@@ -82,7 +82,7 @@
     </mat-form-field>
 
     <div mat-dialog-actions>
-      <button mat-raised-button color="primary">Register</button>
+      <button mat-raised-button [disabled]="form.invalid" color="primary">Register</button>
       <button mat-button mat-dialog-close color="warn">Cancel</button>
     </div>
   </form>

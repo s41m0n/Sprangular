@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Edit Course</h1>
 
 <div mat-dialog-content>
-  <form [formGroup]="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <label>Team Min Size:</label><br />
     <mat-slider
             color="primary"
@@ -80,13 +80,15 @@
       </mat-autocomplete>
     </mat-form-field>
     <button mat-button color="primary" (click)="addProfessor()">Add</button>
+
+    <div mat-dialog-actions style="justify-content: center">
+      <button mat-button mat-dialog-close color="warn">Close</button>
+      <button mat-button color="accent" type="button" (click)="deleteCourse()">
+        Delete Course
+      </button>
+      <button mat-button type="submit" color="primary" [disabled]="form.invalid">Edit</button>
+    </div>
   </form>
 </div>
 
-<div mat-dialog-actions style="justify-content: center">
-  <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-  <button mat-button color="accent" (click)="deleteCourse()">
-    Delete Course
-  </button>
-  <button mat-button color="primary" (click)="editCourse()">Edit</button>
-</div>
+

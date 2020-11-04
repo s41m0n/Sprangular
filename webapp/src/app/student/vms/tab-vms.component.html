@@ -1,7 +1,7 @@
 <div class="container">
-    <div *ngIf="dataSource.length>0 then vmList else noList"></div>
+    <app-tab-professor-team-resources [teamResources]="resources"></app-tab-professor-team-resources>
+    <div *ngIf="dataSource.length > 0 then vmList else noList"></div>
     <ng-template #vmList>
-        <app-tab-professor-team-resources [teamResources]="resources"></app-tab-professor-team-resources>
         <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
             <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vsd of dataSource">
                 <mat-card class="mat-elevation-z4" [ngClass]="vsd.vm.active ? 'active' : 'inactive'">
@@ -47,4 +47,5 @@
     <ng-template #noList>
         <p>Currently your team has not created any virtual machine. Use the button below to create one!</p>
     </ng-template>
+    <button class="newVmButton" mat-raised-button color="primary" [disabled]="checkResourceAvailability()" (click)="createVmEvent.emit()">New VM</button>
 </div>

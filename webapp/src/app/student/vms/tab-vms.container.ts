@@ -16,8 +16,7 @@ import {Subject} from 'rxjs';
  */
 @Component({
   selector: 'app-tab-student-vms-cont',
-  templateUrl: './tab-vms.container.html',
-  styleUrls: ['./tab-vms.container.css'],
+  templateUrl: './tab-vms.container.html'
 })
 export class TabStudentVmsContComponent implements OnInit, OnDestroy {
   vsd: VmStudentDetails[] = []; // The current vms
@@ -118,27 +117,10 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
         });
   }
 
-  checkResourceAvailability() {
-    if (!this.vsd) {
-      return true;
-    }
-    if (this.vsd.length >= this.teamService.currentTeamSubject.value.maxTotalInstances) {
-      return true;
-    }
-
-    const currentMaxVCpu = this.vsd.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0);
-    const currentMaxRam = this.vsd.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0);
-    const currentMaxDiskStorage = this.vsd.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0);
-
-    return !(currentMaxVCpu < this.teamService.currentTeamSubject.value.maxVCpu &&
-        currentMaxRam < this.teamService.currentTeamSubject.value.maxRam &&
-        currentMaxDiskStorage < this.teamService.currentTeamSubject.value.maxDiskStorage);
+  deleteVm(vmId: number) {
+    this.vmService
+        .removeVm(vmId)
+        .pipe(first())
+        .subscribe(() => this.refreshVMs());
   }
-
-    deleteVm(vmId: number) {
-      this.vmService
-          .removeVm(vmId)
-          .pipe(first())
-          .subscribe((_) => this.refreshVMs());
-    }
 }

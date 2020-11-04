@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Create a new VM</h1>
 
 <div mat-dialog-content>
-  <form [formGroup]="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <mat-form-field>
       <input
               matInput
@@ -48,17 +48,18 @@
 
     <label>
       <mat-checkbox
-              color="primar"
+              color="primary"
               formControlName="active"
               (change)="checkActivation()"
       >
         Activate new vm?
       </mat-checkbox>
     </label>
+
+    <div mat-dialog-actions align="end">
+      <button mat-raised-button color="primary" [disabled]="form.invalid">Create</button>
+      <button mat-button color="warn" mat-dialog-close>Back</button>
+    </div>
   </form>
 </div>
 
-<div mat-dialog-actions align="end">
-  <button mat-raised-button color="primary" (click)="createNewVm()">Create</button>
-  <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
-</div>

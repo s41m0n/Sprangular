@@ -43,7 +43,7 @@
 
 <!-- Second toolbar with current selected course name -->
 <mat-toolbar class="subheader">
-  Course: {{ course ? course.name : '❓' }}
+  Course: {{ course ? course.name : '❓' }} {{course && !course.enabled ? '(Disabled)' : ''}}
   <span class="example-fill-remaining-space"></span>
   <button
     mat-icon-button

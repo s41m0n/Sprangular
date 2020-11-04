@@ -232,7 +232,7 @@ public class CourseServiceImpl implements CourseService {
       }
     }
 
-    if(c.getVmModel() != null) {
+    if(c.getVmModel() != null && course.getVmModel() != null) {
       Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
       try {
         Files.delete(oldVmModelPath);
@@ -242,18 +242,20 @@ public class CourseServiceImpl implements CourseService {
       vmModelRepository.delete(c.getVmModel());
     }
 
-    VmModel v = new VmModel();
-    v.setName(c.getAcronym());
-    v.assignToCourse(c);
+    if(course.getVmModel() != null) {
+      VmModel v = new VmModel();
+      v.setName(c.getAcronym());
+      v.assignToCourse(c);
 
-    VmModel savedVmModel = vmModelRepository.save(v);
+      VmModel savedVmModel = vmModelRepository.save(v);
 
-    Path vmModelPath = Utility.VM_MODELS_DIR.resolve(savedVmModel.getId().toString());
-    savedVmModel.setImagePath(vmModelPath.toString());
-    try {
-      Files.copy(course.getVmModel().getInputStream(), vmModelPath, StandardCopyOption.REPLACE_EXISTING);
-    } catch (IOException e) {
-      throw new RuntimeException("Cannot store the file: " + e.getMessage());
+      Path vmModelPath = Utility.VM_MODELS_DIR.resolve(savedVmModel.getId().toString());
+      savedVmModel.setImagePath(vmModelPath.toString());
+      try {
+        Files.copy(course.getVmModel().getInputStream(), vmModelPath, StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException e) {
+        throw new RuntimeException("Cannot store the file: " + e.getMessage());
+      }
     }
 
     c.setTeamMaxSize(course.getTeamMaxSize());

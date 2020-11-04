@@ -55,10 +55,11 @@
       ></ngx-mat-file-input>
       <mat-icon matSuffix>folder</mat-icon>
     </mat-form-field>
-  </form>
-</div>
 
-<div mat-dialog-actions class="centered-buttons">
-  <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-  <button mat-button color="primary" (click)="onSubmit()">Create</button>
+    <div mat-dialog-actions class="centered-buttons">
+      <button mat-button color="warn" mat-dialog-close>Close</button>
+      <button mat-button color="primary" [disabled]="form.invalid">Create</button>
+    </div>
+
+  </form>
 </div>

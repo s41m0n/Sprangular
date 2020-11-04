@@ -23,7 +23,7 @@ export class RegisterDialogComponent implements OnInit {
     this.form = this.fb.group(
       {
         name: ['', Validators.pattern('^[A-Za-z]{1,32}$')],
-        surname: ['', Validators.pattern('^[A-Za-z]{1,32}$')],
+        surname: ['', Validators.pattern('^[A-Za-z,.\'-]{1,32}$')],
         email: ['', Validators.email],
         id: ['', Validators.pattern('^(s|d)[0-9]+$')],
         pic: [''],

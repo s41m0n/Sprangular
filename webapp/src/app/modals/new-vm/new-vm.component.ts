@@ -25,9 +25,9 @@ export class NewVmDialogComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       name: ['', [Validators.minLength(1), Validators.maxLength(256)]],
-      vCpu: [1, [Validators.min(1), Validators.max(4)]],
-      ram: [1, [Validators.min(1), Validators.max(8)]],
-      disk: [1, [Validators.min(1), Validators.max(10)]],
+      vCpu: [1, [Validators.min(1), Validators.max(this.data.maxVCpu - this.data.currentVCpu)]],
+      ram: [1, [Validators.min(1), Validators.max(this.data.maxRam - this.data.currentRam)]],
+      disk: [1, [Validators.min(1), Validators.max(this.data.maxDisk - this.data.currentDisk)]],
       active: [false]
     });
   }
@@ -58,7 +58,7 @@ export class NewVmDialogComponent implements OnInit {
     }
   }
 
-  createNewVm() {
+  onSubmit() {
     if (this.form.invalid) {
       return;
     }
