@@ -76,6 +76,7 @@ public class SprangularBackend {
             Runnable proposalDeadline = () -> {
               log.info("Deadline for proposal ");
               List<Proposal> props = proposalRepository.findAllByTeamId(teamId);
+              props.forEach(p -> p.setValid(false));
               props.stream()
                   .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
                   .forEach(p -> {
@@ -86,6 +87,7 @@ public class SprangularBackend {
             scheduler.schedule(proposalDeadline, new Date(proposal.getDeadline().getTime()));
           }
         } else {
+          proposal.setValid(false);
           proposal.setStatus(ProposalStatus.REJECTED);
           proposalRepository.save(proposal);
         }

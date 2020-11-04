@@ -86,7 +86,7 @@
             mat-icon-button
             color="warn"
             (click)="deleteProposal(row.token)"
-            [disabled]="!disabled(row.membersAndStatus)"
+            [disabled]="row.valid"
           >
             <mat-icon>close</mat-icon>
           </button>
@@ -129,7 +129,7 @@
         <td mat-cell *matCellDef="let row">
           <button
             *ngIf="
-              !accepted(row.membersAndStatus) && !disabled(row.membersAndStatus)
+              !accepted(row.membersAndStatus) && row.valid
             "
             mat-button
             color="primary"
@@ -147,7 +147,7 @@
           </button>
           <button
             *ngIf="
-              !accepted(row.membersAndStatus) && !disabled(row.membersAndStatus)
+              !accepted(row.membersAndStatus) && row.valid
             "
             mat-button
             color="warn"
@@ -156,7 +156,7 @@
             Reject
           </button>
           <button
-            *ngIf="disabled(row.membersAndStatus)"
+            *ngIf="!row.valid"
             mat-button
             color="warn"
             disabled

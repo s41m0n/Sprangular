@@ -108,9 +108,8 @@ public class TeamServiceImpl implements TeamService {
 
     if (!course.isEnabled()) throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
 
-    if (course.getTeams().stream().anyMatch(x -> x.getName().equals(name)
-          && proposalRepository.findAllByTeamId(x.getId()).stream().noneMatch(p ->
-                  p.getStatus().equals(ProposalStatus.REJECTED) || p.getStatus().equals(ProposalStatus.DELETED))))
+    if (course.getTeams().stream().anyMatch(x -> x.getName().equals(name) && (x.isActive()
+          || proposalRepository.findAllByTeamId(x.getId()).stream().allMatch(Proposal::isValid))))
       throw new TeamNameAlreadyInCourseException("Team `" + name + "` already in course `" + courseId + "`");
 
     if (memberIds.size() > course.getTeamMaxSize() || memberIds.size() < course.getTeamMinSize())
@@ -131,8 +130,11 @@ public class TeamServiceImpl implements TeamService {
 
     if (members.stream()
         .anyMatch(student -> student.getTeams().stream()
-            .anyMatch(team -> team.getCourse().getAcronym().equals(courseId) && team.isActive())))
-      throw new StudentAlreadyInTeam("Some student is already in a team for the course " + courseId);
+            .anyMatch(team -> (team.getCourse().getAcronym().equals(courseId) && team.isActive())
+                || proposalRepository.findAllByInvitedUserIdAndCourseId(student.getId(), courseId).stream()
+                  .anyMatch(p -> p.getStatus().equals(ProposalStatus.ACCEPTED) && p.isValid()))))
+      throw new StudentAlreadyInTeam(
+          "Some student is already in a team or accepted another proposal for the course " + courseId);
 
     Student creator = members.stream()
         .filter(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
@@ -160,6 +162,7 @@ public class TeamServiceImpl implements TeamService {
             proposal.setTeamId(t.getId());
             proposal.setCourseId(courseId);
             proposal.setDeadline(new Timestamp(deadline));
+            proposal.setValid(true);
             if(member.getId().equals(creator.getId())) {
               proposal.setStatus(ProposalStatus.ACCEPTED);
             } else {
@@ -171,6 +174,7 @@ public class TeamServiceImpl implements TeamService {
       Runnable proposalDeadline = () -> {
         log.info("Deadline for proposal ");
         List<Proposal> proposals = proposalRepository.findAllByTeamId(t.getId());
+        proposals.forEach(p -> p.setValid(false));
         proposals.stream()
             .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
             .forEach(proposal -> {
@@ -180,6 +184,11 @@ public class TeamServiceImpl implements TeamService {
       };
       scheduler.schedule(proposalDeadline, new Date(deadline));
       notificationService.notifyTeam(t, memberIds, courseId);
+    } else {
+      // Delete all pending proposals since this one is accepted 100%
+      proposalRepository.findAllByInvitedUserIdAndCourseId(creator.getId(), courseId).stream()
+          .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
+          .forEach(p -> notificationService.deleteProposal(p.getId()));
     }
     return t;
   }

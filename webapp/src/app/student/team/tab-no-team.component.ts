@@ -192,15 +192,6 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  disabled(members: string[]): boolean {
-    let member: string;
-    for (member of members) {
-      if (member.includes('REJECTED')) {
-        return true;
-      }
-    }
-  }
-
   deleteProposal(token: string) {
     this.proposalDeletedEvent.emit(token);
   }
