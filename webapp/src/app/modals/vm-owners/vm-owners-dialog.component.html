@@ -2,12 +2,15 @@
 
 <div mat-dialog-content>
 
-    <ul>
+    <ul *ngIf="members.length > 0; else solo">
       <li *ngFor="let student of members">
         <button mat-button [color]="selectColor(student.id)"
                 (click)="dialogRef.close(student.id)">{{student.surname + " " + student.name}}</button>
       </li>
     </ul>
+    <ng-template #solo>
+        <p>You are the only member of the Team</p>
+    </ng-template>
 
 </div>
 

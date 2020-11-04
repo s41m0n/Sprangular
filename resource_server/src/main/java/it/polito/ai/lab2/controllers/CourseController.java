@@ -173,7 +173,7 @@ public class CourseController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (UserNotVerifiedException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    } catch (CourseNotEnabledException e) {
+    } catch (CourseNotEnabledException | StudentAlreadyInCourseException e) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
     }
   }

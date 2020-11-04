@@ -35,7 +35,7 @@
                             <mat-icon>delete</mat-icon>
                         </button>
 
-                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="openDialogVmOption(vsd.vm.id)">
+                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id) || vsd.vm.active" (click)="openDialogVmOption(vsd.vm.id)">
                             <mat-icon>mode_edit</mat-icon>
                         </button>
 
