@@ -274,7 +274,7 @@ public class CourseServiceImpl implements CourseService {
     if (course == null) throw new CourseNotFoundException("Course " + courseId + " does not exist");
 
     if (student.getCourses().contains(course) || !course.isEnabled()) {
-      return false;
+      throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
     }
     if (student.isVerified()) {
       student.addCourse(course);

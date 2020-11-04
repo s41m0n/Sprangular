@@ -165,6 +165,11 @@ public class AssignmentAndUploadServiceImpl implements AssignmentAndUploadServic
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     Professor professor = professorRepository.findById(professorId)
         .orElseThrow(() -> new ProfessorNotFoundException("Professor " + professorId + " does not exist"));
+
+    if(!course.isEnabled()) {
+      throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
+    }
+
     Assignment assignment = new Assignment();
     assignment.setName(details.getName());
     Timestamp currentTs = new Timestamp(System.currentTimeMillis());

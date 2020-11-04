@@ -173,6 +173,8 @@ public class CourseController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (UserNotVerifiedException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    } catch (CourseNotEnabledException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
     }
   }
 
@@ -310,6 +312,8 @@ public class CourseController {
           SecurityContextHolder.getContext().getAuthentication().getName());
     } catch (CourseNotFoundException | ProfessorNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (CourseNotEnabledException e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
     }
   }
 }
