@@ -5,3 +5,8 @@
 .inactive {
     border: solid #ff4d51;
 }
+
+.newVmButton {
+    display: block;
+    margin: 50px auto auto;
+}

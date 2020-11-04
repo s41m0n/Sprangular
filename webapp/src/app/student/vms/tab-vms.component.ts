@@ -1,6 +1,5 @@
 import { EventEmitter, Component, Input, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTableDataSource } from '@angular/material/table';
 import { first } from 'rxjs/operators';
 import { VmOwnersDialogComponent } from 'src/app/modals/vm-owners/vm-owners-dialog.component';
 import { VM } from '../../models/vm.model';
@@ -9,7 +8,6 @@ import {ToastrService} from 'ngx-toastr';
 import {AuthService} from '../../services/auth.service';
 import {TeamService} from '../../services/team.service';
 import {VmStudentDetails} from '../../models/vm-student-details.model';
-import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 import {Resource} from '../../models/resource.model';
 import {ConfirmationDialogComponent} from '../../modals/confirmation-dialog/confirmation-dialog.component';
 
@@ -26,16 +24,21 @@ import {ConfirmationDialogComponent} from '../../modals/confirmation-dialog/conf
 export class TabStudentVmsComponent {
   dataSource: VmStudentDetails[]; // Table datasource dynamically modified
   resources = this.availableTeamResources([]);
+  hasTeam: boolean;
 
   @Input() set vms(vms: VmStudentDetails[]) {
     this.dataSource = vms;
     this.resources  = this.availableTeamResources(vms.map(value => value.vm));
+  }
+  @Input() set inTeam(inTeam: boolean) {
+    this.hasTeam = inTeam;
   }
   @Output() turnVmEvent = new EventEmitter<number>();
   @Output() editOwnerEvent = new EventEmitter<any>();
   @Output() connectEvent = new EventEmitter<VM>();
   @Output() refreshVmList = new EventEmitter();
   @Output() deleteVmEvent = new EventEmitter<number>();
+  @Output() createVmEvent = new EventEmitter();
 
   constructor(private toastrService: ToastrService,
               private authService: AuthService,
@@ -150,5 +153,22 @@ export class TabStudentVmsComponent {
             this.deleteVmEvent.emit(vm.id);
           }
         });
+  }
+
+  checkResourceAvailability() {
+    if (!this.dataSource) {
+      return true;
+    }
+    if (this.dataSource.length >= this.teamService.currentTeamSubject.value.maxTotalInstances) {
+      return true;
+    }
+
+    const currentMaxVCpu = this.dataSource.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0);
+    const currentMaxRam = this.dataSource.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0);
+    const currentMaxDiskStorage = this.dataSource.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0);
+
+    return !(currentMaxVCpu < this.teamService.currentTeamSubject.value.maxVCpu &&
+        currentMaxRam < this.teamService.currentTeamSubject.value.maxRam &&
+        currentMaxDiskStorage < this.teamService.currentTeamSubject.value.maxDiskStorage);
   }
 }
