@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FileInput} from 'ngx-material-file-input';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {CourseService} from '../../services/course.service';
 import {MatDialogRef} from '@angular/material/dialog';
 import {first} from 'rxjs/operators';
@@ -23,7 +23,7 @@ export class NewAssignmentDialogComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
-      title: [''],
+      title: ['', Validators.pattern('^[A-Za-z,.\'-]{1,64}$')],
       doc: [''],
       date: ['']
     });

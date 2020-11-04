@@ -33,7 +33,7 @@
         </mat-form-field>
         <div mat-dialog-actions class="button-centered">
             <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-            <button mat-button color="primary">Publish</button>
+            <button mat-button color="primary" [disabled]="form.invalid">Publish</button>
         </div>
     </form>
 </div>

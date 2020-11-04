@@ -25,7 +25,7 @@ import {ConfirmationDialogComponent} from '../../modals/confirmation-dialog/conf
 })
 export class TabStudentVmsComponent {
   dataSource: VmStudentDetails[]; // Table datasource dynamically modified
-  resources: Resource[];
+  resources = this.availableTeamResources([]);
 
   @Input() set vms(vms: VmStudentDetails[]) {
     this.dataSource = vms;
@@ -105,34 +105,34 @@ export class TabStudentVmsComponent {
 
   availableTeamResources(vms: VM[]) {
     if (vms.length === 0) {
-      return [];
+      vms = undefined;
     }
     const team = this.teamService.currentTeamSubject.value;
     return [
       new Resource(
           '#VMs',
           team.maxTotalInstances,
-          vms.length
+          vms ? vms.length : 0
       ),
       new Resource(
           '#Actives',
           team.maxActiveInstances,
-          vms.filter((vm) => vm.active).length
+          vms ? vms.filter((vm) => vm.active).length : 0
       ),
       new Resource(
           'VCpus',
           team.maxVCpu,
-          vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0)
+          vms ? vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0) : 0
       ),
       new Resource(
           'Ram',
           team.maxRam,
-          vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0)
+          vms ? vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0) : 0
       ),
       new Resource(
           'DiskGB',
           team.maxDiskStorage,
-          vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0)
+          vms ? vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0) : 0
       )
     ];
   }

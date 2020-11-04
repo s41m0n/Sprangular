@@ -48,7 +48,7 @@
 
     <label>
       <mat-checkbox
-              color="primar"
+              color="primary"
               formControlName="active"
               (change)="checkActivation()"
       >
@@ -59,6 +59,6 @@
 </div>
 
 <div mat-dialog-actions align="end">
-  <button mat-raised-button color="primary" (click)="createNewVm()">Create</button>
+  <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="createNewVm()">Create</button>
   <button mat-button color="warn" (click)="dialogRef.close()">Back</button>
 </div>

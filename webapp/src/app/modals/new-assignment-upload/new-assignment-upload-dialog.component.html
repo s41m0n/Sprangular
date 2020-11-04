@@ -28,6 +28,6 @@
 </div>
 <div mat-dialog-actions style="justify-content: center">
     <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-    <button mat-button color="primary" (click)="onSubmit()">Upload</button>
+    <button mat-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">Upload</button>
 </div>
 

@@ -88,5 +88,5 @@
   <button mat-button color="accent" (click)="deleteCourse()">
     Delete Course
   </button>
-  <button mat-button color="primary" (click)="editCourse()">Edit</button>
+  <button mat-button color="primary" [disabled]="form.invalid" (click)="editCourse()">Edit</button>
 </div>

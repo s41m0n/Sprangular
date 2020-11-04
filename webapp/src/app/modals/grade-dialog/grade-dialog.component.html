@@ -14,5 +14,5 @@
 </div>
 <div mat-dialog-actions style="justify-content: center">
     <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-    <button mat-button color="primary" (click)="onSubmit()">Evaluate</button>
+    <button mat-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">Evaluate</button>
 </div>
