@@ -231,14 +231,16 @@ public class CourseServiceImpl implements CourseService {
         throw new CannotUpdateCourseException("Course " + courseId + " cannot be updated: some teams are not compliant with new restrictions");
       }
     }
-
-    Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
-    try {
-      Files.delete(oldVmModelPath);
-    } catch (IOException e) {
-      throw new RuntimeException("Cannot delete the file: " + e.getMessage());
+  
+    if(c.getVmModel() != null) {
+      Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
+      try {
+        Files.delete(oldVmModelPath);
+      } catch (IOException e) {
+        throw new RuntimeException("Cannot delete the file: " + e.getMessage());
+      }
+      vmModelRepository.delete(c.getVmModel());
     }
-    vmModelRepository.delete(c.getVmModel());
 
     VmModel v = new VmModel();
     v.setName(c.getAcronym());

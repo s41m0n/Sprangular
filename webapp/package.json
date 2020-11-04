@@ -26,6 +26,7 @@
     "file-saver": "^2.0.2",
     "json-server-auth": "^2.0.2",
     "moment": "^2.29.1",
+    "ng-circle-progress": "^1.6.0",
     "ngx-material-file-input": "^2.1.1",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",

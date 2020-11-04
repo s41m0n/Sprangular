@@ -25,6 +25,7 @@ import { TabProfessorAssignmentsComponent } from './professor/assignments/tab-as
 import { TabProfessorAssignmentsContComponent } from './professor/assignments/tab-assignments.container';
 import { TabProfessorVmsContComponent } from './professor/vms/tab-vms.container';
 import { TabProfessorVmsComponent } from './professor/vms/tab-vms.component';
+import { TabProfessorVmsTeamResourcesComponent } from './professor/vms/tab-vms-resources.component';
 import { AppRoutingModule } from './app-routing-module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -68,7 +69,8 @@ import { EditCourseDialogComponent } from './modals/edit-course/edit-course-dial
 import { EditTeamVmOptionsDialogComponent } from './modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 import { ConfirmationDialogComponent } from './modals/confirmation-dialog/confirmation-dialog.component';
 import { UploadsDialogComponent } from './modals/uploads/uploads-dialog.component';
-import {GradeDialogComponent} from './modals/grade-dialog/grade-dialog.component';
+import { GradeDialogComponent } from './modals/grade-dialog/grade-dialog.component';
+import { NgCircleProgressModule } from 'ng-circle-progress';
 
 @NgModule({
   declarations: [
@@ -91,6 +93,7 @@ import {GradeDialogComponent} from './modals/grade-dialog/grade-dialog.component
     TabProfessorAssignmentsContComponent,
     TabProfessorVmsComponent,
     TabProfessorVmsContComponent,
+    TabProfessorVmsTeamResourcesComponent,
     VmOptionsDialogComponent,
     NewVmDialogComponent,
     NewAssignmentUploadDialogComponent,
@@ -134,6 +137,15 @@ import {GradeDialogComponent} from './modals/grade-dialog/grade-dialog.component
       progressBar: true,
       timeOut: 3000,
       preventDuplicates: true,
+    }),
+    NgCircleProgressModule.forRoot({
+      // set defaults here
+      radius: 100,
+      outerStrokeWidth: 16,
+      innerStrokeWidth: 8,
+      outerStrokeColor: '#78C000',
+      innerStrokeColor: '#C7E596',
+      animationDuration: 300,
     }),
     MatMenuModule,
     FormsModule,

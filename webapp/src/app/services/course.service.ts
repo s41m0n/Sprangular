@@ -13,6 +13,7 @@ import { environment } from 'src/environments/environment';
 import { handleError } from '../helpers/handle.error';
 import {StudentAssignmentDetails} from '../models/student-assignment-details.model';
 import {VmProfessorDetails} from '../models/vm-professor-details.model';
+import {Team} from "../models/team.model";
 
 /**
  * CourseService service

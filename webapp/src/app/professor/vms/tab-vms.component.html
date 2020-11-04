@@ -9,6 +9,8 @@
                 </button>
             </div>
 
+            <app-tab-professor-team-resources [teamResources]="vpd.resources"></app-tab-professor-team-resources>
+
             <div *ngIf="vpd.vms.length > 0; then vmList else noVm"></div>
             <ng-template #vmList>
                 <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
