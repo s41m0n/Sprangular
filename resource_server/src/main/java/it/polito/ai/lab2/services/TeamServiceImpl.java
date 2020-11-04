@@ -73,7 +73,7 @@ public class TeamServiceImpl implements TeamService {
   public TeamDetails getTeamOfStudentOfCourse(String studentId, String courseId) {
     Team team = studentRepository.findById(studentId)
         .map(student -> student.getTeams().stream()
-            .filter(x -> x.getCourse().getAcronym().equals(courseId))
+            .filter(t -> t.getCourse().getAcronym().equals(courseId) && t.isActive())
             .findFirst()
             .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
