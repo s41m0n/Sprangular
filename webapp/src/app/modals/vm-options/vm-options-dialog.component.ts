@@ -31,7 +31,7 @@ export class VmOptionsDialogComponent implements OnInit {
     });
   }
 
-  editVmSpec() {
+  onSubmit() {
     if (this.form.invalid) {
       return;
     }

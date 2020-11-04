@@ -58,7 +58,7 @@ export class NewVmDialogComponent implements OnInit {
     }
   }
 
-  createNewVm() {
+  onSubmit() {
     if (this.form.invalid) {
       return;
     }

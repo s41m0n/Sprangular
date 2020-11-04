@@ -90,7 +90,7 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
     this.destroy$.unsubscribe();
   }
 
-  editCourse() {
+  onSubmit() {
     if (this.form.invalid) {
       return;
     }
@@ -99,7 +99,9 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
     formData.append('teamMaxSize', this.form.get('teamMaxSize').value);
     formData.append('enabled', this.checked.toString());
     const fileInput: FileInput = this.form.get('vmModel').value;
-    formData.append('vmModel', fileInput.files[0]);
+    if (fileInput) {
+      formData.append('vmModel', fileInput.files[0]);
+    }
 
     this.courseService
       .updateCourse(formData)

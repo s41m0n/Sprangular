@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>VM Options</h1>
 
 <div mat-dialog-content>
-  <form [formGroup]="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <label>Number of vCPUs: {{ this.form.get("vCpu").value }}</label
     ><br />
     <mat-slider
@@ -38,10 +38,10 @@
             (valueChange)='compareWithCurrentValue($event, "disk")'
     >
     </mat-slider>
-  </form>
-</div>
+    <div mat-dialog-actions style="justify-content: center">
+      <button mat-button color="warn" mat-dialog-close>Close</button>
+      <button mat-button color="primary" [disabled]="form.invalid">Set options</button>
+    </div>
 
-<div mat-dialog-actions style="justify-content: center">
-  <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-  <button mat-button color="primary" [disabled]="form.invalid" (click)="editVmSpec()">Set options</button>
+  </form>
 </div>

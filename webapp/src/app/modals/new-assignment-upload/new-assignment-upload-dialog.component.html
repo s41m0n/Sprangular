@@ -24,10 +24,9 @@
         </mat-form-field>
 
         <mat-checkbox *ngIf="isProfessor()" formControlName="reuploadable">Allow Re-Upload</mat-checkbox>
+        <div mat-dialog-actions align="center">
+            <button mat-button color="warn" mat-dialog-close>Close</button>
+            <button mat-button color="primary" [disabled]="form.invalid">Upload</button>
+        </div>
     </form>
 </div>
-<div mat-dialog-actions style="justify-content: center">
-    <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-    <button mat-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">Upload</button>
-</div>
-

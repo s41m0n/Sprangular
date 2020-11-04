@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Edit Team VMs options</h1>
 
 <div mat-dialog-content>
-    <form [formGroup]="form">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <label>Team max number of instances - currently used: {{this.data.currentMaxTotalInstances}}</label><br/>
         <mat-slider
                 color="primary"
@@ -64,10 +64,9 @@
                 (valueChange)='compareWithCurrentValue($event, "maxDiskStorage")'
         >
         </mat-slider>
+        <div mat-dialog-actions align="center" style="margin-bottom: 10px">
+            <button mat-button mat-dialog-close color="warn">Close</button>
+            <button mat-button color="primary" [disabled]="form.invalid">Edit</button>
+        </div>
     </form>
-</div>
-
-<div mat-dialog-actions style="justify-content: center">
-    <button mat-button color="warn" [disabled]="form.invalid" (click)="dialogRef.close()">Close</button>
-    <button mat-button color="primary" (click)="editTeamSpec()">Edit</button>
 </div>

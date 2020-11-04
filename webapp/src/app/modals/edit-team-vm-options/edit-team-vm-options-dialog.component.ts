@@ -35,7 +35,7 @@ export class EditTeamVmOptionsDialogComponent implements OnInit, OnDestroy {
         });
     }
 
-    editTeamSpec() {
+    onSubmit() {
         if (this.form.invalid) {
             return;
         }
