@@ -76,6 +76,7 @@ public class SprangularBackend {
             Runnable proposalDeadline = () -> {
               log.info("Deadline for proposal ");
               List<Proposal> props = proposalRepository.findAllByTeamId(teamId);
+              props.forEach(p -> p.setValid(false));
               props.stream()
                   .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
                   .forEach(p -> {
@@ -86,6 +87,7 @@ public class SprangularBackend {
             scheduler.schedule(proposalDeadline, new Date(proposal.getDeadline().getTime()));
           }
         } else {
+          proposal.setValid(false);
           proposal.setStatus(ProposalStatus.REJECTED);
           proposalRepository.save(proposal);
         }
@@ -116,7 +118,10 @@ public class SprangularBackend {
           if (!programmed.contains(assId)) {
             programmed.add(assId);
             Assignment assignment = assignmentSolution.getAssignment();
-            Runnable automaticDelivery = () -> assignment.getSolutions().forEach(
+            Runnable automaticDelivery = () -> assignment.getSolutions().stream()
+                .filter(as -> as.getStatus().equals(AssignmentStatus.NULL)
+                    || as.getStatus().equals(AssignmentStatus.READ)
+                    || as.getStatus().equals(AssignmentStatus.REVIEWED_UPLOADABLE)).forEach(
                 solution -> {
                   Timestamp currentTs = new Timestamp(System.currentTimeMillis());
                   solution.setStatus(AssignmentStatus.DELIVERED);

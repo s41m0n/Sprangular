@@ -19,4 +19,6 @@ public class TeamProposalDetails {
   List<String> membersAndStatus;
 
   Timestamp deadline;
+
+  boolean valid;
 }

@@ -11,11 +11,9 @@ import java.util.Optional;
 @Repository
 public interface AssignmentSolutionRepository extends JpaRepository<AssignmentSolution, Long> {
 
-  List<AssignmentSolution> findByAssignmentIdAndStatus(Long assignmentId, AssignmentStatus status);
-
   Optional<AssignmentSolution> findByAssignmentIdAndStudentId(Long assignmentId, String studentId);
 
   List<AssignmentSolution> findByStudentId(String studentId);
 
-  List<AssignmentSolution> findAllByStatusIn(List<AssignmentStatus> status);
+  List<AssignmentSolution> findAllByStatusIn(List<AssignmentStatus> statuses);
 }

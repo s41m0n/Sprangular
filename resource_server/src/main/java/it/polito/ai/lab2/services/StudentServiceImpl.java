@@ -9,7 +9,7 @@ import it.polito.ai.lab2.exceptions.CourseNotFoundException;
 import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.pojos.TeamProposalDetails;
 import it.polito.ai.lab2.repositories.*;
-import it.polito.ai.lab2.utility.ProposalStatus;
+import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,7 +54,8 @@ public class StudentServiceImpl implements StudentService {
   PasswordEncoder passwordEncoder;
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
   public Optional<StudentDTO> getStudent(String studentId) {
     return studentRepository.findById(studentId)
         .map(student -> modelMapper.map(student, StudentDTO.class));
@@ -69,7 +70,8 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
   public List<CourseDTO> getStudentCourses(String studentId) {
     return studentRepository.findById(studentId)
         .map(student -> student.getCourses().stream()
@@ -79,10 +81,13 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.isStudentEnrolled(#courseId)")
+  @PreAuthorize("hasRole('ROLE_STUDENT') " +
+      "and @securityServiceImpl.isStudentSelf(#studentId) and @securityServiceImpl.isStudentEnrolled(#courseId)")
   public List<TeamProposalDetails> getProposalsForStudentOfCourse(String studentId, String courseId) {
-    studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
-    Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+    studentRepository.findById(studentId).orElseThrow(
+        () -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+    Course course = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
     List<Proposal> proposals = proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, course.getAcronym());
 
@@ -94,7 +99,7 @@ public class StudentServiceImpl implements StudentService {
 
     for (Proposal p : proposals) {
 
-      if (p.getStatus() == ProposalStatus.DELETED) {
+      if (Utility.isProposalDeleted(p.getStatus())) {
         continue;
       }
 
@@ -108,15 +113,18 @@ public class StudentServiceImpl implements StudentService {
 
       for (Proposal pr : proposalRepository.findAllByTeamId(p.getTeamId())) {
         Student s = studentRepository.getOne(pr.getInvitedUserId());
-        if (pr.getStatus() == ProposalStatus.DELETED) {
-          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : REJECTED");
+        if (Utility.isProposalDeleted(pr.getStatus())) {
+          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : "
+              + Utility.proposalStatusString(pr.getStatus()));
         } else {
-          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : " + pr.getStatus().name());
+          teamApprovalDetails.add(s.getName() + " " + s.getSurname() + " (" + s.getId() + ") : "
+              + pr.getStatus().name());
         }
       }
 
       tpd.setMembersAndStatus(teamApprovalDetails);
       tpd.setDeadline(p.getDeadline());
+      tpd.setValid(p.isValid());
 
       proposalsDetails.add(tpd);
     }

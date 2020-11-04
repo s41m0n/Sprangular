@@ -9,6 +9,7 @@ import { CourseService } from 'src/app/services/course.service';
 import { Team } from 'src/app/models/team.model';
 import { Proposal } from 'src/app/models/proposal.model';
 import { Router } from '@angular/router';
+import {Course} from '../../models/course.model';
 
 /**
  * TabTeamContainer class
@@ -21,6 +22,7 @@ import { Router } from '@angular/router';
 })
 export class TabTeamContComponent implements OnInit, OnDestroy {
   team: Team;
+  course: Course;
   availableStudents: Student[] = []; // The current enrolled list
   filteredStudents: Observable<Student[]>; // The list of students matching a criteria
   proposals: Proposal[] = [];
@@ -35,6 +37,10 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.courseService.course
+        .asObservable()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(c => this.course = c);
     this.courseService
       .getAvailableStudents()
       .pipe(first())
@@ -73,14 +79,21 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
     this.teamService
       .createTeam(proposal)
       .pipe(first())
-      .subscribe(() => this.refreshProposals());
+      .subscribe(t => {
+        if (proposal.studentIds.length === 1) {
+          t.members = [];
+          t.members.push(this.availableStudents.find(s => s.id === JSON.parse(localStorage.getItem('currentUser')).id));
+          this.teamService.currentTeamSubject.next(t);
+        }
+        this.refreshProposals();
+      });
   }
 
   proposalAccepted(token: string) {
     this.teamService
       .acceptProposal(token)
       .pipe(first())
-      .subscribe((result) => {
+      .subscribe(result => {
         if (result) {
           this.teamService
             .getStudentTeam()

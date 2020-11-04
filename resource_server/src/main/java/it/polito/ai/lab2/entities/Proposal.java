@@ -26,6 +26,8 @@ public class Proposal {
 
   Timestamp deadline;
 
+  boolean valid;
+
   @Enumerated(EnumType.STRING)
   ProposalStatus status;
 }

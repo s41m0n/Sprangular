@@ -14,7 +14,6 @@ public class Team {
   @GeneratedValue
   Long id;
 
-  @Column(unique = true)
   String name;
 
   boolean active;

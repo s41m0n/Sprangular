@@ -18,6 +18,8 @@ import { TeamProposal } from '../../models/team-proposal.model';
 import { Student } from '../../models/student.model';
 import { Proposal } from '../../models/proposal.model';
 import * as moment from 'moment';
+import {Course} from '../../models/course.model';
+import {ToastrService} from 'ngx-toastr';
 
 /**
  * TabNoTeamComponent
@@ -34,6 +36,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   maxDate = moment(this.minDate).add(9, 'M').format('YYYY-MM-DD');
 
   currentUser: Student;
+  course: Course;
   date: string = null;
   chosenMembers: Student[] = [];
   dataSource = new MatTableDataSource<Student>(); // Table datasource dynamically modified
@@ -66,6 +69,12 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
   }
   @Input() set proposals(proposals: Proposal[]) {
     this.dataSourceProposals.data = proposals;
+  }
+  @Input() set currentCourse(course: Course) {
+    this.course = course;
+  }
+
+  constructor(private toastrService: ToastrService) {
   }
 
   ngOnInit() {
@@ -103,14 +112,31 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
 
   addWishMember(student: Student) {
     if (!this.chosenMembers.find((x) => x.id === student.id)) {
+      if (this.chosenMembers.length + 2 > this.course.teamMaxSize) {
+        this.toastrService.info(
+            `You already reached the maximum limit for members (MAX ${this.course.teamMaxSize})`,
+            'Ops! Invalid operation 😅');
+        return;
+      }
       this.chosenMembers.push(student);
       this.addStudentControl.setValue('');
     }
   }
 
   submitTeam() {
+    if (this.chosenMembers.length + 1 < this.course.teamMinSize) {
+      this.toastrService.info(
+          `Too few members (MIN ${this.course.teamMinSize})`,
+          'Ops! Invalid operation 😅');
+      return;
+    }
     this.chosenMembers.push(this.currentUser);
-    const deadlineDate = new Date(this.date);
+    let deadlineDate: Date;
+    if (this.date) {
+      deadlineDate = new Date(this.date);
+    } else {
+      deadlineDate = new Date();
+    }
     deadlineDate.setDate(deadlineDate.getDate() + 1);
     if (
         this.teamNameControl.valid &&
@@ -120,7 +146,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
       this.submitTeamEvent.emit(
           new TeamProposal(
               this.teamNameControl.value,
-              this.chosenMembers.map((x) => x.id),
+              this.chosenMembers.map(x => x.id),
               deadlineDate.getTime().toString(10)
           )
       );
@@ -166,16 +192,11 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  disabled(members: string[]): boolean {
-    let member: string;
-    for (member of members) {
-      if (member.includes('REJECTED')) {
-        return true;
-      }
-    }
-  }
-
   deleteProposal(token: string) {
     this.proposalDeletedEvent.emit(token);
+  }
+
+  isPickable(id: string) {
+    return !this.chosenMembers.find(x => x.id === id);
   }
 }

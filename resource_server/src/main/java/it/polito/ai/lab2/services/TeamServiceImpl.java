@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,7 +73,7 @@ public class TeamServiceImpl implements TeamService {
   public TeamDetails getTeamOfStudentOfCourse(String studentId, String courseId) {
     Team team = studentRepository.findById(studentId)
         .map(student -> student.getTeams().stream()
-            .filter(x -> x.getCourse().getAcronym().equals(courseId))
+            .filter(t -> t.getCourse().getAcronym().equals(courseId) && t.isActive())
             .findFirst()
             .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
@@ -106,15 +103,18 @@ public class TeamServiceImpl implements TeamService {
     if (memberIds.stream().distinct().count() != memberIds.size())
       throw new DuplicateStudentInTeam("Some student is already in the group " + name);
 
-    Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+    Course course = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
     if (!course.isEnabled()) throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
 
-    if (course.getTeams().stream().anyMatch(x -> x.getName().equals(name)))
+    if (course.getTeams().stream().anyMatch(x -> x.getName().equals(name) && (x.isActive()
+          || proposalRepository.findAllByTeamId(x.getId()).stream().allMatch(Proposal::isValid))))
       throw new TeamNameAlreadyInCourseException("Team `" + name + "` already in course `" + courseId + "`");
 
     if (memberIds.size() > course.getTeamMaxSize() || memberIds.size() < course.getTeamMinSize())
-      throw new IllegalTeamMemberException("For the course " + courseId + " team must be composed between " + course.getTeamMinSize() + " and " + course.getTeamMaxSize() + " students");
+      throw new IllegalTeamMemberException("For the course " + courseId + " team must be composed between "
+          + course.getTeamMinSize() + " and " + course.getTeamMaxSize() + " students");
 
     List<Student> members = studentRepository.findAllById(memberIds);
 
@@ -130,8 +130,11 @@ public class TeamServiceImpl implements TeamService {
 
     if (members.stream()
         .anyMatch(student -> student.getTeams().stream()
-            .anyMatch(team -> team.getCourse().getAcronym().equals(courseId) && team.isActive())))
-      throw new StudentAlreadyInTeam("Some student is already in a team for the course " + courseId);
+            .anyMatch(team -> (team.getCourse().getAcronym().equals(courseId) && team.isActive())
+                || proposalRepository.findAllByInvitedUserIdAndCourseId(student.getId(), courseId).stream()
+                  .anyMatch(p -> p.getStatus().equals(ProposalStatus.ACCEPTED) && p.isValid()))))
+      throw new StudentAlreadyInTeam(
+          "Some student is already in a team or accepted another proposal for the course " + courseId);
 
     Student creator = members.stream()
         .filter(s -> s.getId().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
@@ -143,6 +146,11 @@ public class TeamServiceImpl implements TeamService {
     team.setCourse(course);
     team.setName(name);
     team.setActive(isAlone);
+    team.setMaxTotalInstances(4);
+    team.setMaxActiveInstances(2);
+    team.setMaxVCpu(4);
+    team.setMaxRam(8);
+    team.setMaxDiskStorage(20);
     TeamDTO t = modelMapper.map(teamRepository.save(team), TeamDTO.class);
     if (!isAlone) {
       members.forEach(
@@ -154,6 +162,7 @@ public class TeamServiceImpl implements TeamService {
             proposal.setTeamId(t.getId());
             proposal.setCourseId(courseId);
             proposal.setDeadline(new Timestamp(deadline));
+            proposal.setValid(true);
             if(member.getId().equals(creator.getId())) {
               proposal.setStatus(ProposalStatus.ACCEPTED);
             } else {
@@ -165,6 +174,7 @@ public class TeamServiceImpl implements TeamService {
       Runnable proposalDeadline = () -> {
         log.info("Deadline for proposal ");
         List<Proposal> proposals = proposalRepository.findAllByTeamId(t.getId());
+        proposals.forEach(p -> p.setValid(false));
         proposals.stream()
             .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
             .forEach(proposal -> {
@@ -174,6 +184,11 @@ public class TeamServiceImpl implements TeamService {
       };
       scheduler.schedule(proposalDeadline, new Date(deadline));
       notificationService.notifyTeam(t, memberIds, courseId);
+    } else {
+      // Delete all pending proposals since this one is accepted 100%
+      proposalRepository.findAllByInvitedUserIdAndCourseId(creator.getId(), courseId).stream()
+          .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
+          .forEach(p -> notificationService.deleteProposal(p.getId()));
     }
     return t;
   }
