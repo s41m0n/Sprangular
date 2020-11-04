@@ -66,6 +66,7 @@ public class NotificationServiceImpl implements NotificationService {
             .forEach(m -> {
               // Delete all proposals since the members are now officially part of a team
               proposalRepository.findAllByInvitedUserIdAndCourseId(m.getId(), proposal.getCourseId())
+                  .stream().filter(p -> !Utility.isProposalDeleted(p.getStatus()))
                   .forEach(p -> deleteProposal(p.getId()));
             });
         proposalRepository.deleteAll(proposalRepository.findAllByTeamId(proposal.getTeamId()));
