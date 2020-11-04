@@ -295,6 +295,7 @@ public class VmServiceImpl implements VmService {
     Course course = courseRepository.findById(courseId)
         .orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
     return course.getTeams().stream()
+        .filter(Team::isActive)
         .map(t -> {
           List<VmDTO> vmDtos = t.getVms().stream()
               .map(vm -> modelMapper.map(vm, VmDTO.class))

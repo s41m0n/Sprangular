@@ -10,6 +10,8 @@ import {AuthService} from '../../services/auth.service';
 import {TeamService} from '../../services/team.service';
 import {VmStudentDetails} from '../../models/vm-student-details.model';
 import {VmProfessorDetails} from '../../models/vm-professor-details.model';
+import {Resource} from '../../models/resource.model';
+import {ConfirmationDialogComponent} from '../../modals/confirmation-dialog/confirmation-dialog.component';
 
 /**
  * StudentsComponent
@@ -23,14 +25,17 @@ import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 })
 export class TabStudentVmsComponent {
   dataSource: VmStudentDetails[]; // Table datasource dynamically modified
+  resources: Resource[];
 
   @Input() set vms(vms: VmStudentDetails[]) {
     this.dataSource = vms;
+    this.resources  = this.availableTeamResources(vms.map(value => value.vm));
   }
   @Output() turnVmEvent = new EventEmitter<number>();
   @Output() editOwnerEvent = new EventEmitter<any>();
   @Output() connectEvent = new EventEmitter<VM>();
   @Output() refreshVmList = new EventEmitter();
+  @Output() deleteVmEvent = new EventEmitter<number>();
 
   constructor(private toastrService: ToastrService,
               private authService: AuthService,
@@ -96,5 +101,54 @@ export class TabStudentVmsComponent {
   isOwner(vmId: number) {
     return this.dataSource.find((vm) => vm.vm.id === vmId).owners
         .find(stud => stud.id.toString() === this.authService.currentUserValue.id.toString());
+  }
+
+  availableTeamResources(vms: VM[]) {
+    if (vms.length === 0) {
+      return [];
+    }
+    const team = this.teamService.currentTeamSubject.value;
+    return [
+      new Resource(
+          '#VMs',
+          team.maxTotalInstances,
+          vms.length
+      ),
+      new Resource(
+          '#Actives',
+          team.maxActiveInstances,
+          vms.filter((vm) => vm.active).length
+      ),
+      new Resource(
+          'VCpus',
+          team.maxVCpu,
+          vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0)
+      ),
+      new Resource(
+          'Ram',
+          team.maxRam,
+          vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0)
+      ),
+      new Resource(
+          'DiskGB',
+          team.maxDiskStorage,
+          vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0)
+      )
+    ];
+  }
+
+  deleteVm(vm: VM) {
+    const confirmRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false,
+    });
+    confirmRef.componentInstance.confirmMessage = `Are you sure you want to delete "${vm.name}" vm?\nThis operation cannot be undone!`;
+    confirmRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.deleteVmEvent.emit(vm.id);
+          }
+        });
   }
 }

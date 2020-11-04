@@ -134,4 +134,11 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
         currentMaxRam < this.teamService.currentTeamSubject.value.maxRam &&
         currentMaxDiskStorage < this.teamService.currentTeamSubject.value.maxDiskStorage);
   }
+
+    deleteVm(vmId: number) {
+      this.vmService
+          .removeVm(vmId)
+          .pipe(first())
+          .subscribe((_) => this.refreshVMs());
+    }
 }

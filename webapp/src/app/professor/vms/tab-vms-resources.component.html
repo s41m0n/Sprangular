@@ -1,0 +1,20 @@
+<h3>Resources currently in use by all team VMs:</h3>
+<div class="section-resources">
+    <div *ngFor="let resource of resources">
+    <circle-progress
+                      [maxPercent]="100"
+                      [percent]="resource.mappedValue"
+                      [subtitle]="resource.name"
+                      [radius]="45"
+                      [outerStrokeWidth]="6"
+                      [innerStrokeWidth]="3"
+                      [outerStrokeColor]="color(resource.mappedValue)[0]"
+                      [innerStrokeColor]="color(resource.mappedValue)[1]"
+                      [animation]="true"
+                      [animationDuration]="300"
+                      [lazy]="false"
+                      [renderOnClick]="false"
+    ></circle-progress>
+        <p style="text-align: center!important;">{{resource.value}}/{{resource.maxValue}}</p>
+    </div>
+</div>

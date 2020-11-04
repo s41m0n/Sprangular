@@ -11,6 +11,7 @@ import { NewVmDialogComponent } from '../../modals/new-vm/new-vm.component';
 import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 import {first} from 'rxjs/operators';
 import {VmProfessorDetails} from '../../models/vm-professor-details.model';
+import {Resource} from '../../models/resource.model';
 
 /**
  * VmsComponent
@@ -26,6 +27,7 @@ export class TabProfessorVmsComponent implements AfterViewInit {
   dataSources: VmProfessorDetails[];
 
   @Input() set vms(vms: VmProfessorDetails[]) {
+    vms.forEach(vm => vm.resources = this.availableTeamResources(vm));
     this.dataSources = vms;
   }
   @Output() wipeVmEvent = new EventEmitter<number>();
@@ -76,10 +78,33 @@ export class TabProfessorVmsComponent implements AfterViewInit {
     this.triggerVmEvent.emit({teamId, vmId});
   }
 
-  newVm() {
-    const newVmDialog = this.dialog.open(NewVmDialogComponent, {
-      width: '300px',
-      data: { teams: ['aggiungere', 'dati'], courses: ['aggiungere', 'dati'] },
-    });
+  availableTeamResources(vpd: VmProfessorDetails) {
+    return [
+      new Resource(
+          '#VMs',
+          vpd.team.maxTotalInstances,
+          vpd.vms ? vpd.vms.length : 0
+      ),
+      new Resource(
+          '#Actives',
+          vpd.team.maxActiveInstances,
+          vpd.vms ? vpd.vms.filter((vm) => vm.active).length : 0
+      ),
+      new Resource(
+          'VCpus',
+          vpd.team.maxVCpu,
+          vpd.vms ? vpd.vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0) : 0
+      ),
+      new Resource(
+          'Ram',
+          vpd.team.maxRam,
+          vpd.vms ? vpd.vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0) : 0
+      ),
+      new Resource(
+          'DiskGB',
+          vpd.team.maxDiskStorage,
+          vpd.vms ? vpd.vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0) : 0
+      )
+    ];
   }
 }

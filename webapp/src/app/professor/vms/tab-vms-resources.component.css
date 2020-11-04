@@ -1,0 +1,12 @@
+div.section-resources {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 32px 16px;
+}
+
+p {
+    text-align: center !important;
+    font-size: larger;
+    color: slategray;
+    border: 1px solid slategray;
+}
