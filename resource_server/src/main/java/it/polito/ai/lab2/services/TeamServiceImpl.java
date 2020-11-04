@@ -144,6 +144,11 @@ public class TeamServiceImpl implements TeamService {
     team.setCourse(course);
     team.setName(name);
     team.setActive(isAlone);
+    team.setMaxTotalInstances(4);
+    team.setMaxActiveInstances(2);
+    team.setMaxVCpu(4);
+    team.setMaxRam(8);
+    team.setMaxDiskStorage(20);
     TeamDTO t = modelMapper.map(teamRepository.save(team), TeamDTO.class);
     if (!isAlone) {
       members.forEach(
