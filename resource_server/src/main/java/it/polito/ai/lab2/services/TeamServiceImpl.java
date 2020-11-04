@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,15 +103,19 @@ public class TeamServiceImpl implements TeamService {
     if (memberIds.stream().distinct().count() != memberIds.size())
       throw new DuplicateStudentInTeam("Some student is already in the group " + name);
 
-    Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+    Course course = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
     if (!course.isEnabled()) throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
 
-    if (course.getTeams().stream().anyMatch(x -> x.getName().equals(name)))
+    if (course.getTeams().stream().anyMatch(x -> x.getName().equals(name)
+          && proposalRepository.findAllByTeamId(x.getId()).stream().noneMatch(p ->
+                  p.getStatus().equals(ProposalStatus.REJECTED) || p.getStatus().equals(ProposalStatus.DELETED))))
       throw new TeamNameAlreadyInCourseException("Team `" + name + "` already in course `" + courseId + "`");
 
     if (memberIds.size() > course.getTeamMaxSize() || memberIds.size() < course.getTeamMinSize())
-      throw new IllegalTeamMemberException("For the course " + courseId + " team must be composed between " + course.getTeamMinSize() + " and " + course.getTeamMaxSize() + " students");
+      throw new IllegalTeamMemberException("For the course " + courseId + " team must be composed between "
+          + course.getTeamMinSize() + " and " + course.getTeamMaxSize() + " students");
 
     List<Student> members = studentRepository.findAllById(memberIds);
 
