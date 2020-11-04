@@ -231,7 +231,7 @@ public class CourseServiceImpl implements CourseService {
         throw new CannotUpdateCourseException("Course " + courseId + " cannot be updated: some teams are not compliant with new restrictions");
       }
     }
-  
+
     if(c.getVmModel() != null) {
       Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
       try {

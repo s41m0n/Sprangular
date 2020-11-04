@@ -11,6 +11,7 @@ import {TeamService} from '../../services/team.service';
 import {VmStudentDetails} from '../../models/vm-student-details.model';
 import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 import {Resource} from '../../models/resource.model';
+import {ConfirmationDialogComponent} from '../../modals/confirmation-dialog/confirmation-dialog.component';
 
 /**
  * StudentsComponent
@@ -34,6 +35,7 @@ export class TabStudentVmsComponent {
   @Output() editOwnerEvent = new EventEmitter<any>();
   @Output() connectEvent = new EventEmitter<VM>();
   @Output() refreshVmList = new EventEmitter();
+  @Output() deleteVmEvent = new EventEmitter<number>();
 
   constructor(private toastrService: ToastrService,
               private authService: AuthService,
@@ -133,5 +135,20 @@ export class TabStudentVmsComponent {
           vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0)
       )
     ];
+  }
+
+  deleteVm(vm: VM) {
+    const confirmRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false,
+    });
+    confirmRef.componentInstance.confirmMessage = `Are you sure you want to delete "${vm.name}" vm?\nThis operation cannot be undone!`;
+    confirmRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.deleteVmEvent.emit(vm.id);
+          }
+        });
   }
 }

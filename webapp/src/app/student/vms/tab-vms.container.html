@@ -4,6 +4,7 @@
   (editOwnerEvent)="editOwner($event)"
   (connectEvent)="connect($event)"
   (refreshVmList)="refreshVMs()"
+  (deleteVmEvent)="deleteVm($event)"
 ></app-tab-student-vms>
 <div *ngIf="inTeam; else single">
   <button mat-raised-button color="primary" [disabled]="checkResourceAvailability()" (click)="newVm()">New VM</button>

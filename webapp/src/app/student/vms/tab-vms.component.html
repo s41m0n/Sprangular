@@ -1,40 +1,50 @@
 <div class="container">
-    <app-tab-professor-team-resources [teamResources]="resources"></app-tab-professor-team-resources>
-    <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
-        <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vsd of dataSource">
-            <mat-card class="mat-elevation-z4" [ngClass]="vsd.vm.active ? 'active' : 'inactive'">
-                <mat-card-content>
-                    VM "{{vsd.vm.id}} - {{vsd.vm.name}}" configuration:
-                    <ul>
-                        <li>
-                            <span class="badge">vCPU:</span> {{vsd.vm.vcpu}} in use
-                        </li>
-                        <li>
-                            <span class="badge">RAM:</span> {{vsd.vm.ram}}GB
-                        </li>
-                        <li>
-                            <span class="badge">Disk:</span> {{vsd.vm.diskStorage}}GB
-                        </li>
-                    </ul>
-                </mat-card-content>
-                <mat-card-actions align="end">
-                    <button mat-raised-button [disabled]="!vsd.vm.active" color="primary" (click)="connectToVm(vsd.vm)">CONNECT TO VM</button>
+    <div *ngIf="dataSource.length>0 then vmList else noList"></div>
+    <ng-template #vmList>
+        <app-tab-professor-team-resources [teamResources]="resources"></app-tab-professor-team-resources>
+        <div class="content" fxLayout="row wrap" fxLayoutGap="16px grid">
+            <div fxFlex="33%" fxFlex.xs="100%" fxFlex.sm="100%" fxFlex.md="50%" *ngFor="let vsd of dataSource">
+                <mat-card class="mat-elevation-z4" [ngClass]="vsd.vm.active ? 'active' : 'inactive'">
+                    <mat-card-content>
+                        VM "{{vsd.vm.id}} - {{vsd.vm.name}}" configuration:
+                        <ul>
+                            <li>
+                                <span class="badge">vCPU:</span> {{vsd.vm.vcpu}} in use
+                            </li>
+                            <li>
+                                <span class="badge">RAM:</span> {{vsd.vm.ram}}GB
+                            </li>
+                            <li>
+                                <span class="badge">Disk:</span> {{vsd.vm.diskStorage}}GB
+                            </li>
+                        </ul>
+                    </mat-card-content>
+                    <mat-card-actions align="end">
+                        <button mat-raised-button [disabled]="!vsd.vm.active" color="primary" (click)="connectToVm(vsd.vm)">CONNECT TO VM</button>
 
-                    <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="editOwners(vsd)">
-                        <mat-icon>person_add</mat-icon>
-                    </button>
+                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="editOwners(vsd)">
+                            <mat-icon>person_add</mat-icon>
+                        </button>
 
-                    <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="triggerTurn(vsd.vm.id, !vsd.vm.active)">
-                        <mat-icon *ngIf="vsd.vm.active">toggle_on</mat-icon>
-                        <mat-icon *ngIf="!vsd.vm.active">toggle_off</mat-icon>
-                    </button>
+                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="triggerTurn(vsd.vm.id, !vsd.vm.active)">
+                            <mat-icon *ngIf="vsd.vm.active">toggle_on</mat-icon>
+                            <mat-icon *ngIf="!vsd.vm.active">toggle_off</mat-icon>
+                        </button>
 
-                    <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="openDialogVmOption(vsd.vm.id)">
-                        <mat-icon>mode_edit</mat-icon>
-                    </button>
+                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id) || vsd.vm.active" (click)="deleteVm(vsd.vm)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
 
-                </mat-card-actions>
-            </mat-card>
+                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="openDialogVmOption(vsd.vm.id)">
+                            <mat-icon>mode_edit</mat-icon>
+                        </button>
+
+                    </mat-card-actions>
+                </mat-card>
+            </div>
         </div>
-    </div>
+    </ng-template>
+    <ng-template #noList>
+        <p>Currently your team has not created any virtual machine. Use the button below to create one!</p>
+    </ng-template>
 </div>
