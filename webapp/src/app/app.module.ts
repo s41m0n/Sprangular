@@ -48,7 +48,6 @@ import { TabStudentVmsComponent } from './student/vms/tab-vms.component';
 import { TabStudentVmsContComponent } from './student/vms/tab-vms.container';
 import { TabStudentAssignmentsComponent } from './student/assignments/tab-assignments.component';
 import { TabStudentAssignmentsContComponent } from './student/assignments/tab-assignments.container';
-import { TabExpandendAssignmentComponent } from './student/assignments/tab-expandend-assignment.component';
 
 import { MatMenuModule } from '@angular/material/menu';
 import { VmOptionsDialogComponent } from './modals/vm-options/vm-options-dialog.component';
@@ -101,7 +100,6 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     VmOwnersDialogComponent,
     ImageViewerDialogComponent,
     NewCourseDialogComponent,
-    TabExpandendAssignmentComponent,
     UserConfirmComponent,
     NewAssignmentDialogComponent,
     EditCourseDialogComponent,

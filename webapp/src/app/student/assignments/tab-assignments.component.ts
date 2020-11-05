@@ -1,12 +1,13 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {first} from 'rxjs/operators';
 import {Upload} from '../../models/upload.model';
 import {StudentAssignmentDetails} from '../../models/student-assignment-details.model';
-import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {MatDialog} from '@angular/material/dialog';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
+import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
+import {first} from 'rxjs/operators';
+import {ActivatedRoute, Router} from '@angular/router';
 
 /**
  * StudentsComponent
@@ -28,8 +29,10 @@ export class TabStudentAssignmentsComponent {
   regularDataSource = new MatTableDataSource<StudentAssignmentDetails>();                     // Table datasource dynamically modified
   expiredDataSource = new MatTableDataSource<StudentAssignmentDetails>();                     // Table datasource dynamically
   colsToDisplay = ['name', 'releaseDate', 'dueDate', 'status', 'statusTs', 'grade', 'document', 'uploads'];
-
-  assignmentUploads: Upload[];
+  innerDataSource = new MatTableDataSource<Upload>();
+  innerColsToDisplay = ['timestamp', 'author', 'comment', 'status', 'download'];
+  canUpload: boolean;
+  expandedElement: StudentAssignmentDetails | null;
 
   @Input() set assignments(assignments: StudentAssignmentDetails[]) {
     this.regularDataSource.data = assignments.filter(
@@ -39,22 +42,51 @@ export class TabStudentAssignmentsComponent {
         assignment => (Date.now() >= Date.parse(assignment.dueDate) || assignment.status === AssignmentStatus.DEFINITIVE)
         && assignment.status !== AssignmentStatus.REVIEWED_UPLOADABLE);
   }
+  @Input() set uploads(uploads: Upload[]) {
+    this.innerDataSource.data = uploads.sort(Upload.compare);
+  }
+  @Output() getUploadsEvent = new EventEmitter<number>();
+  @Output() viewDocumentEvent = new EventEmitter<Upload>();
+  @Output() refreshUploadsEvent = new EventEmitter<number>();
 
-  expandedElement: StudentAssignmentDetails | null;
-
-  constructor(private assignmentService: AssignmentAndUploadService,
-              public dialog: MatDialog) {
+  constructor(public dialog: MatDialog,
+              private router: Router,
+              private route: ActivatedRoute) {
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.studentUpload ? this.newAssignmentSolution(queryParam.studentUpload) : null
+    );
   }
 
-  showUploads(element) {
+  showUploads(element: StudentAssignmentDetails) {
     this.expandedElement = this.expandedElement === element ? null : element;
     if (this.expandedElement === null) {
       return;
     }
-    this.assignmentService.getAssignmentSolutionUploads(element.assignmentSolutionId)
-        .pipe(
-        first()
-    ).subscribe(uploads => this.assignmentUploads = uploads.sort(Upload.compare));
+    this.canUpload = element.status === AssignmentStatus.READ || element.status === AssignmentStatus.REVIEWED_UPLOADABLE;
+    this.getUploadsEvent.emit(element.assignmentSolutionId);
+  }
+
+  viewDocument(upload: Upload) {
+    this.viewDocumentEvent.emit(upload);
+  }
+
+  newAssignmentSolution(assSolId: string) {
+    const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
+        {
+          data: { assignmentSolutionId: assSolId }
+        });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.refreshUploadsEvent.emit(this.expandedElement.assignmentSolutionId);
+            this.expandedElement.status = AssignmentStatus.DELIVERED;
+            this.expandedElement.statusTs = result.timestamp;
+            this.canUpload = false;
+          }
+          this.router.navigate([this.router.url.split('?')[0]]);
+        });
   }
 
   dateString(statusTs: string): string {

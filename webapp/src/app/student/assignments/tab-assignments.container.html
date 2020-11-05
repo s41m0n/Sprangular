@@ -1,1 +1,6 @@
-<app-tab-student-assignments [assignments]="assignments"></app-tab-student-assignments>
+<app-tab-student-assignments [assignments]="assignments"
+                             [uploads]="assignmentUploads"
+                             (getUploadsEvent)="getUploads($event)"
+                             (viewDocumentEvent)="viewDocument($event)"
+                             (refreshUploadsEvent)="refreshUploads($event)">
+</app-tab-student-assignments>

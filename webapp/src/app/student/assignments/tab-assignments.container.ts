@@ -7,6 +7,7 @@ import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer
 import {MatDialog} from '@angular/material/dialog';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Upload} from '../../models/upload.model';
 
 /**
  * AssignmentsContainer
@@ -19,6 +20,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 })
 export class TabStudentAssignmentsContComponent {
   assignments: StudentAssignmentDetails[] = [];
+  assignmentUploads: Upload[] = [];
 
   constructor(private courseService: CourseService,
               private assignmentService: AssignmentAndUploadService,
@@ -55,10 +57,42 @@ export class TabStudentAssignmentsContComponent {
     });
   }
 
+  viewDocument(upload: Upload) {
+    this.assignmentService.getUploadDocument(upload.id).pipe(first()).subscribe(instance => {
+      if (!instance) { return; }
+      const url = URL.createObjectURL(instance);
+      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+        data: {title: `Upload: ${upload.id}`,
+          imageSrc: url,
+          downloadable: true,
+          dl_name: `upload_${upload.id}`
+        }
+      });
+      dialogRef.afterClosed().subscribe(() => {
+        URL.revokeObjectURL(url);
+      });
+    });
+  }
+
   private refreshAssignmentsDetails() {
     this.courseService.getStudentCourseAssignments(this.courseService.course.value.acronym)
         .pipe(first())
         .subscribe(as => this.assignments = as);
+  }
+
+  refreshUploads(assSolId: number) {
+    this.assignmentService.getAssignmentSolutionUploads(assSolId)
+        .pipe(first())
+        .subscribe((uploads) => {
+          this.assignmentUploads = uploads;
+        });
+  }
+
+  getUploads(assSolId: number) {
+    this.assignmentService.getAssignmentSolutionUploads(assSolId)
+        .pipe(
+            first()
+        ).subscribe(uploads => this.assignmentUploads = uploads);
   }
 }
 
