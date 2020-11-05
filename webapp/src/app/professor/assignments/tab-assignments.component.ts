@@ -15,6 +15,8 @@ import {GradeDialogComponent} from '../../modals/grade-dialog/grade-dialog.compo
 import {ActivatedRoute, Router} from '@angular/router';
 import {UploadsDialogComponent} from '../../modals/uploads/uploads-dialog.component';
 import {NewAssignmentDialogComponent} from '../../modals/new-assignment/new-assignment-dialog.component';
+import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
+import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 
 /**
  * AssignmentsComponent
@@ -56,11 +58,16 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
               private sanitizer: DomSanitizer,
               private router: Router,
               private route: ActivatedRoute) {
-    this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.solution
-            ? this.uploadsDialog(queryParam.solution)
-            : null
-    );
+    this.route.queryParams.subscribe((queryParam) => {
+        if (queryParam && queryParam.solution) {
+          this.uploadsDialog(queryParam.solution);
+          if (queryParam.professorUpload) {
+            this.uploadReview(queryParam.solution);
+          } else if (queryParam.professorImage) {
+            this.viewDocument(queryParam.solution, queryParam.professorImage);
+          }
+        }
+    });
 
     this.route.queryParams.subscribe((queryParam) =>
         queryParam && queryParam.addAssignment ? this.newAssignment() : null
@@ -124,12 +131,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     dialogRef
         .afterClosed()
         .pipe(first())
-        .subscribe((res) => {
-          if (res) {
-            const element = this.innerDataSource.data.find(e => e.id === Number.parseInt(id, 10));
-            element.status = res.status;
-            element.statusTs = res.timestamp;
-          }
+        .subscribe(() => {
           this.router.navigate([this.router.url.split('?')[0]]);
         });
   }
@@ -148,5 +150,47 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
           }
           this.router.navigate([this.router.url.split('?')[0]]);
         });
+  }
+
+  uploadReview(assSolId: string) {
+    const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
+        {
+          data: { assignmentSolutionId: assSolId }
+        });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            const element = this.innerDataSource.data.find(e => e.id === Number.parseInt(assSolId, 10));
+            element.status = result.status;
+            element.statusTs = result.timestamp;
+            this.dialog.closeAll();
+            this.router.navigate([this.router.url.split('?')[0]]);
+          } else {
+            this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
+          }
+        });
+  }
+
+  viewDocument(assSolId: string, uploadId: number) {
+    this.assignmentService.getUploadDocument(uploadId).pipe(first()).subscribe(instance => {
+      if (!instance) {
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
+        return;
+      }
+      const url = URL.createObjectURL(instance);
+      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+        data: {title: `Upload: ${uploadId}`,
+          imageSrc: url,
+          downloadable: true,
+          dl_name: `upload_${uploadId}`
+        }
+      });
+      dialogRef.afterClosed().subscribe(() => {
+        URL.revokeObjectURL(url);
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
+      });
+    });
   }
 }

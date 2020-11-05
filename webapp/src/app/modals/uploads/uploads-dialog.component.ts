@@ -30,12 +30,6 @@ export class UploadsDialogComponent {
       @Inject(MAT_DIALOG_DATA) public data: any) {
     this.assignmentService.getAssignmentSolutionUploads(data.id).pipe(first()).subscribe(
         uploads => this.dataSource.data = uploads.sort(Upload.compare));
-    this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.professorUpload ? this.uploadReview() : null
-    );
-    this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.professorImage ? this.viewDocument(queryParam.professorImage) : null
-    );
   }
 
   dateString(statusTs: string): string {
@@ -49,42 +43,5 @@ export class UploadsDialogComponent {
 
   uploadable(): boolean {
     return this.dataSource.data.length > 0 && this.dataSource.data[this.dataSource.data.length - 1].status === AssignmentStatus.DELIVERED;
-  }
-
-  uploadReview() {
-    const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
-        {
-          data: { assignmentSolutionId: this.data.id }
-        });
-    dialogRef
-        .afterClosed()
-        .pipe(first())
-        .subscribe((result) => {
-          if (result) {
-            this.dialogRef.close(result);
-          }
-          this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: this.data.id}});
-        });
-  }
-
-  viewDocument(uploadId: number) {
-    this.assignmentService.getUploadDocument(uploadId).pipe(first()).subscribe(instance => {
-      if (!instance) {
-        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: this.data.id}});
-        return;
-      }
-      const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Upload: ${uploadId}`,
-          imageSrc: url,
-          downloadable: true,
-          dl_name: `upload_${uploadId}`
-        }
-      });
-      dialogRef.afterClosed().subscribe(() => {
-        URL.revokeObjectURL(url);
-        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: this.data.id}});
-      });
-    });
   }
 }
