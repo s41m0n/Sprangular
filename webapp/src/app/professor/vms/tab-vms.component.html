@@ -7,7 +7,7 @@
                 <button mat-raised-button
                         class="centered-button"
                         color="primary"
-                        [routerLink]="'/professor/courses/' + acronym + '/vms'"
+                        [routerLink]=""
                         [queryParams]="{ teamVmOptions: vpd.team.id }">
                     Change Team Settings
                 </button>
@@ -38,7 +38,7 @@
                                 <button mat-raised-button
                                         [disabled]="!vm.active"
                                         color="primary"
-                                        [routerLink]="'/professor/courses/' + acronym + '/vms'"
+                                        [routerLink]=""
                                         [queryParams]="{ professorConnect: vm.id }">CONNECT</button>
                             </mat-card-actions>
                         </mat-card>

@@ -19,7 +19,6 @@ import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-option
 })
 export class TabProfessorVmsContComponent {
   vmBundle: VmProfessorDetails[] = []; // The current vms
-  currentCourse: string;
 
   constructor(
     public dialog: MatDialog,
@@ -28,9 +27,8 @@ export class TabProfessorVmsContComponent {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.courseService.currentCourseSubject.asObservable().subscribe(c => this.currentCourse = c);
     this.courseService
-        .getCourseVMs(this.currentCourse)
+        .getCourseVMs(this.courseService.currentCourseSubject.value)
         .pipe(first())
         .subscribe((vms) => {
           this.vmBundle = vms;
@@ -42,7 +40,7 @@ export class TabProfessorVmsContComponent {
 
   refreshVmList() {
     this.courseService
-      .getCourseVMs(this.currentCourse)
+      .getCourseVMs(this.courseService.currentCourseSubject.value)
       .pipe(first())
       .subscribe((vms) => (this.vmBundle = vms));
   }

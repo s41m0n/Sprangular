@@ -5,7 +5,6 @@ import {MatTableDataSource} from '@angular/material/table';
 
 import {Assignment} from '../../models/assignment.model';
 import {first} from 'rxjs/operators';
-import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {DomSanitizer} from '@angular/platform-browser';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
@@ -76,22 +75,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.expiredDataSource.paginator = this.paginatorBis;
   }
 
-  viewAssignment(assignment: Assignment) {
-    this.assignmentService.getDocument(assignment.id).pipe(first()).subscribe(instance => {
-      if (!instance) { return; }
-      const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Assignment: ${assignment.id} - ${assignment.name}`,
-          imageSrc: url,
-          downloadable: true,
-          dl_name: `assignment_${assignment.id}`
-        }
-      });
-      dialogRef.afterClosed().subscribe(() => {
-        URL.revokeObjectURL(url);
-      });
-    });
-  }
+
 
   showSolutions(row: Assignment) {
     this.expandedElement = this.expandedElement === row ? null : row;

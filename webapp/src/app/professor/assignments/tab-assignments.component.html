@@ -43,7 +43,8 @@
             <td mat-cell *matCellDef="let element">
                 <button mat-raised-button
                         color="primary"
-                        (click)="viewAssignment(element)">
+                        [routerLink]=""
+                        [queryParams]="{ professorAssignment: element.id }">
                     View
                 </button>
             </td>
@@ -159,7 +160,8 @@
             <td mat-cell *matCellDef="let element">
                 <button mat-raised-button
                         color="primary"
-                        (click)="viewAssignment(element)">
+                        [routerLink]=""
+                        [queryParams]="{ professorAssignment: element.id }">
                     View
                 </button>
             </td>

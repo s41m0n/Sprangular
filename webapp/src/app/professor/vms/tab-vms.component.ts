@@ -5,7 +5,6 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { VM } from '../../models/vm.model';
 import { MatDialog } from '@angular/material/dialog';
 import {VmProfessorDetails} from '../../models/vm-professor-details.model';
 import {Resource} from '../../models/resource.model';
@@ -22,14 +21,10 @@ import {Resource} from '../../models/resource.model';
 })
 export class TabProfessorVmsComponent implements AfterViewInit {
   dataSources: VmProfessorDetails[];
-  acronym: string;
 
   @Input() set vms(vms: VmProfessorDetails[]) {
     vms.forEach(vm => vm.resources = this.availableTeamResources(vm));
     this.dataSources = vms;
-  }
-  @Input() set course(acronym: string) {
-    this.acronym = acronym;
   }
   @Output() triggerVmEvent = new EventEmitter<{teamId: number, vmId: number}>();
   @Output() refreshVmList = new EventEmitter();
