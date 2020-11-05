@@ -38,12 +38,12 @@ export class TabStudentVmsComponent {
   @Output() connectEvent = new EventEmitter<VM>();
   @Output() refreshVmList = new EventEmitter();
   @Output() deleteVmEvent = new EventEmitter<number>();
-  @Output() createVmEvent = new EventEmitter();
 
   constructor(private toastrService: ToastrService,
               private authService: AuthService,
               private teamService: TeamService,
-              public dialog: MatDialog) {}
+              public dialog: MatDialog) {
+  }
 
   triggerTurn(vmId: number, enable: boolean) {
     if (enable && this.dataSource.filter(vm => vm.vm.active).length + 1 > this.teamService.currentTeamSubject.value.maxActiveInstances) {

@@ -8,6 +8,7 @@ import { VmService } from 'src/app/services/vm.service';
 import { ImageViewerDialogComponent } from '../../modals/image-viewer/image-viewer-dialog.component';
 import {VmStudentDetails} from '../../models/vm-student-details.model';
 import {Subject} from 'rxjs';
+import {ActivatedRoute, Router} from '@angular/router';
 
 /**
  * VmsContainer
@@ -25,6 +26,8 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
 
   constructor(
       public dialog: MatDialog,
+      private router: Router,
+      private route: ActivatedRoute,
       private teamService: TeamService,
       private vmService: VmService) {
   }
@@ -36,7 +39,14 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
         .subscribe(t => {
           this.inTeam = t !== null;
           if (this.inTeam) {
-            this.refreshVMs();
+            this.vmService
+                .getTeamVms()
+                .pipe(first())
+                .subscribe((vms) => {
+                  this.vsd = vms;
+                  this.route.queryParams.subscribe((queryParam) =>
+                      queryParam && queryParam.newVm ? this.newVm() : null);
+                });
           }
     });
   }
@@ -114,6 +124,7 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
           if (result) {
             this.refreshVMs();
           }
+          this.router.navigate([this.router.url.split('?')[0]]);
         });
   }
 

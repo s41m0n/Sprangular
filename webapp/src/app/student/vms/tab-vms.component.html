@@ -47,5 +47,9 @@
     <ng-template #noList>
         <p>Currently your team has not created any virtual machine. Use the button below to create one!</p>
     </ng-template>
-    <button class="newVmButton" mat-raised-button color="primary" [disabled]="checkResourceAvailability()" (click)="createVmEvent.emit()">New VM</button>
+    <button class="newVmButton"
+            mat-raised-button color="primary"
+            [disabled]="checkResourceAvailability()"
+            [routerLink]=""
+            [queryParams]="{newVm: true}">New VM</button>
 </div>
