@@ -1,10 +1,7 @@
 version: "3"
 services:
   spring-jdbc:
-    build:
-      context: .
-      dockerfile: dockerfile
-    image: sprangular
+    image: sprangular_server
     container_name: spring-server
     ports:
       - "8080:8080"
@@ -12,18 +9,20 @@ services:
       - spring-maria
     depends_on:
       - mariadb
+    restart: on-failure
  
   mariadb:
     image: mariadb
-    container_name: mariadbcomposer
+    container_name: mariadb_compose
     volumes:
-       - "/home/francesco/Università/Applicazioni\ Internet/dbProgetto/:/var/lib/mysql"
+      - "/home/$USER/db:/var/lib/mysql"
     ports:
       - "3306:3306"
     networks:
       - spring-maria
     environment:
-      - MYSQL_ROOT_PASSWORD=root   
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sprangular
 
 networks:
   spring-maria:

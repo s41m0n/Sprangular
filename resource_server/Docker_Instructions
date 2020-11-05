@@ -1,0 +1,7 @@
+
+Istruzioni per dockerizzare server e mariadb:
+- accendere container mariadb normalmente (se non è acceso il package fallisce!!!)
+- fare mvn package del server con il container di mariadb accesso + opzione docker in applications.properties (vedi commenti del file)
+- fare docker build -t sprangular_server .
+- stoppare il container mariadb (altrimenti il composer non va a causa del conflitto di porte!!)
+- lanciare docker-compose up
