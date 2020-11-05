@@ -5,7 +5,6 @@ import {MatTableDataSource} from '@angular/material/table';
 
 import {Assignment} from '../../models/assignment.model';
 import {first} from 'rxjs/operators';
-import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {DomSanitizer} from '@angular/platform-browser';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
@@ -16,6 +15,8 @@ import {GradeDialogComponent} from '../../modals/grade-dialog/grade-dialog.compo
 import {ActivatedRoute, Router} from '@angular/router';
 import {UploadsDialogComponent} from '../../modals/uploads/uploads-dialog.component';
 import {NewAssignmentDialogComponent} from '../../modals/new-assignment/new-assignment-dialog.component';
+import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
+import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 
 /**
  * AssignmentsComponent
@@ -41,6 +42,9 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   innerDataSource = new MatTableDataSource<AssignmentSolutionDetails>();
   colsToDisplay = ['name', 'releaseDate', 'dueDate', 'document', 'solutions']; // Columns to be displayed in the table
   innerColsToDisplay = ['studentName', 'studentSurname', 'studentId', 'status', 'statusTs', 'grade', 'uploads'];
+  expandedElement: Assignment | null;
+  assignmentStatuses = Object.values(AssignmentStatus);
+  filteredStatuses: string[] = [];
   @ViewChild(MatSort, {static: true}) sort: MatSort;                  // Mat sort for the table
   @ViewChild('pagOne') paginator: MatPaginator;                   // Mat paginator for the table
   @ViewChild('pagTwo') paginatorBis: MatPaginator;                   // Mat paginator for the table
@@ -48,23 +52,29 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.activeDataSource.data = assignments.filter(a => Date.now() < Date.parse(a.dueDate)).sort(Assignment.compare);
     this.expiredDataSource.data = assignments.filter(a => Date.now() >= Date.parse(a.dueDate)).sort(Assignment.compare);
   }
-  expandedElement: Assignment | null;
-  assignmentStatuses = Object.values(AssignmentStatus);
-  filteredStatuses: string[] = [];
 
   constructor(public dialog: MatDialog,
               private assignmentService: AssignmentAndUploadService,
               private sanitizer: DomSanitizer,
               private router: Router,
               private route: ActivatedRoute) {
-    this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.solution
-            ? this.uploadsDialog(queryParam.solution)
-            : null
-    );
+    this.route.queryParams.subscribe((queryParam) => {
+        if (queryParam && queryParam.solution) {
+          this.uploadsDialog(queryParam.solution);
+          if (queryParam.professorUpload) {
+            this.uploadReview(queryParam.solution);
+          } else if (queryParam.professorImage) {
+            this.viewDocument(queryParam.solution, queryParam.professorImage);
+          }
+        }
+    });
 
     this.route.queryParams.subscribe((queryParam) =>
         queryParam && queryParam.addAssignment ? this.newAssignment() : null
+    );
+
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.assignGrade ? this.assignGrade(queryParam.assignGrade) : null
     );
   }
 
@@ -74,23 +84,6 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.activeDataSource.sort = this.sort;
     this.expiredDataSource.sort = this.sort;
     this.expiredDataSource.paginator = this.paginatorBis;
-  }
-
-  viewAssignment(assignment: Assignment) {
-    this.assignmentService.getDocument(assignment.id).pipe(first()).subscribe(instance => {
-      if (!instance) { return; }
-      const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Assignment: ${assignment.id} - ${assignment.name}`,
-          imageSrc: url,
-          downloadable: true,
-          dl_name: `assignment_${assignment.id}`
-        }
-      });
-      dialogRef.afterClosed().subscribe(() => {
-        URL.revokeObjectURL(url);
-      });
-    });
   }
 
   showSolutions(row: Assignment) {
@@ -120,18 +113,23 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     return !asd.grade && (asd.status === AssignmentStatus.REVIEWED || asd.status === AssignmentStatus.REVIEWED_UPLOADABLE);
   }
 
-  assignGrade(element: AssignmentSolutionDetails) {
-    const dialogRef = this.dialog.open(GradeDialogComponent, { data: {assignmentSolutionId: element.id.toString()}});
+  assignGrade(assSolId: string) {
+    const dialogRef = this.dialog.open(GradeDialogComponent, { data: {assignmentSolutionId: assSolId}});
     dialogRef.afterClosed().pipe(first()).subscribe(res => {
       if (res) {
+        const element = this.innerDataSource.data.find(e => e.id.toString() === assSolId);
         element.status = res.status;
         element.statusTs = res.statusTs;
         element.grade = res.grade;
       }
+      this.router.navigate([this.router.url.split('?')[0]]);
     });
   }
 
   private uploadsDialog(id: string) {
+    if (this.dialog.openDialogs.length > 0) {
+      return;
+    }
     const dialogRef = this.dialog.open(UploadsDialogComponent, {
       width: '75%',
       data: { id },
@@ -139,12 +137,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     dialogRef
         .afterClosed()
         .pipe(first())
-        .subscribe((res) => {
-          if (res) {
-            const element = this.innerDataSource.data.find(e => e.id === Number.parseInt(id, 10));
-            element.status = res.status;
-            element.statusTs = res.timestamp;
-          }
+        .subscribe(() => {
           this.router.navigate([this.router.url.split('?')[0]]);
         });
   }
@@ -163,5 +156,47 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
           }
           this.router.navigate([this.router.url.split('?')[0]]);
         });
+  }
+
+  uploadReview(assSolId: string) {
+    const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
+        {
+          data: { assignmentSolutionId: assSolId }
+        });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            const element = this.innerDataSource.data.find(e => e.id === Number.parseInt(assSolId, 10));
+            element.status = result.status;
+            element.statusTs = result.timestamp;
+            this.dialog.closeAll();
+            this.router.navigate([this.router.url.split('?')[0]]);
+          } else {
+            this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
+          }
+        });
+  }
+
+  viewDocument(assSolId: string, uploadId: number) {
+    this.assignmentService.getUploadDocument(uploadId).pipe(first()).subscribe(instance => {
+      if (!instance) {
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
+        return;
+      }
+      const url = URL.createObjectURL(instance);
+      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+        data: {title: `Upload: ${uploadId}`,
+          imageSrc: url,
+          downloadable: true,
+          dl_name: `upload_${uploadId}`
+        }
+      });
+      dialogRef.afterClosed().subscribe(() => {
+        URL.revokeObjectURL(url);
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
+      });
+    });
   }
 }

@@ -8,6 +8,7 @@ import {AssignmentStatus} from '../../models/assignment-solution.model';
 import {NewAssignmentUploadDialogComponent} from '../new-assignment-upload/new-assignment-upload-dialog.component';
 import {ImageViewerDialogComponent} from '../image-viewer/image-viewer-dialog.component';
 import {DomSanitizer} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-uploads-dialog',
@@ -23,6 +24,8 @@ export class UploadsDialogComponent {
       public dialog: MatDialog,
       public dialogRef: MatDialogRef<UploadsDialogComponent>,
       public sanitizer: DomSanitizer,
+      private router: Router,
+      private route: ActivatedRoute,
       private assignmentService: AssignmentAndUploadService,
       @Inject(MAT_DIALOG_DATA) public data: any) {
     this.assignmentService.getAssignmentSolutionUploads(data.id).pipe(first()).subscribe(
@@ -40,37 +43,5 @@ export class UploadsDialogComponent {
 
   uploadable(): boolean {
     return this.dataSource.data.length > 0 && this.dataSource.data[this.dataSource.data.length - 1].status === AssignmentStatus.DELIVERED;
-  }
-
-  uploadReview() {
-    const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
-        {
-          data: { assignmentSolutionId: this.data.id }
-        });
-    dialogRef
-        .afterClosed()
-        .pipe(first())
-        .subscribe((result) => {
-          if (result) {
-            this.dialogRef.close(result);
-          }
-        });
-  }
-
-  viewDocument(upload: Upload) {
-    this.assignmentService.getUploadDocument(upload.id).pipe(first()).subscribe(instance => {
-      if (!instance) { return; }
-      const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Upload: ${upload.id}`,
-          imageSrc: url,
-          downloadable: true,
-          dl_name: `upload_${upload.id}`
-        }
-      });
-      dialogRef.afterClosed().subscribe(() => {
-        URL.revokeObjectURL(url);
-      });
-    });
   }
 }

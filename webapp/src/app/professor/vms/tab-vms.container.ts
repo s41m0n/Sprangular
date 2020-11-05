@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { VM } from '../../models/vm.model';
 import { CourseService } from '../../services/course.service';
 import { first } from 'rxjs/operators';
 import { VmService } from 'src/app/services/vm.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageViewerDialogComponent } from 'src/app/modals/image-viewer/image-viewer-dialog.component';
 import {VmProfessorDetails} from '../../models/vm-professor-details.model';
+import {ActivatedRoute, Router} from '@angular/router';
+import {EditTeamVmOptionsDialogComponent} from '../../modals/edit-team-vm-options/edit-team-vm-options-dialog.component';
 
 /**
  * VmsContainer
@@ -23,9 +23,20 @@ export class TabProfessorVmsContComponent {
   constructor(
     public dialog: MatDialog,
     private courseService: CourseService,
-    private vmService: VmService
+    private vmService: VmService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
-    this.refreshVmList();
+    this.courseService
+        .getCourseVMs(this.courseService.currentCourseSubject.value)
+        .pipe(first())
+        .subscribe((vms) => {
+          this.vmBundle = vms;
+          this.route.queryParams.subscribe((queryParam) =>
+              queryParam && queryParam.teamVmOptions ? this.openDialogTeamOption(queryParam.teamVmOptions) : null);
+          this.route.queryParams.subscribe((queryParam) =>
+              queryParam && queryParam.professorConnect ? this.connect(queryParam.professorConnect) : null);
+        });
   }
 
   refreshVmList() {
@@ -33,13 +44,6 @@ export class TabProfessorVmsContComponent {
       .getCourseVMs(this.courseService.currentCourseSubject.value)
       .pipe(first())
       .subscribe((vms) => (this.vmBundle = vms));
-  }
-
-  wipeVm(vmId: number) {
-    this.vmService
-      .removeVm(vmId)
-      .pipe(first())
-      .subscribe(() => this.refreshVmList());
   }
 
   triggerVm(event: any) {
@@ -50,12 +54,42 @@ export class TabProfessorVmsContComponent {
       .subscribe(() => this.refreshVmList());
   }
 
-  connect(vm: VM) {
+  openDialogTeamOption(teamId: string): void {
+    const vpd = this.vmBundle.find(d => d.team.id.toString() === teamId);
+    const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
+      data: {
+        teamId: vpd.team.id,
+        maxTotalInstances: vpd.team.maxTotalInstances,
+        currentMaxTotalInstances: vpd.vms.length,
+        maxActiveInstances: vpd.team.maxActiveInstances,
+        currentMaxActiveInstances: vpd.vms.filter((vm) => vm.active).length,
+        maxVCpu: vpd.team.maxVCpu,
+        currentMaxVCpu: vpd.vms.map(vm => vm.vcpu).reduce((acc, val) => acc + val, 0),
+        maxRam: vpd.team.maxRam,
+        currentMaxRam: vpd.vms.map(vm => vm.ram).reduce((acc, val) => acc + val, 0),
+        maxDiskStorage: vpd.team.maxDiskStorage,
+        currentMaxDiskStorage: vpd.vms.map(vm => vm.diskStorage).reduce((acc, val) => acc + val, 0)
+      },
+    });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.refreshVmList();
+          }
+          this.router.navigate([this.router.url.split('?')[0]]);
+        });
+  }
+
+  connect(vmId: string) {
+    const vm = this.vmBundle.find(vpd => vpd.vms.some(v => v.id.toString() === vmId)).vms.find(v => v.id.toString() === vmId);
     this.vmService
       .getInstance(vm.id)
       .pipe(first())
       .subscribe((instance) => {
         if (!instance) {
+          this.router.navigate([this.router.url.split('?')[0]]);
           return;
         }
         const url = URL.createObjectURL(instance);
@@ -68,6 +102,7 @@ export class TabProfessorVmsContComponent {
         });
         dialogRef.afterClosed().subscribe(() => {
           URL.revokeObjectURL(url);
+          this.router.navigate([this.router.url.split('?')[0]]);
         });
       });
   }

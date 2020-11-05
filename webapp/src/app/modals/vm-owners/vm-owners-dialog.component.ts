@@ -24,10 +24,6 @@ export class VmOwnersDialogComponent implements OnDestroy {
       .subscribe((x) => (this.members = x.members.filter(s => s.id !== JSON.parse(localStorage.getItem('currentUser')).id)));
   }
 
-  onNoClick(): void {
-    this.dialogRef.close(this.data);
-  }
-
   ngOnDestroy() {
     this.destroy$.next(null);
     this.destroy$.unsubscribe();

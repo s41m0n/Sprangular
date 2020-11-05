@@ -1,9 +1,7 @@
 import { EventEmitter, Component, Input, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { first } from 'rxjs/operators';
-import { VmOwnersDialogComponent } from 'src/app/modals/vm-owners/vm-owners-dialog.component';
 import { VM } from '../../models/vm.model';
-import {VmOptionsDialogComponent} from '../../modals/vm-options/vm-options-dialog.component';
 import {ToastrService} from 'ngx-toastr';
 import {AuthService} from '../../services/auth.service';
 import {TeamService} from '../../services/team.service';
@@ -34,16 +32,13 @@ export class TabStudentVmsComponent {
     this.hasTeam = inTeam;
   }
   @Output() turnVmEvent = new EventEmitter<number>();
-  @Output() editOwnerEvent = new EventEmitter<any>();
-  @Output() connectEvent = new EventEmitter<VM>();
-  @Output() refreshVmList = new EventEmitter();
   @Output() deleteVmEvent = new EventEmitter<number>();
-  @Output() createVmEvent = new EventEmitter();
 
   constructor(private toastrService: ToastrService,
               private authService: AuthService,
               private teamService: TeamService,
-              public dialog: MatDialog) {}
+              public dialog: MatDialog) {
+  }
 
   triggerTurn(vmId: number, enable: boolean) {
     if (enable && this.dataSource.filter(vm => vm.vm.active).length + 1 > this.teamService.currentTeamSubject.value.maxActiveInstances) {
@@ -54,51 +49,6 @@ export class TabStudentVmsComponent {
       return;
     }
     this.turnVmEvent.emit(vmId);
-  }
-
-  editOwners(vsd: VmStudentDetails) {
-    const dialogRef = this.dialog.open(VmOwnersDialogComponent, {
-      data: {vmDetails: vsd}
-    });
-    dialogRef
-        .afterClosed()
-        .pipe(first())
-        .subscribe((result) => {
-          if (result) {
-            this.editOwnerEvent.emit({ vmId: vsd.vm.id, studentId: result });
-          }
-        });
-  }
-
-  connectToVm(vm: VM) {
-    this.connectEvent.emit(vm);
-  }
-
-  openDialogVmOption(id: number): void {
-    const selectedVm = this.dataSource.find((vm) => vm.vm.id === id);
-    const dialogRef = this.dialog.open(VmOptionsDialogComponent, {
-      data: {
-        vmId: selectedVm.vm.id,
-        vCpu: selectedVm.vm.vcpu,
-        currentVCpu: this.dataSource.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0),
-        maxVCpu: this.teamService.currentTeamSubject.value.maxVCpu,
-        ram: selectedVm.vm.ram,
-        currentRam: this.dataSource.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0),
-        maxRam: this.teamService.currentTeamSubject.value.maxRam,
-        disk: selectedVm.vm.diskStorage,
-        currentDisk: this.dataSource.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0),
-        maxDisk: this.teamService.currentTeamSubject.value.maxDiskStorage
-      },
-    });
-
-    dialogRef
-        .afterClosed()
-        .pipe(first())
-        .subscribe((result) => {
-          if (result) {
-            this.refreshVmList.emit();
-          }
-        });
   }
 
   isOwner(vmId: number) {

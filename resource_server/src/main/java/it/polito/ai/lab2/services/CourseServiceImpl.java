@@ -62,6 +62,18 @@ public class CourseServiceImpl implements CourseService {
   @Autowired
   UploadRepository uploadRepository;
 
+  @Autowired
+  TeamRepository teamRepository;
+
+  @Autowired
+  AssignmentRepository assignmentRepository;
+
+  @Autowired
+  VmRepository vmRepository;
+
+  @Autowired
+  ProposalRepository proposalRepository;
+
   @Override
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
   public CourseDTO addCourse(CourseWithModelDetails course) {
@@ -207,12 +219,37 @@ public class CourseServiceImpl implements CourseService {
   @Override
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
   public CourseDTO removeCourse(String courseId) {
-    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-    if (!c.getStudents().isEmpty() || !c.getAssignments().isEmpty() || !c.getTeams().isEmpty()) {
-      throw new CourseNotEmptyException("Course " + courseId + " has some students/teams/assignments associated to it");
-    }
-
+    Course c = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    List<Path> imagesToDelete = new ArrayList<>();
+    imagesToDelete.add(Utility.VM_MODELS_DIR.resolve(c.getVmModel().getImagePath()));
+    vmModelRepository.delete(c.getVmModel());
+    proposalRepository.deleteAllByCourseId(courseId);
+    c.getTeams().forEach(t -> {
+      t.getVms().forEach(v -> imagesToDelete.add(Utility.VMS_DIR.resolve(v.getImagePath())));
+      vmRepository.deleteAll(t.getVms());
+    });
+    c.getAssignments().forEach(a -> {
+      imagesToDelete.add(Utility.ASSIGNMENTS_DIR.resolve(a.getImagePath()));
+      a.getSolutions().forEach(s -> {
+        s.getUploads().forEach(u -> {
+          imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getImagePath()));
+        });
+        uploadRepository.deleteAll(s.getUploads());
+      });
+      assignmentSolutionRepository.deleteAll(a.getSolutions());
+    });
+    teamRepository.deleteAll(c.getTeams());
+    assignmentRepository.deleteAll(c.getAssignments());
     courseRepository.delete(c);
+    imagesToDelete.forEach(path -> {
+      try {
+        Files.delete(path);
+      } catch (IOException e) {
+        throw new RuntimeException("Cannot delete the file: " + e.getMessage());
+      }
+    });
+    
     return modelMapper.map(c, CourseDTO.class);
   }
 
@@ -233,7 +270,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     if(c.getVmModel() != null && course.getVmModel() != null) {
-      Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
+      Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getImagePath());
       try {
         Files.delete(oldVmModelPath);
       } catch (IOException e) {
@@ -275,9 +312,14 @@ public class CourseServiceImpl implements CourseService {
     Course course = courseRepository.findById(courseId).orElse(null);
     if (course == null) throw new CourseNotFoundException("Course " + courseId + " does not exist");
 
-    if (student.getCourses().contains(course) || !course.isEnabled()) {
+    if (!course.isEnabled()) {
       throw new CourseNotEnabledException("Course " + courseId + " is not enabled");
     }
+
+    if (student.getCourses().contains(course)) {
+      throw new StudentAlreadyInCourseException("Student " + studentId + " already enrolled in course " + courseId);
+    }
+
     if (student.isVerified()) {
       student.addCourse(course);
       Timestamp currentTs = new Timestamp(System.currentTimeMillis());

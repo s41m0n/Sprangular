@@ -20,9 +20,16 @@
                         </ul>
                     </mat-card-content>
                     <mat-card-actions align="end">
-                        <button mat-raised-button [disabled]="!vsd.vm.active" color="primary" (click)="connectToVm(vsd.vm)">CONNECT TO VM</button>
+                        <button mat-raised-button
+                                [disabled]="!vsd.vm.active"
+                                color="primary"
+                                [routerLink]=""
+                                [queryParams]="{studentConnect: vsd.vm.id}">CONNECT TO VM</button>
 
-                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="editOwners(vsd)">
+                        <button mat-icon-button
+                                [disabled]="!isOwner(vsd.vm.id)"
+                                [routerLink]=""
+                                [queryParams]="{editOwners: vsd.vm.id}">
                             <mat-icon>person_add</mat-icon>
                         </button>
 
@@ -35,7 +42,10 @@
                             <mat-icon>delete</mat-icon>
                         </button>
 
-                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="openDialogVmOption(vsd.vm.id)">
+                        <button mat-icon-button
+                                [disabled]="!isOwner(vsd.vm.id) || vsd.vm.active"
+                                [routerLink]=""
+                                [queryParams]="{editVm: vsd.vm.id}">
                             <mat-icon>mode_edit</mat-icon>
                         </button>
 
@@ -47,5 +57,9 @@
     <ng-template #noList>
         <p>Currently your team has not created any virtual machine. Use the button below to create one!</p>
     </ng-template>
-    <button class="newVmButton" mat-raised-button color="primary" [disabled]="checkResourceAvailability()" (click)="createVmEvent.emit()">New VM</button>
+    <button class="newVmButton"
+            mat-raised-button color="primary"
+            [disabled]="checkResourceAvailability()"
+            [routerLink]=""
+            [queryParams]="{newVm: true}">New VM</button>
 </div>

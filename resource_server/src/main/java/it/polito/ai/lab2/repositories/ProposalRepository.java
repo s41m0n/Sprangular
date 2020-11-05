@@ -17,4 +17,5 @@ public interface ProposalRepository extends JpaRepository<Proposal, String> {
 
   List<Proposal> findAllByStatus(ProposalStatus status);
 
+  void deleteAllByCourseId(String courseId);
 }

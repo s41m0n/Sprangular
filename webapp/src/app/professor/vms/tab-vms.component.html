@@ -4,7 +4,11 @@
         <div *ngFor="let vpd of dataSources; let i = index">
             <div class="section-title">
                 <h2>VMs for team: {{vpd.team.name}}</h2>
-                <button mat-raised-button class="centered-button" color="primary" (click)="openDialogTeamOption(vpd)">
+                <button mat-raised-button
+                        class="centered-button"
+                        color="primary"
+                        [routerLink]=""
+                        [queryParams]="{ teamVmOptions: vpd.team.id }">
                     Change Team Settings
                 </button>
             </div>
@@ -31,7 +35,11 @@
                                 </ul>
                             </mat-card-content>
                             <mat-card-actions align="end">
-                                <button mat-raised-button [disabled]="!vm.active" color="primary" (click)="connectToVm(vm)">CONNECT</button>
+                                <button mat-raised-button
+                                        [disabled]="!vm.active"
+                                        color="primary"
+                                        [routerLink]=""
+                                        [queryParams]="{ professorConnect: vm.id }">CONNECT</button>
                             </mat-card-actions>
                         </mat-card>
                     </div>

@@ -22,9 +22,11 @@
         </ng-container>
         <ng-container matColumnDef="download">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Document</th>
-            <td mat-cell *matCellDef="let element"><button mat-button
-                                                           *ngIf="element.imagePath"
-                                                           (click)="viewDocument(element)">View</button></td>
+            <td mat-cell *matCellDef="let element">
+                <button mat-button
+                        *ngIf="element.imagePath"
+                        [routerLink]=""
+                        [queryParams]="{solution: data.id, professorImage: element.id}">View</button></td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="colsToDisplay"></tr>
         <tr mat-row *matRowDef="let row; columns: colsToDisplay;"></tr>
@@ -32,5 +34,7 @@
 </div>
 <div mat-dialog-actions style="justify-content: center">
     <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-    <button mat-button *ngIf="uploadable()" color="primary" (click)="uploadReview()">Upload Review</button>
+    <button mat-button *ngIf="uploadable()" color="primary"
+            [routerLink]=""
+            [queryParams]="{solution: data.id, professorUpload: true}">Upload Review</button>
 </div>
