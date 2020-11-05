@@ -31,9 +31,10 @@ export class UploadsDialogComponent {
     this.assignmentService.getAssignmentSolutionUploads(data.id).pipe(first()).subscribe(
         uploads => this.dataSource.data = uploads.sort(Upload.compare));
     this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.professorUpload
-            ? this.uploadReview()
-            : null
+        queryParam && queryParam.professorUpload ? this.uploadReview() : null
+    );
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.professorImage ? this.viewDocument(queryParam.professorImage) : null
     );
   }
 
@@ -66,19 +67,23 @@ export class UploadsDialogComponent {
         });
   }
 
-  viewDocument(upload: Upload) {
-    this.assignmentService.getUploadDocument(upload.id).pipe(first()).subscribe(instance => {
-      if (!instance) { return; }
+  viewDocument(uploadId: number) {
+    this.assignmentService.getUploadDocument(uploadId).pipe(first()).subscribe(instance => {
+      if (!instance) {
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: this.data.id}});
+        return;
+      }
       const url = URL.createObjectURL(instance);
       const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Upload: ${upload.id}`,
+        data: {title: `Upload: ${uploadId}`,
           imageSrc: url,
           downloadable: true,
-          dl_name: `upload_${upload.id}`
+          dl_name: `upload_${uploadId}`
         }
       });
       dialogRef.afterClosed().subscribe(() => {
         URL.revokeObjectURL(url);
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: this.data.id}});
       });
     });
   }
