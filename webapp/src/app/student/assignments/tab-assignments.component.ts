@@ -46,7 +46,6 @@ export class TabStudentAssignmentsComponent {
     this.innerDataSource.data = uploads.sort(Upload.compare);
   }
   @Output() getUploadsEvent = new EventEmitter<number>();
-  @Output() viewDocumentEvent = new EventEmitter<Upload>();
   @Output() refreshUploadsEvent = new EventEmitter<number>();
 
   constructor(public dialog: MatDialog,
@@ -64,10 +63,6 @@ export class TabStudentAssignmentsComponent {
     }
     this.canUpload = element.status === AssignmentStatus.READ || element.status === AssignmentStatus.REVIEWED_UPLOADABLE;
     this.getUploadsEvent.emit(element.assignmentSolutionId);
-  }
-
-  viewDocument(upload: Upload) {
-    this.viewDocumentEvent.emit(upload);
   }
 
   newAssignmentSolution(assSolId: string) {

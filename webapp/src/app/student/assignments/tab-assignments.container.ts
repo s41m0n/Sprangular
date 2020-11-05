@@ -33,6 +33,9 @@ export class TabStudentAssignmentsContComponent {
           queryParam && queryParam.studentAssignment ? this.viewAssignment(queryParam.studentAssignment) : null
       );
     });
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.studentImage ? this.viewDocument(queryParam.studentImage) : null
+    );
   }
 
   viewAssignment(assId: string) {
@@ -57,19 +60,20 @@ export class TabStudentAssignmentsContComponent {
     });
   }
 
-  viewDocument(upload: Upload) {
-    this.assignmentService.getUploadDocument(upload.id).pipe(first()).subscribe(instance => {
+  viewDocument(uploadId: number) {
+    this.assignmentService.getUploadDocument(uploadId).pipe(first()).subscribe(instance => {
       if (!instance) { return; }
       const url = URL.createObjectURL(instance);
       const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Upload: ${upload.id}`,
+        data: {title: `Upload: ${uploadId}`,
           imageSrc: url,
           downloadable: true,
-          dl_name: `upload_${upload.id}`
+          dl_name: `upload_${uploadId}`
         }
       });
       dialogRef.afterClosed().subscribe(() => {
         URL.revokeObjectURL(url);
+        this.router.navigate([this.router.url.split('?')[0]]);
       });
     });
   }
