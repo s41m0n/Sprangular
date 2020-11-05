@@ -23,6 +23,7 @@ export class AppComponent {
   currentUser: User; // Variable to keep track of the current user
   courseList: Observable<Course[]>; // Variable to keep track (asynchronously) of the courses
   course: Course;
+  openNavbar = false;
 
   // Unsubscribes are not performed here since alive till this root component is always alive and must be updated
   constructor(
@@ -38,6 +39,9 @@ export class AppComponent {
     this.authService.getUserObservable().subscribe((user: User) => {
       this.currentUser = user;
       this.refreshCourses();
+      if (user) {
+        this.openNavbar = true;
+      }
     });
 
     // Subscribe to Broadcaster selected course subject
@@ -83,6 +87,7 @@ export class AppComponent {
           this.router.navigate([
             this.route.snapshot.queryParams.returnUrl || '/home',
           ]);
+          this.openNavbar = true;
         } else if (this.router.url === previousUrl) {
           this.router.navigate(['/home']);
         }
@@ -91,7 +96,7 @@ export class AppComponent {
 
   openRegister() {
     const dialogRef = this.dialog.open(RegisterDialogComponent, {
-      width: '40%',
+      width: '60%',
     });
     const previousUrl = this.router.url;
     dialogRef
@@ -102,6 +107,7 @@ export class AppComponent {
           this.router.navigate([
             this.route.snapshot.queryParams.returnUrl || '/home',
           ]);
+          this.openNavbar = true;
         } else if (this.router.url === previousUrl) {
           this.router.navigate(['/home']);
         }
@@ -110,7 +116,7 @@ export class AppComponent {
 
   newCourse() {
     const dialogRef = this.dialog.open(NewCourseDialogComponent, {
-      width: '25%',
+      width: '60%',
     });
     dialogRef
       .afterClosed()
@@ -169,6 +175,7 @@ export class AppComponent {
     this.dialog.closeAll();
     this.authService.logout();
     this.course = null;
+    this.openNavbar = false;
     this.router.navigate(['/home']);
   }
 }

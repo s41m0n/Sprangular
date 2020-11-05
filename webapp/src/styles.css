@@ -1,6 +1,7 @@
 html,
 body {
   height: 100%;
+  overflow:auto
 }
 
 body {
@@ -109,4 +110,22 @@ mat-sidenav {
 mat-slider {
   width: 100%;
   margin-top: 25px;
+}
+
+app-root {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.mat-dialog-container {
+  margin: 0 auto 30px !important;
+  height: auto !important;
+  overflow: initial !important;
+}
+
+.mat-dialog-content {
+  max-width: none !important;
+  max-height: none !important;
+  overflow: initial !important;
 }

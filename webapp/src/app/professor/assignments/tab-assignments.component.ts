@@ -131,7 +131,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
       return;
     }
     const dialogRef = this.dialog.open(UploadsDialogComponent, {
-      width: '75%',
+      width: '70%',
       data: { id },
     });
     dialogRef
@@ -144,7 +144,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
 
   newAssignment() {
     const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
-      width: '25%',
+      width: '50%',
     });
     dialogRef
         .afterClosed()

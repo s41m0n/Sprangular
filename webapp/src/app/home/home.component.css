@@ -1,0 +1,51 @@
+
+.bg {
+    /* The image used */
+    background-image: url("~src/assets/clouds_cropper.png");
+    /* Full height */
+    height: 550px;
+    margin: -20px;
+    overflow: hidden;
+
+    /* Center and scale the image nicely */
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+div.title-section {
+    margin-top: 50px;
+    margin-left: 50px;
+}
+h1.home-title {
+    background-color:#fff;
+    overflow:hidden;
+    display:inline-block;
+    padding: 10px 20px;
+    margin-bottom: 0px;
+    font-weight:bold;
+    font-family: arial, serif !important;
+    color:transparent;
+    font-size:120px;
+    line-height: 120px !important;
+}
+
+h2.home-subtitle {
+    color: #fff;
+    padding-top: -10px;
+    font-size: 32px;
+    font-family: arial, Serif, serif !important;
+}
+span {
+    background: url(~src/assets/clouds_cropper.png) -20px -20px repeat;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    display:block;
+}
+
+p.home-description {
+    font-family: arial, serif !important;
+    font-size: 18px;
+    line-height: 23px !important;
+    padding: 20px 20px 0;
+}

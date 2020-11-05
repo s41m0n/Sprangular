@@ -42,7 +42,7 @@
 </mat-toolbar>
 
 <!-- Second toolbar with current selected course name -->
-<mat-toolbar class="subheader">
+<mat-toolbar *ngIf="course" class="subheader">
   Course: {{ course ? course.name : '❓' }} {{course && !course.enabled ? '(Disabled)' : ''}}
   <span class="example-fill-remaining-space"></span>
   <button
@@ -63,7 +63,7 @@
     #sidebar
     class="navbar"
     mode="side"
-    opened="true"
+    [opened]="openNavbar"
     position="start"
   >
     <div class="container">
