@@ -46,6 +46,8 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
                   this.vsd = vms;
                   this.route.queryParams.subscribe((queryParam) =>
                       queryParam && queryParam.newVm ? this.newVm() : null);
+                  this.route.queryParams.subscribe((queryParam) =>
+                      queryParam && queryParam.studentConnect ? this.connect(queryParam.studentConnect) : null);
                 });
           }
     });
@@ -81,12 +83,14 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
         .subscribe(() => this.refreshVMs());
   }
 
-  connect(vm: VM) {
+  connect(vmId: string) {
+    const vm = this.vsd.find(elem => elem.vm.id.toString() === vmId).vm;
     this.vmService
         .getInstance(vm.id)
         .pipe(first())
         .subscribe((instance) => {
           if (!instance) {
+            this.router.navigate([this.router.url.split('?')[0]]);
             return;
           }
           const url = URL.createObjectURL(instance);
@@ -99,6 +103,7 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
           });
           dialogRef.afterClosed().subscribe(() => {
             URL.revokeObjectURL(url);
+            this.router.navigate([this.router.url.split('?')[0]]);
           });
         });
   }

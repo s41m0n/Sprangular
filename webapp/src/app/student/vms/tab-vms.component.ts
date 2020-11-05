@@ -35,7 +35,6 @@ export class TabStudentVmsComponent {
   }
   @Output() turnVmEvent = new EventEmitter<number>();
   @Output() editOwnerEvent = new EventEmitter<any>();
-  @Output() connectEvent = new EventEmitter<VM>();
   @Output() refreshVmList = new EventEmitter();
   @Output() deleteVmEvent = new EventEmitter<number>();
 
@@ -68,10 +67,6 @@ export class TabStudentVmsComponent {
             this.editOwnerEvent.emit({ vmId: vsd.vm.id, studentId: result });
           }
         });
-  }
-
-  connectToVm(vm: VM) {
-    this.connectEvent.emit(vm);
   }
 
   openDialogVmOption(id: number): void {

@@ -20,7 +20,11 @@
                         </ul>
                     </mat-card-content>
                     <mat-card-actions align="end">
-                        <button mat-raised-button [disabled]="!vsd.vm.active" color="primary" (click)="connectToVm(vsd.vm)">CONNECT TO VM</button>
+                        <button mat-raised-button
+                                [disabled]="!vsd.vm.active"
+                                color="primary"
+                                [routerLink]=""
+                                [queryParams]="{studentConnect: vsd.vm.id}">CONNECT TO VM</button>
 
                         <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="editOwners(vsd)">
                             <mat-icon>person_add</mat-icon>
