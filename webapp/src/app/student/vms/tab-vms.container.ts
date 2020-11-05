@@ -1,5 +1,4 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import { VM } from '../../models/vm.model';
 import {first, takeUntil} from 'rxjs/operators';
 import { TeamService } from 'src/app/services/team.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,6 +9,7 @@ import {VmStudentDetails} from '../../models/vm-student-details.model';
 import {Subject} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {VmOwnersDialogComponent} from '../../modals/vm-owners/vm-owners-dialog.component';
+import {VmOptionsDialogComponent} from '../../modals/vm-options/vm-options-dialog.component';
 
 /**
  * VmsContainer
@@ -51,6 +51,8 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
                       queryParam && queryParam.studentConnect ? this.connect(queryParam.studentConnect) : null);
                   this.route.queryParams.subscribe((queryParam) =>
                       queryParam && queryParam.editOwners ? this.editOwners(queryParam.editOwners) : null);
+                  this.route.queryParams.subscribe((queryParam) =>
+                      queryParam && queryParam.editVm ? this.openDialogVmOption(queryParam.editVm) : null);
                 });
           }
     });
@@ -135,6 +137,34 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
         currentDisk: this.vsd.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0),
         maxDisk: this.teamService.currentTeamSubject.value.maxDiskStorage
       }
+    });
+
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.refreshVMs();
+          }
+          this.router.navigate([this.router.url.split('?')[0]]);
+        });
+  }
+
+  openDialogVmOption(id: string): void {
+    const selectedVm = this.vsd.find(vm => vm.vm.id.toString() === id);
+    const dialogRef = this.dialog.open(VmOptionsDialogComponent, {
+      data: {
+        vmId: selectedVm.vm.id,
+        vCpu: selectedVm.vm.vcpu,
+        currentVCpu: this.vsd.map(vm => vm.vm.vcpu).reduce((acc, val) => acc + val, 0),
+        maxVCpu: this.teamService.currentTeamSubject.value.maxVCpu,
+        ram: selectedVm.vm.ram,
+        currentRam: this.vsd.map(vm => vm.vm.ram).reduce((acc, val) => acc + val, 0),
+        maxRam: this.teamService.currentTeamSubject.value.maxRam,
+        disk: selectedVm.vm.diskStorage,
+        currentDisk: this.vsd.map(vm => vm.vm.diskStorage).reduce((acc, val) => acc + val, 0),
+        maxDisk: this.teamService.currentTeamSubject.value.maxDiskStorage
+      },
     });
 
     dialogRef
