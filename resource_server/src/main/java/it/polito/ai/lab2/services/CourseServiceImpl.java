@@ -221,16 +221,34 @@ public class CourseServiceImpl implements CourseService {
   public CourseDTO removeCourse(String courseId) {
     Course c = courseRepository.findById(courseId).orElseThrow(
         () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    List<Path> imagesToDelete = new ArrayList<>();
+    imagesToDelete.add(Utility.VM_MODELS_DIR.resolve(c.getVmModel().getImagePath()));
     vmModelRepository.delete(c.getVmModel());
     proposalRepository.deleteAllByCourseId(courseId);
-    c.getTeams().forEach(t -> vmRepository.deleteAll(t.getVms()));
+    c.getTeams().forEach(t -> {
+      t.getVms().forEach(v -> imagesToDelete.add(Utility.VMS_DIR.resolve(v.getImagePath())));
+      vmRepository.deleteAll(t.getVms());
+    });
     c.getAssignments().forEach(a -> {
-      a.getSolutions().forEach(s -> uploadRepository.deleteAll(s.getUploads()));
+      imagesToDelete.add(Utility.ASSIGNMENTS_DIR.resolve(a.getImagePath()));
+      a.getSolutions().forEach(s -> {
+        s.getUploads().forEach(u -> {
+          imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getImagePath()));
+        });
+        uploadRepository.deleteAll(s.getUploads());
+      });
       assignmentSolutionRepository.deleteAll(a.getSolutions());
     });
     teamRepository.deleteAll(c.getTeams());
     assignmentRepository.deleteAll(c.getAssignments());
     courseRepository.delete(c);
+    imagesToDelete.forEach(path -> {
+      try {
+        Files.delete(path);
+      } catch (IOException e) {
+        throw new RuntimeException("Cannot delete the file: " + e.getMessage());
+      }
+    });
     return modelMapper.map(c, CourseDTO.class);
   }
 
@@ -251,7 +269,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     if(c.getVmModel() != null && course.getVmModel() != null) {
-      Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
+      Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getImagePath());
       try {
         Files.delete(oldVmModelPath);
       } catch (IOException e) {
