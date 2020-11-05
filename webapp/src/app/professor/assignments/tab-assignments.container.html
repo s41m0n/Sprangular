@@ -1,2 +1,5 @@
-<app-tab-professor-assignments [assignments]="assignments">
+<app-tab-professor-assignments [assignments]="assignments"
+                               [setAssignmentSolutions]="assignmentSolutions"
+                               (assignmentSolutionEvent)="getAssignmentSolutions($event)"
+                               (viewDocEvent)="viewDocument($event)">
 </app-tab-professor-assignments>
