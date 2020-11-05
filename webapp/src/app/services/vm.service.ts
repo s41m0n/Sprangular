@@ -127,7 +127,7 @@ export class VmService {
             );
     }
 
-    public editOwner(vmId: number, studentId: string): Observable<VM> {
+    public editOwner(vmId: number, studentId: string, owner: boolean): Observable<VM> {
         return this.http
             .post<VM>(
                 `${environment.base_vms_url}/${vmId}/editOwner`,
@@ -135,9 +135,19 @@ export class VmService {
                 environment.base_http_headers
             )
             .pipe(
-                tap(() =>
-                    console.log(`added owner ${studentId} to vm ${vmId} - addOwner()`)
-                ),
+                tap(() => {
+                    if (owner) {
+                        this.toastrService.info(
+                            `Correctly remove ${studentId} as owner`,
+                            'Congratulations 😃'
+                        );
+                    } else {
+                        this.toastrService.success(
+                            `Correctly add ${studentId} as owner`,
+                            'Congratulations 😃'
+                        );
+                    }
+                }),
                 catchError(
                     handleError<VM>(this.toastrService, `addOwner(${vmId}, ${studentId})`)
                 )

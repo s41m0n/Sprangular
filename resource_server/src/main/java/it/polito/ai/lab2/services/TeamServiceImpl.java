@@ -9,6 +9,7 @@ import it.polito.ai.lab2.pojos.SetVmsResourceLimits;
 import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.ProposalStatus;
+import it.polito.ai.lab2.utility.Utility;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,9 +187,13 @@ public class TeamServiceImpl implements TeamService {
       notificationService.notifyTeam(t, memberIds, courseId);
     } else {
       // Delete all pending proposals since this one is accepted 100%
-      proposalRepository.findAllByInvitedUserIdAndCourseId(creator.getId(), courseId).stream()
-          .filter(p -> p.getStatus().equals(ProposalStatus.PENDING))
-          .forEach(p -> notificationService.deleteProposal(p.getId()));
+      proposalRepository.findAllByInvitedUserIdAndCourseId(creator.getId(), courseId)
+          .forEach(p -> {
+            if (p.getStatus().equals(ProposalStatus.PENDING)) {
+              notificationService.reject(p.getId());
+            }
+            notificationService.deleteProposal(p.getId());
+          });
     }
     return t;
   }

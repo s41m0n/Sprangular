@@ -4,17 +4,18 @@ import { Observable, of, throwError } from 'rxjs';
 /**
  * Handle Http operation that failed.
  * Let the app continue.
+ * @param service - service notification
  * @param operation - name of the operation that failed
  * @param result - optional value to return as the observable result
  * @param show - is it visible
  * @param message - error message
  */
 export function handleError<T>(
-  service: ToastrService = this.toastrService,
-  operation = 'operation',
-  result?: T,
-  show: boolean = true,
-  message: string = 'An error occurred while performing'
+    service: ToastrService = this.toastrService,
+    operation = 'operation',
+    result?: T,
+    show: boolean = true,
+    message: string = 'An error occurred while performing'
 ) {
   return (error: any): Observable<T> => {
     if (show) {

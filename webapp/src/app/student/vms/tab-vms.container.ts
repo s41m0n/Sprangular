@@ -92,7 +92,7 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
         .subscribe((result) => {
           if (result) {
             this.vmService
-                .editOwner(vsd.vm.id, result)
+                .editOwner(vsd.vm.id, result, !!vsd.owners.find(s => s.id === result))
                 .pipe(first())
                 .subscribe(() => this.refreshVMs());
           }
