@@ -72,6 +72,10 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.route.queryParams.subscribe((queryParam) =>
         queryParam && queryParam.addAssignment ? this.newAssignment() : null
     );
+
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.assignGrade ? this.assignGrade(queryParam.assignGrade) : null
+    );
   }
 
   ngAfterViewInit() {
@@ -109,14 +113,16 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     return !asd.grade && (asd.status === AssignmentStatus.REVIEWED || asd.status === AssignmentStatus.REVIEWED_UPLOADABLE);
   }
 
-  assignGrade(element: AssignmentSolutionDetails) {
-    const dialogRef = this.dialog.open(GradeDialogComponent, { data: {assignmentSolutionId: element.id.toString()}});
+  assignGrade(assSolId: string) {
+    const dialogRef = this.dialog.open(GradeDialogComponent, { data: {assignmentSolutionId: assSolId}});
     dialogRef.afterClosed().pipe(first()).subscribe(res => {
       if (res) {
+        const element = this.innerDataSource.data.find(e => e.id.toString() === assSolId);
         element.status = res.status;
         element.statusTs = res.statusTs;
         element.grade = res.grade;
       }
+      this.router.navigate([this.router.url.split('?')[0]]);
     });
   }
 
