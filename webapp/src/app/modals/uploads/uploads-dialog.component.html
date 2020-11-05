@@ -32,5 +32,7 @@
 </div>
 <div mat-dialog-actions style="justify-content: center">
     <button mat-button color="warn" (click)="dialogRef.close()">Close</button>
-    <button mat-button *ngIf="uploadable()" color="primary" (click)="uploadReview()">Upload Review</button>
+    <button mat-button *ngIf="uploadable()" color="primary"
+            [routerLink]=""
+            [queryParams]="{solution: data.id, professorUpload: true}">Upload Review</button>
 </div>

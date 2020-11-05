@@ -114,6 +114,9 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   }
 
   private uploadsDialog(id: string) {
+    if (this.dialog.openDialogs.length > 0) {
+      return;
+    }
     const dialogRef = this.dialog.open(UploadsDialogComponent, {
       width: '75%',
       data: { id },

@@ -8,6 +8,7 @@ import {AssignmentStatus} from '../../models/assignment-solution.model';
 import {NewAssignmentUploadDialogComponent} from '../new-assignment-upload/new-assignment-upload-dialog.component';
 import {ImageViewerDialogComponent} from '../image-viewer/image-viewer-dialog.component';
 import {DomSanitizer} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-uploads-dialog',
@@ -23,10 +24,17 @@ export class UploadsDialogComponent {
       public dialog: MatDialog,
       public dialogRef: MatDialogRef<UploadsDialogComponent>,
       public sanitizer: DomSanitizer,
+      private router: Router,
+      private route: ActivatedRoute,
       private assignmentService: AssignmentAndUploadService,
       @Inject(MAT_DIALOG_DATA) public data: any) {
     this.assignmentService.getAssignmentSolutionUploads(data.id).pipe(first()).subscribe(
         uploads => this.dataSource.data = uploads.sort(Upload.compare));
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.professorUpload
+            ? this.uploadReview()
+            : null
+    );
   }
 
   dateString(statusTs: string): string {
@@ -54,6 +62,7 @@ export class UploadsDialogComponent {
           if (result) {
             this.dialogRef.close(result);
           }
+          this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: this.data.id}});
         });
   }
 
