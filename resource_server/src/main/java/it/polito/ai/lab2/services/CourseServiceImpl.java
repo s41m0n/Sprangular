@@ -12,6 +12,7 @@ import it.polito.ai.lab2.pojos.CourseWithModelDetails;
 import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.AssignmentStatus;
+import it.polito.ai.lab2.utility.ProposalStatus;
 import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,9 @@ public class CourseServiceImpl implements CourseService {
 
   @Autowired
   ProposalRepository proposalRepository;
+
+  @Autowired
+  NotificationService notificationService;
 
   @Override
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
@@ -209,7 +213,9 @@ public class CourseServiceImpl implements CourseService {
                 return modelMapper.map(x, StudentWithTeamDetails.class);
               }
               StudentWithTeamDetails ret = modelMapper.map(x, StudentWithTeamDetails.class);
-              x.getTeams().stream().filter(y -> y.getCourse().getAcronym().equals(courseId)).findAny().ifPresent(team -> ret.setTeam(modelMapper.map(team, TeamDTO.class)));
+              x.getTeams().stream()
+                  .filter(y -> y.isActive() && y.getCourse().getAcronym().equals(courseId)).findAny()
+                  .ifPresent(team -> ret.setTeam(modelMapper.map(team, TeamDTO.class)));
               return ret;
             })
             .collect(Collectors.toList()))
@@ -379,6 +385,16 @@ public class CourseServiceImpl implements CourseService {
       if (!course.getStudents().contains(student)) {
         throw new StudentNotInCourseException("Student " + studentId + " is not enrolled in course " + courseId);
       }
+      if (student.getTeams().stream().anyMatch(t -> t.getCourse().getAcronym().equals(courseId) && t.isActive())) {
+        throw new StudentAlreadyInTeam("Student " + studentId + " is a member of a team");
+      }
+    proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, courseId)
+        .forEach(p -> {
+          if (p.getStatus().equals(ProposalStatus.PENDING)) {
+            notificationService.reject(p.getId());
+          }
+          notificationService.deleteProposal(p.getId());
+        });
       student.removeCourse(course); //symmetric method, it updates also the course
 
     return modelMapper.map(student, StudentDTO.class);

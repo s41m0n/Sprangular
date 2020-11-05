@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 
-import { BehaviorSubject, from, Observable, of, forkJoin } from 'rxjs';
+import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { Assignment } from '../models/assignment.model';
 import { Student } from '../models/student.model';
-import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
 import { handleError } from '../helpers/handle.error';
 import {StudentAssignmentDetails} from '../models/student-assignment-details.model';
 import {VmProfessorDetails} from '../models/vm-professor-details.model';
-import {Team} from "../models/team.model";
 
 /**
  * CourseService service
