@@ -40,6 +40,9 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
   innerDataSource = new MatTableDataSource<AssignmentSolutionDetails>();
   colsToDisplay = ['name', 'releaseDate', 'dueDate', 'document', 'solutions']; // Columns to be displayed in the table
   innerColsToDisplay = ['studentName', 'studentSurname', 'studentId', 'status', 'statusTs', 'grade', 'uploads'];
+  expandedElement: Assignment | null;
+  assignmentStatuses = Object.values(AssignmentStatus);
+  filteredStatuses: string[] = [];
   @ViewChild(MatSort, {static: true}) sort: MatSort;                  // Mat sort for the table
   @ViewChild('pagOne') paginator: MatPaginator;                   // Mat paginator for the table
   @ViewChild('pagTwo') paginatorBis: MatPaginator;                   // Mat paginator for the table
@@ -47,9 +50,6 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.activeDataSource.data = assignments.filter(a => Date.now() < Date.parse(a.dueDate)).sort(Assignment.compare);
     this.expiredDataSource.data = assignments.filter(a => Date.now() >= Date.parse(a.dueDate)).sort(Assignment.compare);
   }
-  expandedElement: Assignment | null;
-  assignmentStatuses = Object.values(AssignmentStatus);
-  filteredStatuses: string[] = [];
 
   constructor(public dialog: MatDialog,
               private assignmentService: AssignmentAndUploadService,
@@ -74,8 +74,6 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.expiredDataSource.sort = this.sort;
     this.expiredDataSource.paginator = this.paginatorBis;
   }
-
-
 
   showSolutions(row: Assignment) {
     this.expandedElement = this.expandedElement === row ? null : row;

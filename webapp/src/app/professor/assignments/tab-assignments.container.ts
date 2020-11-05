@@ -6,6 +6,7 @@ import {first} from 'rxjs/operators';
 import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
+import {AssignmentSolutionDetails} from '../../models/assignment-solution-details.model';
 
 /**
  * AssignmentsContainer
@@ -28,12 +29,13 @@ export class TabProfessorAssignmentsContComponent {
     this.courseService.getCourseAssignments(this.courseService.currentCourseSubject.value)
         .pipe(first()).subscribe(assignments => {
           this.assignments = assignments;
-          this.route.queryParams.subscribe((queryParam) => queryParam && queryParam.professorAssignment ? this.viewAssignment() : null);
+          this.route.queryParams.subscribe((queryParam) =>
+              queryParam && queryParam.professorAssignment ? this.viewAssignment(queryParam.professorAssignment) : null);
     });
   }
 
-  viewAssignment() {
-    const assignment = this.assignments.find(a => a.id.toString() === this.route.snapshot.queryParamMap.get('professorAssignment'));
+  viewAssignment(assId: string) {
+    const assignment = this.assignments.find(a => a.id.toString() === assId);
     this.assignmentService.getDocument(assignment.id).pipe(first()).subscribe(instance => {
       if (!instance) {
         this.router.navigate([this.router.url.split('?')[0]]);

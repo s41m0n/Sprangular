@@ -33,8 +33,9 @@ export class TabProfessorVmsContComponent {
         .subscribe((vms) => {
           this.vmBundle = vms;
           this.route.queryParams.subscribe((queryParam) =>
-              queryParam && queryParam.teamVmOptions ? this.openDialogTeamOption() : null);
-          this.route.queryParams.subscribe((queryParam) => queryParam && queryParam.professorConnect ? this.connect() : null);
+              queryParam && queryParam.teamVmOptions ? this.openDialogTeamOption(queryParam.teamVmOptions) : null);
+          this.route.queryParams.subscribe((queryParam) =>
+              queryParam && queryParam.professorConnect ? this.connect(queryParam.professorConnect) : null);
         });
   }
 
@@ -53,8 +54,8 @@ export class TabProfessorVmsContComponent {
       .subscribe(() => this.refreshVmList());
   }
 
-  openDialogTeamOption(): void {
-    const vpd = this.vmBundle.find(d => d.team.id.toString() === this.route.snapshot.queryParamMap.get('teamVmOptions'));
+  openDialogTeamOption(teamId: string): void {
+    const vpd = this.vmBundle.find(d => d.team.id.toString() === teamId);
     const dialogRef = this.dialog.open(EditTeamVmOptionsDialogComponent, {
       data: {
         teamId: vpd.team.id,
@@ -81,10 +82,8 @@ export class TabProfessorVmsContComponent {
         });
   }
 
-  connect() {
-    const vm = this.vmBundle.find(vpd => vpd.vms.some(
-        v => v.id.toString() === this.route.snapshot.queryParamMap.get('professorConnect')))
-        .vms.find(v => v.id.toString() === this.route.snapshot.queryParamMap.get('professorConnect'));
+  connect(vmId: string) {
+    const vm = this.vmBundle.find(vpd => vpd.vms.some(v => v.id.toString() === vmId)).vms.find(v => v.id.toString() === vmId);
     this.vmService
       .getInstance(vm.id)
       .pipe(first())

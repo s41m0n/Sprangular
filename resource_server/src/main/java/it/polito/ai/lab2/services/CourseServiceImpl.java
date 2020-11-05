@@ -249,6 +249,7 @@ public class CourseServiceImpl implements CourseService {
         throw new RuntimeException("Cannot delete the file: " + e.getMessage());
       }
     });
+    
     return modelMapper.map(c, CourseDTO.class);
   }
 
