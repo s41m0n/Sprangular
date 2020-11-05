@@ -26,7 +26,10 @@
                                 [routerLink]=""
                                 [queryParams]="{studentConnect: vsd.vm.id}">CONNECT TO VM</button>
 
-                        <button mat-icon-button [disabled]="!isOwner(vsd.vm.id)" (click)="editOwners(vsd)">
+                        <button mat-icon-button
+                                [disabled]="!isOwner(vsd.vm.id)"
+                                [routerLink]=""
+                                [queryParams]="{editOwners: vsd.vm.id}">
                             <mat-icon>person_add</mat-icon>
                         </button>
 

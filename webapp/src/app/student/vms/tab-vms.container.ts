@@ -9,6 +9,7 @@ import { ImageViewerDialogComponent } from '../../modals/image-viewer/image-view
 import {VmStudentDetails} from '../../models/vm-student-details.model';
 import {Subject} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
+import {VmOwnersDialogComponent} from '../../modals/vm-owners/vm-owners-dialog.component';
 
 /**
  * VmsContainer
@@ -48,6 +49,8 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
                       queryParam && queryParam.newVm ? this.newVm() : null);
                   this.route.queryParams.subscribe((queryParam) =>
                       queryParam && queryParam.studentConnect ? this.connect(queryParam.studentConnect) : null);
+                  this.route.queryParams.subscribe((queryParam) =>
+                      queryParam && queryParam.editOwners ? this.editOwners(queryParam.editOwners) : null);
                 });
           }
     });
@@ -76,11 +79,23 @@ export class TabStudentVmsContComponent implements OnInit, OnDestroy {
         .subscribe((_) => this.refreshVMs());
   }
 
-  editOwner(object: any) {
-    this.vmService
-        .editOwner(object.vmId, object.studentId)
+  editOwners(vmId: string) {
+    const vsd = this.vsd.find(elem => elem.vm.id.toString() === vmId);
+    const dialogRef = this.dialog.open(VmOwnersDialogComponent, {
+      data: {vmDetails: vsd}
+    });
+    dialogRef
+        .afterClosed()
         .pipe(first())
-        .subscribe(() => this.refreshVMs());
+        .subscribe((result) => {
+          if (result) {
+            this.vmService
+                .editOwner(vsd.vm.id, result)
+                .pipe(first())
+                .subscribe(() => this.refreshVMs());
+          }
+          this.router.navigate([this.router.url.split('?')[0]]);
+        });
   }
 
   connect(vmId: string) {

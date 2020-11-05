@@ -2,7 +2,6 @@
         *ngIf="inTeam; else single"
         [vms]="vsd"
         (turnVmEvent)="turnVm($event)"
-        (editOwnerEvent)="editOwner($event)"
         (refreshVmList)="refreshVMs()"
         (deleteVmEvent)="deleteVm($event)"
 ></app-tab-student-vms>

@@ -34,7 +34,6 @@ export class TabStudentVmsComponent {
     this.hasTeam = inTeam;
   }
   @Output() turnVmEvent = new EventEmitter<number>();
-  @Output() editOwnerEvent = new EventEmitter<any>();
   @Output() refreshVmList = new EventEmitter();
   @Output() deleteVmEvent = new EventEmitter<number>();
 
@@ -53,20 +52,6 @@ export class TabStudentVmsComponent {
       return;
     }
     this.turnVmEvent.emit(vmId);
-  }
-
-  editOwners(vsd: VmStudentDetails) {
-    const dialogRef = this.dialog.open(VmOwnersDialogComponent, {
-      data: {vmDetails: vsd}
-    });
-    dialogRef
-        .afterClosed()
-        .pipe(first())
-        .subscribe((result) => {
-          if (result) {
-            this.editOwnerEvent.emit({ vmId: vsd.vm.id, studentId: result });
-          }
-        });
   }
 
   openDialogVmOption(id: number): void {
