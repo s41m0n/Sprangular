@@ -5,10 +5,8 @@ import {first} from 'rxjs/operators';
 import {Upload} from '../../models/upload.model';
 import {StudentAssignmentDetails} from '../../models/student-assignment-details.model';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
-import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
-import {CourseService} from '../../services/course.service';
 
 /**
  * StudentsComponent
@@ -45,7 +43,6 @@ export class TabStudentAssignmentsComponent {
   expandedElement: StudentAssignmentDetails | null;
 
   constructor(private assignmentService: AssignmentAndUploadService,
-              private courseService: CourseService,
               public dialog: MatDialog) {
   }
 
@@ -67,31 +64,5 @@ export class TabStudentAssignmentsComponent {
       ' at ' +
       date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
     );
-  }
-
-  viewAssignment(element: StudentAssignmentDetails) {
-    this.assignmentService.readStudentAssignment(element.assignmentId).pipe(first()).subscribe(instance => {
-      if (!instance) { return; }
-      const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Assignment: ${element.assignmentId} - ${element.name}`,
-          imageSrc: url,
-          downloadable: true,
-          dl_name: `assignment_${element.assignmentId}`
-        }
-      });
-      dialogRef.afterClosed().subscribe(() => {
-        URL.revokeObjectURL(url);
-        if (element.status === AssignmentStatus.NULL) {
-          this.refreshAssignmentsDetails();
-        }
-      });
-    });
-  }
-
-  private refreshAssignmentsDetails() {
-    this.courseService.getStudentCourseAssignments(this.courseService.course.value.acronym)
-        .pipe(first())
-        .subscribe(as => this.assignments = as);
   }
 }
