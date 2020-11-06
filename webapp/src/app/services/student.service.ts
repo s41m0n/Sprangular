@@ -63,6 +63,12 @@ export class StudentService {
       );
   }
 
+  /**
+   *
+   * @param name The substring to match
+   * @param courseId The course acronym
+   * @param all True if get all
+   */
   searchStudentsInCourseAvailable(
     name: string,
     courseId: string = this.courseService.currentCourseSubject.value,
@@ -99,6 +105,10 @@ export class StudentService {
       );
   }
 
+  /**
+   *
+   * @param id The course acronym
+   */
   public getStudentCourses(id: string): Observable<Course[]> {
     return this.http
       .get<Course[]>(`${environment.base_students_url}/${id}/courses`)
@@ -112,6 +122,11 @@ export class StudentService {
       );
   }
 
+  /**
+   *
+   * @param uploadDetails The details of the upload
+   * @param assignmentSolutionId The assignment solution id
+   */
   studentAssignmentUpload(
     uploadDetails: FormData,
     assignmentSolutionId: number
@@ -137,6 +152,11 @@ export class StudentService {
       );
   }
 
+  /**
+   *
+   * @param studentId The student id
+   * @param courseId The course acronym
+   */
   getTeamProposalsForCourse(
     studentId: string = this.authService.currentUserValue.id,
     courseId: string = this.courseService.currentCourseSubject.value

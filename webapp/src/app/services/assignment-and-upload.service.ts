@@ -18,6 +18,10 @@ export class AssignmentAndUploadService {
               private toastrService: ToastrService) {
   }
 
+  /**
+   * Return the document of the assignment
+   * @param assignmentId The assignment id
+   */
   getDocument(assignmentId: number): Observable<any> {
     return this.http.get(`${environment.base_assignments_url}/${assignmentId}/document`, {
       responseType: 'blob',
@@ -27,6 +31,10 @@ export class AssignmentAndUploadService {
     );
   }
 
+  /**
+   * Return the enriched information of all the assignment solutions
+   * @param assignmentId The assignment id
+   */
   getSolutionsForAssignment(assignmentId: number): Observable<AssignmentSolutionDetails[]> {
     return this.http.get<AssignmentSolutionDetails[]>(`${environment.base_assignments_url}/${assignmentId}/solutions`)
         .pipe(
@@ -34,6 +42,10 @@ export class AssignmentAndUploadService {
           catchError(handleError<any>(this.toastrService, `getSolutionsForAssingment(${assignmentId})`)));
   }
 
+  /**
+   * Return all the uploads of the assignment solution
+   * @param assignmentSolutionId The assignment solution id
+   */
   public getAssignmentSolutionUploads(assignmentSolutionId: number): Observable<Upload[]> {
     return this.http.get<Upload[]>(`${environment.base_assignmentSolutions_url}/${assignmentSolutionId}/uploads`)
         .pipe(
@@ -41,6 +53,10 @@ export class AssignmentAndUploadService {
             catchError(handleError<Upload[]>(this.toastrService, `getAssignmentUploads(${assignmentSolutionId})`)));
   }
 
+  /**
+   * Return the document of the assignment
+   * @param assignmentId The assignment id
+   */
   readStudentAssignment(assignmentId: number): Observable<any> {
     return this.http.get(`${environment.base_assignments_url}/${assignmentId}/studentDocument`, {
       responseType: 'blob',
@@ -50,6 +66,11 @@ export class AssignmentAndUploadService {
     );
   }
 
+  /**
+   *
+   * @param assignmentSolutionId The assignment solution id
+   * @param grade The grade to assign
+   */
   evaluateAssignment(assignmentSolutionId: number, grade: string): Observable<AssignmentSolution> {
     return this.http.post<AssignmentSolution>(`${environment.base_assignmentSolutions_url}/${assignmentSolutionId}/grade`,
         {grade},
@@ -60,6 +81,10 @@ export class AssignmentAndUploadService {
     );
   }
 
+  /**
+   * Return the document of the upload
+   * @param uploadId The upload id
+   */
   getUploadDocument(uploadId: number): Observable<any> {
     return this.http.get(`${environment.base_uploads_url}/${uploadId}/document`, {
       responseType: 'blob',

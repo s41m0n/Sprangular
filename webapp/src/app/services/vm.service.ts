@@ -23,6 +23,11 @@ export class VmService {
         private teamService: TeamService
     ) {}
 
+    /**
+     *
+     * @param vmDTO The vm to create
+     * @param teamId The team id
+     */
     public createVmForTeam(
         vmDTO: VM,
         teamId: number = this.teamService.currentTeamSubject.value.id
@@ -50,6 +55,10 @@ export class VmService {
             );
     }
 
+    /**
+     *
+     * @param teamId The team id
+     */
     public getTeamVms(
         teamId: number = this.teamService.currentTeamSubject.value.id
     ): Observable<VmStudentDetails[]> {
@@ -63,6 +72,11 @@ export class VmService {
             );
     }
 
+    /**
+     *
+     * @param vmId The vm id
+     * @param vmActive the actual status
+     */
     public triggerVm(vmId: number, vmActive: boolean): Observable<VM> {
         // If the vm is active, request the turn off, request the turn on otherwise
         const active = vmActive ? 'false' : 'true';
@@ -78,6 +92,12 @@ export class VmService {
             );
     }
 
+    /**
+     *
+     * @param vmId The vm id
+     * @param studentId The student id
+     * @param owner True if it is owner
+     */
     public editOwner(vmId: number, studentId: string, owner: boolean): Observable<VM> {
         return this.http
             .post<VM>(
@@ -105,6 +125,10 @@ export class VmService {
             );
     }
 
+    /**
+     *
+     * @param vmId The vm id
+     */
     public getInstance(vmId: number): Observable<any> {
         return this.http
             .get(`${environment.base_vms_url}/${vmId}/instance`, {
@@ -118,6 +142,10 @@ export class VmService {
             );
     }
 
+    /**
+     *
+     * @param vmId The vm id
+     */
     public removeVm(vmId: number) {
         return this.http.delete(`${environment.base_vms_url}/${vmId}`).pipe(
             tap(() => console.log(`removed vm ${vmId} - removeVm()`)),
@@ -125,6 +153,13 @@ export class VmService {
         );
     }
 
+    /**
+     *
+     * @param vmId The vm id
+     * @param vcpu The vcpu requested value
+     * @param ram The ram requested value
+     * @param diskStorage The disk storage requested value
+     */
     public updateVm(vmId: number, vcpu: string, ram: string, diskStorage: string) {
         return this.http
             .put<VM>(
