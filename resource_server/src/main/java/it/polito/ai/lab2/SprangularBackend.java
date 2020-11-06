@@ -63,12 +63,13 @@ public class SprangularBackend {
         log.info("Uploads directory already exists");
       }
 
-      // Team proposals management
-      List<Proposal> proposals = proposalRepository.findAllByStatus(ProposalStatus.PENDING);
+      // Team pending active proposals management
       Set<Long> scheduled = new HashSet<>();
-      proposals.forEach(proposal -> {
+      proposalRepository.findAllByStatus(ProposalStatus.PENDING).stream()
+          .filter(Proposal::isValid)
+          .forEach(proposal -> {
         if (proposal.getDeadline().after(new Timestamp(System.currentTimeMillis()))) {
-          // Create scheduled task
+          // Create scheduled task for the team corresponding to the proposal
           Long teamId = proposal.getTeamId();
           if (!scheduled.contains(teamId)) {
             scheduled.add(teamId);
@@ -93,10 +94,10 @@ public class SprangularBackend {
       });
 
       // Assignment delivery management
-      List<AssignmentSolution> assignmentSolutions = assignmentSolutionRepository.findAllByStatusIn(
-          Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ, AssignmentStatus.REVIEWED_UPLOADABLE));
       Set<Long> programmed = new HashSet<>();
-      assignmentSolutions.forEach(assignmentSolution -> {
+      assignmentSolutionRepository.findAllByStatusIn(
+          Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ, AssignmentStatus.REVIEWED_UPLOADABLE))
+          .forEach(assignmentSolution -> {
         if (assignmentSolution.getAssignment().getDueDate().before(new Timestamp(System.currentTimeMillis()))) {
           // Deliver assignment
           Timestamp currentTs = new Timestamp(System.currentTimeMillis());

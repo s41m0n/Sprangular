@@ -13,7 +13,6 @@ import {AssignmentStatus} from '../../models/assignment-solution.model';
 import {GradeDialogComponent} from '../../modals/grade-dialog/grade-dialog.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {UploadsDialogComponent} from '../../modals/uploads/uploads-dialog.component';
-import {NewAssignmentDialogComponent} from '../../modals/new-assignment/new-assignment-dialog.component';
 import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
 
 /**
@@ -60,24 +59,6 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
               private sanitizer: DomSanitizer,
               private router: Router,
               private route: ActivatedRoute) {
-    this.route.queryParams.subscribe((queryParam) => {
-        if (queryParam && queryParam.solution) {
-          this.uploadsDialog(queryParam.solution);
-          if (queryParam.professorUpload) {
-            this.uploadReview(queryParam.solution);
-          } else if (queryParam.professorImage) {
-            this.viewDocEvent.emit({solId: queryParam.solution, upId: queryParam.professorImage});
-          }
-        }
-    });
-
-    this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.addAssignment ? this.newAssignment() : null
-    );
-
-    this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.assignGrade ? this.assignGrade(queryParam.assignGrade) : null
-    );
   }
 
   ngAfterViewInit() {
@@ -86,6 +67,23 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.activeDataSource.sort = this.sort;
     this.expiredDataSource.sort = this.sort;
     this.expiredDataSource.paginator = this.paginatorBis;
+
+    this.route.queryParams.subscribe((queryParam) => {
+      if (queryParam && queryParam.solution) {
+        this.uploadsDialog(queryParam.solution);
+        if (queryParam.professorUpload) {
+          this.uploadReview(queryParam.solution);
+        } else if (queryParam.professorImage) {
+          const solId: number = queryParam.solution;
+          const upId: number = queryParam.professorImage;
+          this.viewDocEvent.emit({solId, upId});
+        }
+      }
+    });
+
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.assignGrade ? this.assignGrade(queryParam.assignGrade) : null
+    );
   }
 
   showSolutions(row: Assignment) {
@@ -143,22 +141,6 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
         });
   }
 
-  newAssignment() {
-    const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
-      width: '50%',
-    });
-    dialogRef
-        .afterClosed()
-        .pipe(first())
-        .subscribe((result) => {
-          if (result) {
-            this.activeDataSource.data.push(result);
-            this.assignments = this.activeDataSource.data;
-          }
-          this.router.navigate([this.router.url.split('?')[0]]);
-        });
-  }
-
   uploadReview(assSolId: string) {
     const dialogRef = this.dialog.open(NewAssignmentUploadDialogComponent,
         {
@@ -170,8 +152,10 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
         .subscribe((result) => {
           if (result) {
             const element = this.innerDataSource.data.find(e => e.id === Number.parseInt(assSolId, 10));
-            element.status = result.status;
-            element.statusTs = result.timestamp;
+            if (element) {
+              element.status = result.status;
+              element.statusTs = result.timestamp;
+            }
             this.dialog.closeAll();
             this.router.navigate([this.router.url.split('?')[0]]);
           } else {

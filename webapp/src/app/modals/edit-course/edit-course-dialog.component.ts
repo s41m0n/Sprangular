@@ -171,6 +171,9 @@ export class EditCourseDialogComponent implements OnInit, OnDestroy {
   }
 
   addProfessor() {
+    if (!this.addProfessorControl.value) {
+      return;
+    }
     this.professors.pipe(first()).subscribe((arr) => {
       if (arr.find((p) => p.id === this.addProfessorControl.value.id)) {
         this.addProfessorControl.setValue('');

@@ -7,6 +7,7 @@ import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer
 import {MatDialog} from '@angular/material/dialog';
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {AssignmentSolutionDetails} from '../../models/assignment-solution-details.model';
+import {NewAssignmentDialogComponent} from '../../modals/new-assignment/new-assignment-dialog.component';
 
 /**
  * AssignmentsContainer
@@ -32,6 +33,26 @@ export class TabProfessorAssignmentsContComponent {
           this.route.queryParams.subscribe((queryParam) =>
               queryParam && queryParam.professorAssignment ? this.viewAssignment(queryParam.professorAssignment) : null);
     });
+
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.addAssignment ? this.newAssignment() : null
+    );
+  }
+
+  newAssignment() {
+    const dialogRef = this.dialog.open(NewAssignmentDialogComponent, {
+      width: '50%',
+    });
+    dialogRef
+        .afterClosed()
+        .pipe(first())
+        .subscribe((result) => {
+          if (result) {
+            this.assignments.push(result);
+            this.assignments = this.assignments.slice();
+          }
+          this.router.navigate([this.router.url.split('?')[0]]);
+        });
   }
 
   viewAssignment(assId: string) {

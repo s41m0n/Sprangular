@@ -250,7 +250,9 @@ public class CourseServiceImpl implements CourseService {
     c.getAssignments().forEach(a -> {
       imagesToDelete.add(Utility.ASSIGNMENTS_DIR.resolve(a.getId().toString()));
       a.getSolutions().forEach(s -> {
-        s.getUploads().forEach(u -> imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getId().toString())));
+        s.getUploads().stream()
+            .filter(u -> u.getImagePath() != null)
+            .forEach(u -> imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getId().toString())));
         uploadRepository.deleteAll(s.getUploads());
       });
       assignmentSolutionRepository.deleteAll(a.getSolutions());

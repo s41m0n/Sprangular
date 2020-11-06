@@ -1,23 +1,22 @@
 # Sprangular
 
-## AI University project
+Progetto finale di Applicazioni Internet - sito web creato con Spring Boot e Angular
 
-### How to start a persistent MariaDB docker container
+## Come avviare un database sfruttando un container mariadDB collegato
 
-Command to execute from CLI (replace `<local path>` with the path to the directory where you want to store the DB):
+Eseguire il seguente comando sostituendo a _\<local_path\>_ il path desiderato per salvare i dati del database.
 
-`docker run --name mariadb -v <local path>:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mariadb`
+`$ docker run --name mariadb -v <local path>:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mariadb`
 
-Steps to create the DB from IntelliJ Database window:
+## Come creare un nuovo database utilizzando il plugin di IntelliJ IDEA
 
-- Create a `@localhost` data source
-- Open the source editor
-- Execute `CREATE DATABASE sprangular`
-- Create a `sprangular@localhost` data source
+- Creare una data source `@localhost`;
+- Aprire il source editor collegato;
+- Digitare ed eseguire il comando `CREATE DATABASE sprangular` nel source editor;
+- Creare ora una data source `sprangular@localhost`.
 
-DB access credentials:
+## Credenziali accesso al database:
 
-```
-User: root
-Psw:  root
-```
+| Username | Password |
+| -------- | -------- |
+| root     | root     |

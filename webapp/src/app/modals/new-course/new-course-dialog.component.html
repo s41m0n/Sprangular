@@ -10,7 +10,7 @@
               formControlName="acronym"
               required
       />
-      <mat-error>Please provide a valid Acronym (only capital letters)</mat-error>
+      <mat-error>Please provide a valid Acronym (only capital letters, no spaces, min: 2, max: 10)</mat-error>
     </mat-form-field>
 
     <mat-form-field class="full-width-input">
@@ -21,7 +21,7 @@
               formControlName="name"
               required
       />
-      <mat-error>Please provide a valid Name</mat-error>
+      <mat-error>Please provide a valid Name (min: 2, max: 32)</mat-error>
     </mat-form-field>
 
     <label>Team Min Size:</label>
