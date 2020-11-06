@@ -18,7 +18,7 @@ Dalla cartella del client ./webapp generare l'immagine docker per l'applicazione
 ```$ docker build -t sprangular_client .```
 
 Dalla cartella root del progetto deployare tutto il sistema usando il docker-compose presente con il comando:
-```$ docker-compose up```
+```$ docker-compose up --force-recreate```
 
 ## Avviare l'applicazione
 
