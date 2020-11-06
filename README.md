@@ -23,6 +23,8 @@ Dalla cartella del client ./webapp generare l'immagine docker per l'applicazione
 Dalla cartella root del progetto deployare tutto il sistema usando il docker-compose presente con il comando:
 ```$ docker-compose up --force-recreate```
 
+Il server potrebbe riavviarsi più volte durante il primo avvio, questo è dovuto al fatto che mariadb impiega un determinato lasso di tempo per creare il database e fino a che il server non riesce a connettersi ritorna un messaggio di errore, che causa il riavvio automatico. 
+
 ## Avviare l'applicazione
 
 Per collegarsi all'applicazione è sufficiente aprire un browser al seguente link: https://localhost:4200/home
