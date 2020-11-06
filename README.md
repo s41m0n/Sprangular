@@ -27,7 +27,11 @@ Dalla cartella root del progetto deployare tutto il sistema usando il docker-com
 
 Per collegarsi all'applicazione è sufficiente aprire un browser al seguente link: https://localhost:4200/home
 
-## Utenti già presenti
+## Gestione del database
+
+Il database viene gestito tramite un container mariadb che utilizza come volume una carella creata in automatico: ```/home/$USER/db```
+
+## Utenti già presenti nel database
 
 ### Studenti:
 
