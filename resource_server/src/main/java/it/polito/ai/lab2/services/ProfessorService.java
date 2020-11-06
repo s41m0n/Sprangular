@@ -8,6 +8,10 @@ import java.util.Optional;
 
 public interface ProfessorService {
 
+  /**
+   *
+   * @return
+   */
   List<ProfessorDTO> getProfessors();
 
   List<ProfessorDTO> getProfessorsLike(String pattern);
