@@ -6,6 +6,7 @@ import it.polito.ai.lab2.exceptions.TokenNotFoundException;
 import it.polito.ai.lab2.repositories.ProposalRepository;
 import it.polito.ai.lab2.utility.ProposalStatus;
 import it.polito.ai.lab2.utility.Utility;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,6 +21,7 @@ import java.util.List;
 @Service
 @Transactional
 @EnableScheduling
+@Log(topic = "NotificationServiceImpl")
 public class NotificationServiceImpl implements NotificationService {
 
   @Autowired
@@ -34,9 +36,11 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   @Async
   public void sendMessage(String address, String subject, String body) {
-    address = "noreply.sprangular@gmail.com";
+    String sprangularAddress = "noreply.sprangular@gmail.com";
+    log.warning("*** THE MAIL SHOULD BE SENT TO " + address +
+        " BUT FOR OBVIOUS REASON WILL BE SENT TO OUR DESIGNED ADDRESS: " + sprangularAddress + " ***");
     SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(address);
+    message.setTo(sprangularAddress);
     message.setSubject(subject);
     message.setText(body);
     emailSender.send(message);
