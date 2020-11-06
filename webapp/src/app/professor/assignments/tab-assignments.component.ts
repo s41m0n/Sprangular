@@ -59,20 +59,6 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
               private sanitizer: DomSanitizer,
               private router: Router,
               private route: ActivatedRoute) {
-    this.route.queryParams.subscribe((queryParam) => {
-        if (queryParam && queryParam.solution) {
-          this.uploadsDialog(queryParam.solution);
-          if (queryParam.professorUpload) {
-            this.uploadReview(queryParam.solution);
-          } else if (queryParam.professorImage) {
-            this.viewDocEvent.emit({solId: queryParam.solution, upId: queryParam.professorImage});
-          }
-        }
-    });
-
-    this.route.queryParams.subscribe((queryParam) =>
-        queryParam && queryParam.assignGrade ? this.assignGrade(queryParam.assignGrade) : null
-    );
   }
 
   ngAfterViewInit() {
@@ -81,6 +67,23 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.activeDataSource.sort = this.sort;
     this.expiredDataSource.sort = this.sort;
     this.expiredDataSource.paginator = this.paginatorBis;
+
+    this.route.queryParams.subscribe((queryParam) => {
+      if (queryParam && queryParam.solution) {
+        this.uploadsDialog(queryParam.solution);
+        if (queryParam.professorUpload) {
+          this.uploadReview(queryParam.solution);
+        } else if (queryParam.professorImage) {
+          const solId: number = queryParam.solution;
+          const upId: number = queryParam.professorImage;
+          this.viewDocEvent.emit({solId, upId});
+        }
+      }
+    });
+
+    this.route.queryParams.subscribe((queryParam) =>
+        queryParam && queryParam.assignGrade ? this.assignGrade(queryParam.assignGrade) : null
+    );
   }
 
   showSolutions(row: Assignment) {
