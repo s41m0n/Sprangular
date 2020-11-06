@@ -20,6 +20,10 @@ import { Upload } from '../models/upload.model';
 export class ProfessorService {
   constructor(private http: HttpClient, private toastrService: ToastrService) {}
 
+  /**
+   *
+   * @param professorId The professor id
+   */
   public getProfessorCourses(professorId: string): Observable<Course[]> {
     return this.http
       .get<Course[]>(
@@ -40,6 +44,10 @@ export class ProfessorService {
       );
   }
 
+  /**
+   *
+   * @param professor The updated professor
+   */
   public updateProfessor(professor: Professor): Observable<Professor> {
     return this.http
       .put<Professor>(
@@ -99,6 +107,11 @@ export class ProfessorService {
       );
   }
 
+  /**
+   * Create an upload for the assignment solution
+   * @param uploadDetails The upload details
+   * @param assignmentSolutionId The assignment solution id
+   */
   professorAssignmentUpload(
       uploadDetails: FormData,
       assignmentSolutionId: number
@@ -109,7 +122,7 @@ export class ProfessorService {
             uploadDetails
         )
         .pipe(
-            tap((x) =>
+            tap(() =>
                 this.toastrService.success(
                     `Uploaded a new assignment solution`,
                     'Congratulations 😃'

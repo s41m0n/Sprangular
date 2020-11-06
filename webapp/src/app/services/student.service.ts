@@ -3,13 +3,12 @@ import { Injectable } from '@angular/core';
 import { Student } from '../models/student.model';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { environment } from 'src/environments/environment';
 import { CourseService } from './course.service';
 import { handleError } from '../helpers/handle.error';
-import { AssignmentSolution } from '../models/assignment-solution.model';
 import { Upload } from '../models/upload.model';
 import { AuthService } from './auth.service';
 import { Proposal } from '../models/proposal.model';
@@ -64,6 +63,12 @@ export class StudentService {
       );
   }
 
+  /**
+   *
+   * @param name The substring to match
+   * @param courseId The course acronym
+   * @param all True if get all
+   */
   searchStudentsInCourseAvailable(
     name: string,
     courseId: string = this.courseService.currentCourseSubject.value,
@@ -100,29 +105,10 @@ export class StudentService {
       );
   }
 
-  public getAssignmentSolution(
-    assignmentId: number,
-    studentId: string = this.authService.currentUserValue.id
-  ): Observable<AssignmentSolution> {
-    return this.http
-      .get<AssignmentSolution>(
-        `${environment.base_students_url}/${studentId}/assignments/${assignmentId}`
-      )
-      .pipe(
-        tap(() =>
-          console.log(
-            `fetched assignment solution ${assignmentId} - getAssignmentSolution()`
-          )
-        ),
-        catchError(
-          handleError<AssignmentSolution>(
-            this.toastrService,
-            `getAssignmentSolution(${studentId}, ${assignmentId})`
-          )
-        )
-      );
-  }
-
+  /**
+   *
+   * @param id The course acronym
+   */
   public getStudentCourses(id: string): Observable<Course[]> {
     return this.http
       .get<Course[]>(`${environment.base_students_url}/${id}/courses`)
@@ -136,27 +122,11 @@ export class StudentService {
       );
   }
 
-  public getStudentByEmail(email: string): Observable<Student> {
-    return this.http
-      .get<Student[]>(
-        `${environment.base_students_url}?email_like=${email}&_expand=team`
-      )
-      .pipe(
-        map((x) => x.shift()),
-        tap(() =>
-          console.log(
-            `fetched student with email ${email} - getStudentByEmail()`
-          )
-        ),
-        catchError(
-          handleError<Student>(
-            this.toastrService,
-            `getStudentByEmail(${email})`
-          )
-        )
-      );
-  }
-
+  /**
+   *
+   * @param uploadDetails The details of the upload
+   * @param assignmentSolutionId The assignment solution id
+   */
   studentAssignmentUpload(
     uploadDetails: FormData,
     assignmentSolutionId: number
@@ -167,7 +137,7 @@ export class StudentService {
         uploadDetails
       )
       .pipe(
-        tap((x) =>
+        tap(() =>
           this.toastrService.success(
             `Uploaded a new assignment solution`,
             'Congratulations 😃'
@@ -182,6 +152,11 @@ export class StudentService {
       );
   }
 
+  /**
+   *
+   * @param studentId The student id
+   * @param courseId The course acronym
+   */
   getTeamProposalsForCourse(
     studentId: string = this.authService.currentUserValue.id,
     courseId: string = this.courseService.currentCourseSubject.value

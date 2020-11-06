@@ -9,16 +9,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class TeamProposalDetails {
-
-  String token; //ci serve per creare il link cliccabile nel frontend
-
+  String token; // Used to generate the clickable on the frontend
   String proposalCreator;
-
   String teamName;
-
   List<String> membersAndStatus;
-
   Timestamp deadline;
-
   boolean valid;
 }

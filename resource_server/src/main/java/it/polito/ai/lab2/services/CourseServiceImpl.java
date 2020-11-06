@@ -12,6 +12,7 @@ import it.polito.ai.lab2.pojos.CourseWithModelDetails;
 import it.polito.ai.lab2.pojos.StudentWithTeamDetails;
 import it.polito.ai.lab2.repositories.*;
 import it.polito.ai.lab2.utility.AssignmentStatus;
+import it.polito.ai.lab2.utility.ProposalStatus;
 import it.polito.ai.lab2.utility.Utility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,14 +75,19 @@ public class CourseServiceImpl implements CourseService {
   @Autowired
   ProposalRepository proposalRepository;
 
+  @Autowired
+  NotificationService notificationService;
+
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public CourseDTO addCourse(CourseWithModelDetails course) {
     if (courseRepository.existsById(course.getAcronym())) {
       throw new DuplicatedCourseException("Course " + course.getAcronym() + " already exists");
     }
 
-    if (course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
+    if (course.getTeamMaxSize() < course.getTeamMinSize()
+        || course.getTeamMaxSize() < 0
+        || course.getTeamMinSize() < 0) {
       throw new TeamSizesNotCoherentException("Cannot create course " + course.getAcronym() + ": wrong team sizes");
     }
 
@@ -103,20 +109,22 @@ public class CourseServiceImpl implements CourseService {
 
     courseRepository.save(c);
     if (professorRepository.findById(SecurityContextHolder.getContext().getAuthentication().getName()).isPresent()) {
-      this.addProfessorToCourse(professorRepository.getOne(SecurityContextHolder.getContext().getAuthentication().getName()).getId(), course.getAcronym());
+      this.addProfessorToCourse(professorRepository.getOne(
+          SecurityContextHolder.getContext().getAuthentication().getName()).getId(), course.getAcronym());
     }
     return modelMapper.map(c, CourseDTO.class);
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') " +
+      "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId)")
   public Optional<CourseDTO> getCourse(String courseId) {
     return courseRepository.findById(courseId)
         .map(course -> modelMapper.map(course, CourseDTO.class));
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public List<CourseDTO> getAllCourses() {
     return courseRepository.findAll().stream()
         .map(course -> modelMapper.map(course, CourseDTO.class))
@@ -124,7 +132,8 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
   public List<StudentWithTeamDetails> getEnrolledStudents(String courseId) {
     List<StudentDTO> students = courseRepository.findById(courseId)
         .map(course -> course.getStudents().stream()
@@ -135,19 +144,21 @@ public class CourseServiceImpl implements CourseService {
     List<StudentWithTeamDetails> returnedList = new ArrayList<>();
 
     for (StudentDTO s : students) {
-      modelMapper.map(s, StudentWithTeamDetails.class).setTeam(modelMapper.map(teamService.getTeamOfStudentOfCourse(s.getId(), courseId), TeamDTO.class));
+      modelMapper.map(s, StudentWithTeamDetails.class).setTeam(
+          modelMapper.map(teamService.getTeamOfStudentOfCourse(s.getId(), courseId), TeamDTO.class));
     }
 
     return returnedList;
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public boolean enableCourse(String courseId) {
     courseRepository.findById(courseId)
         .ifPresentOrElse(course -> {
           if (course.getProfessors().isEmpty())
-            throw new CourseProfessorNotAssigned("You can enable course " + courseId + " only when at least one professor has been assigned to it");
+            throw new CourseProfessorNotAssignedException(
+                "You can enable course " + courseId + " only when at least one professor has been assigned to it");
           course.setEnabled(true);
         }, () -> {
           throw new CourseNotFoundException("Course " + courseId + " does not exist");
@@ -156,7 +167,7 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public boolean disableCourse(String courseId) {
     courseRepository.findById(courseId)
         .ifPresentOrElse(course -> course.setEnabled(false), () -> {
@@ -166,17 +177,21 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public List<ProfessorDTO> getCourseProfessors(String courseId) {
-    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-    return c.getProfessors() == null ? null : c.getProfessors().stream().map(p -> modelMapper.map(p, ProfessorDTO.class)).collect(Collectors.toList());
+    Course c = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    return c.getProfessors() == null ? null
+        : c.getProfessors().stream().map(p -> modelMapper.map(p, ProfessorDTO.class)).collect(Collectors.toList());
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public boolean addProfessorToCourse(String professor, String courseId) {
-    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
-    Professor p = professorRepository.findById(professor).orElseThrow(() -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
+    Course c = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    Professor p = professorRepository.findById(professor).orElseThrow(
+        () -> new ProfessorNotFoundException("Professor `" + professor + "` does not exist"));
     if (p.isVerified()) {
       return p.addCourse(c);
     }
@@ -184,7 +199,7 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public ProfessorDTO removeProfessorFromCourse(String professor, String courseId) {
     Course c = courseRepository.findById(courseId).orElseThrow(
         () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
@@ -194,11 +209,12 @@ public class CourseServiceImpl implements CourseService {
       p.removeCourse(c);
       return modelMapper.map(p, ProfessorDTO.class);
     }
-    throw new CourseWithoutProfessorException("Cannot remove professor " + professor + " from course " + courseId + ", it is the only professor");
+    throw new CourseWithoutProfessorException(
+        "Cannot remove professor " + professor + " from course " + courseId + ", it is the only professor");
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public List<StudentWithTeamDetails> getStudentsOfCourse(String courseId, String pattern) {
     boolean applyFilter = pattern != null && !pattern.isEmpty();
     return courseRepository.findById(courseId)
@@ -209,7 +225,9 @@ public class CourseServiceImpl implements CourseService {
                 return modelMapper.map(x, StudentWithTeamDetails.class);
               }
               StudentWithTeamDetails ret = modelMapper.map(x, StudentWithTeamDetails.class);
-              x.getTeams().stream().filter(y -> y.getCourse().getAcronym().equals(courseId)).findAny().ifPresent(team -> ret.setTeam(modelMapper.map(team, TeamDTO.class)));
+              x.getTeams().stream()
+                  .filter(y -> y.isActive() && y.getCourse().getAcronym().equals(courseId)).findAny()
+                  .ifPresent(team -> ret.setTeam(modelMapper.map(team, TeamDTO.class)));
               return ret;
             })
             .collect(Collectors.toList()))
@@ -217,7 +235,7 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public CourseDTO removeCourse(String courseId) {
     Course c = courseRepository.findById(courseId).orElseThrow(
         () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
@@ -232,9 +250,7 @@ public class CourseServiceImpl implements CourseService {
     c.getAssignments().forEach(a -> {
       imagesToDelete.add(Utility.ASSIGNMENTS_DIR.resolve(a.getId().toString()));
       a.getSolutions().forEach(s -> {
-        s.getUploads().forEach(u -> {
-          imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getId().toString()));
-        });
+        s.getUploads().forEach(u -> imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getId().toString())));
         uploadRepository.deleteAll(s.getUploads());
       });
       assignmentSolutionRepository.deleteAll(a.getSolutions());
@@ -254,18 +270,23 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public CourseDTO updateCourse(String courseId, CourseWithModelDetails course) {
 
-    if (course.getTeamMaxSize() < course.getTeamMinSize() || course.getTeamMaxSize() < 0 || course.getTeamMinSize() < 0) {
+    if (course.getTeamMaxSize() < course.getTeamMinSize()
+        || course.getTeamMaxSize() < 0
+        || course.getTeamMinSize() < 0) {
       throw new CannotUpdateCourseException("Cannot update course " + course.getAcronym() + ": wrong team sizes");
     }
 
-    Course c = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+    Course c = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
     for (Team t : c.getTeams()) {
-      if (t.getMembers().size() < course.getTeamMinSize() || t.getMembers().size() > course.getTeamMaxSize()) {
-        throw new CannotUpdateCourseException("Course " + courseId + " cannot be updated: some teams are not compliant with new restrictions");
+      if (t.getMembers().size() < course.getTeamMinSize()
+          || t.getMembers().size() > course.getTeamMaxSize()) {
+        throw new CannotUpdateCourseException(
+            "Course " + courseId + " cannot be updated: some teams are not compliant with new restrictions");
       }
     }
 
@@ -304,7 +325,7 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public boolean addStudentToCourse(String studentId, String courseId) {
     Student student = studentRepository.findById(studentId).orElse(null);
     if (student == null) throw new StudentNotFoundException("Student " + studentId + " does not exist");
@@ -347,9 +368,10 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public List<Boolean> enrollAll(Reader r, String courseId) {
-    courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+    courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
     CsvToBean<StudentDTO> csvToBean = new CsvToBeanBuilder(r)
         .withType(StudentDTO.class)
@@ -359,7 +381,8 @@ public class CourseServiceImpl implements CourseService {
     List<StudentDTO> students = csvToBean.parse();
 
     for (StudentDTO s : students) {
-      Student student = studentRepository.findById(s.getId()).orElseThrow(() -> new StudentNotFoundException("Student " + s.getId() + " does not exist"));
+      Student student = studentRepository.findById(s.getId()).orElseThrow(
+          () -> new StudentNotFoundException("Student " + s.getId() + " does not exist"));
       if (!student.isVerified()) {
         throw new UserNotVerifiedException("Student " + s.getId() + " is not verified");
       }
@@ -371,21 +394,33 @@ public class CourseServiceImpl implements CourseService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public StudentDTO removeStudentFromCourse(String studentId, String courseId) {
-    Student student = studentRepository.findById(studentId).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
-    Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("Course " + courseId + " does not exist"));
+    Student student = studentRepository.findById(studentId).orElseThrow(
+        () -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+    Course course = courseRepository.findById(courseId).orElseThrow(
+        () -> new CourseNotFoundException("Course " + courseId + " does not exist"));
 
       if (!course.getStudents().contains(student)) {
         throw new StudentNotInCourseException("Student " + studentId + " is not enrolled in course " + courseId);
       }
+      if (student.getTeams().stream().anyMatch(t -> t.getCourse().getAcronym().equals(courseId) && t.isActive())) {
+        throw new StudentAlreadyInTeamException("Student " + studentId + " is a member of a team");
+      }
+    proposalRepository.findAllByInvitedUserIdAndCourseId(studentId, courseId)
+        .forEach(p -> {
+          if (p.getStatus().equals(ProposalStatus.PENDING)) {
+            notificationService.reject(p.getId());
+          }
+          notificationService.deleteProposal(p.getId());
+        });
       student.removeCourse(course); //symmetric method, it updates also the course
 
     return modelMapper.map(student, StudentDTO.class);
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)")
   public List<StudentDTO> removeStudentsFromCourse(List<String> studentIds, String courseId) {
     return studentIds.stream()
         .map(studentId -> removeStudentFromCourse(studentId, courseId))

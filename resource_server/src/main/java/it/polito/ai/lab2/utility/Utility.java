@@ -17,7 +17,6 @@ public class Utility {
   public static final Path VMS_DIR = Paths.get(IMAGES_ROOT_DIR).resolve("vms");
 
   // Roles
-  public static final String ADMIN_ROLE = "ROLE_ADMIN";
   public static final String PROFESSOR_ROLE = "ROLE_PROFESSOR";
   public static final String STUDENT_ROLE = "ROLE_STUDENT";
 

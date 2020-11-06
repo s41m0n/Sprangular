@@ -1,5 +1,3 @@
-import { Student } from './student.model';
-
 export class TeamProposal {
   teamName: string;
   studentIds: string[];

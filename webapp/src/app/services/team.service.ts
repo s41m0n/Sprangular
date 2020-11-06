@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { Team } from '../models/team.model';
@@ -9,7 +9,6 @@ import { environment } from 'src/environments/environment';
 import { TeamProposal } from '../models/team-proposal.model';
 import { CourseService } from './course.service';
 import { AuthService } from './auth.service';
-import { Student } from '../models/student.model';
 import { handleError } from '../helpers/handle.error';
 
 /** Team service
@@ -31,6 +30,11 @@ export class TeamService {
     this.currentTeamSubject = new BehaviorSubject<Team>(null);
   }
 
+  /**
+   *
+   * @param proposal The details of the proposal
+   * @param courseId The course acronym
+   */
   public createTeam(
       proposal: TeamProposal,
       courseId: string = this.courseService.currentCourseSubject.value
@@ -54,6 +58,11 @@ export class TeamService {
         );
   }
 
+  /**
+   *
+   * @param teamId The team id
+   * @param formData The details of the resources update
+   */
   public updateTeamVmResources(teamId: number, formData: FormData): Observable<Team> {
     return this.http
         .put<Team>(
@@ -76,6 +85,11 @@ export class TeamService {
         );
   }
 
+  /**
+   *
+   * @param courseId The course id
+   * @param studentId The student id
+   */
   public getStudentTeam(
       courseId: string = this.courseService.currentCourseSubject.value,
       studentId: string = this.authService.currentUserValue.id
@@ -101,24 +115,10 @@ export class TeamService {
         );
   }
 
-  public getStudentsInTeam(teamId: number = this.currentTeamSubject.value.id) {
-    return this.http
-        .get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
-        .pipe(
-            tap(() =>
-                console.log(
-                    `retrieved members of team ${teamId} - getStudentsInTeam()`
-                )
-            ),
-            catchError(
-                handleError<Student[]>(
-                    this.toastrService,
-                    `getStudentsInTeam(${teamId})`
-                )
-            )
-        );
-  }
-
+  /**
+   *
+   * @param token The token id
+   */
   public acceptProposal(token: string): Observable<boolean> {
     return this.http
       .get<boolean>(
@@ -133,6 +133,10 @@ export class TeamService {
       );
   }
 
+  /**
+   *
+   * @param token The token id
+   */
   public rejectProposal(token: string): Observable<boolean> {
     return this.http
       .get<boolean>(
@@ -147,6 +151,10 @@ export class TeamService {
       );
   }
 
+  /**
+   *
+   * @param token The token id
+   */
   public deleteProposal(token: string): Observable<boolean> {
     return this.http
       .get<boolean>(

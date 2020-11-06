@@ -48,9 +48,7 @@ public class JwtTokenUtil {
   public String generateToken(UserDetails userDetails) {
     HashMap<String, Object> roles = new HashMap<>();
     List<String> tmp = new ArrayList<>();
-    userDetails.getAuthorities().stream().forEach(x -> {
-      tmp.add(x.toString());
-    });
+    userDetails.getAuthorities().forEach(x -> tmp.add(x.toString()));
     roles.put("roles", tmp);
 
     return Jwts.builder()

@@ -143,7 +143,7 @@ public class CourseController {
       else return courseService.disableCourse(courseId);
     } catch (CourseNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    } catch (CourseProfessorNotAssigned e) {
+    } catch (CourseProfessorNotAssignedException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }

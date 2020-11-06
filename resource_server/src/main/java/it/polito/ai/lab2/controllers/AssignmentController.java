@@ -2,7 +2,6 @@ package it.polito.ai.lab2.controllers;
 
 import it.polito.ai.lab2.exceptions.AssignmentNotFoundException;
 import it.polito.ai.lab2.exceptions.AssignmentSolutionNotFoundException;
-import it.polito.ai.lab2.exceptions.StudentNotFoundException;
 import it.polito.ai.lab2.pojos.AssignmentSolutionDetails;
 import it.polito.ai.lab2.services.AssignmentAndUploadService;
 import lombok.extern.java.Log;

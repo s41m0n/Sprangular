@@ -71,8 +71,6 @@ export class NewVmDialogComponent implements OnInit {
         this.form.get('active').value
     );
 
-    console.log(vm);
-
     this.vmService
         .createVmForTeam(vm)
         .pipe(first())

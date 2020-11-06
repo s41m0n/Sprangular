@@ -5,8 +5,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class VmModelDetails {
-
   String name;
-
   MultipartFile image;
 }

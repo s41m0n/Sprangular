@@ -5,8 +5,6 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {first} from 'rxjs/operators';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
-import {NewAssignmentUploadDialogComponent} from '../new-assignment-upload/new-assignment-upload-dialog.component';
-import {ImageViewerDialogComponent} from '../image-viewer/image-viewer-dialog.component';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 

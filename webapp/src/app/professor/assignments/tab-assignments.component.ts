@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
@@ -7,7 +7,6 @@ import {Assignment} from '../../models/assignment.model';
 import {first} from 'rxjs/operators';
 import {MatDialog} from '@angular/material/dialog';
 import {DomSanitizer} from '@angular/platform-browser';
-import {AssignmentAndUploadService} from '../../services/assignment-and-upload.service';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AssignmentSolutionDetails} from '../../models/assignment-solution-details.model';
 import {AssignmentStatus} from '../../models/assignment-solution.model';
@@ -16,7 +15,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {UploadsDialogComponent} from '../../modals/uploads/uploads-dialog.component';
 import {NewAssignmentDialogComponent} from '../../modals/new-assignment/new-assignment-dialog.component';
 import {NewAssignmentUploadDialogComponent} from '../../modals/new-assignment-upload/new-assignment-upload-dialog.component';
-import {ImageViewerDialogComponent} from '../../modals/image-viewer/image-viewer-dialog.component';
 
 /**
  * AssignmentsComponent
@@ -52,9 +50,13 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.activeDataSource.data = assignments.filter(a => Date.now() < Date.parse(a.dueDate)).sort(Assignment.compare);
     this.expiredDataSource.data = assignments.filter(a => Date.now() >= Date.parse(a.dueDate)).sort(Assignment.compare);
   }
+  @Input() set setAssignmentSolutions(val: AssignmentSolutionDetails[]) {
+    this.innerDataSource.data = val;
+  }
+  @Output() assignmentSolutionEvent = new EventEmitter<number>();
+  @Output() viewDocEvent = new EventEmitter<{solId: number, upId: number}>();
 
   constructor(public dialog: MatDialog,
-              private assignmentService: AssignmentAndUploadService,
               private sanitizer: DomSanitizer,
               private router: Router,
               private route: ActivatedRoute) {
@@ -64,7 +66,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
           if (queryParam.professorUpload) {
             this.uploadReview(queryParam.solution);
           } else if (queryParam.professorImage) {
-            this.viewDocument(queryParam.solution, queryParam.professorImage);
+            this.viewDocEvent.emit({solId: queryParam.solution, upId: queryParam.professorImage});
           }
         }
     });
@@ -91,8 +93,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     if (this.expandedElement === null) {
       return;
     }
-    this.assignmentService.getSolutionsForAssignment(row.id).pipe(first()).subscribe(
-        solutions => this.innerDataSource.data = solutions.sort(AssignmentSolutionDetails.compare));
+    this.assignmentSolutionEvent.emit(row.id);
   }
 
   dateString(statusTs: string): string {
@@ -177,26 +178,5 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
             this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
           }
         });
-  }
-
-  viewDocument(assSolId: string, uploadId: number) {
-    this.assignmentService.getUploadDocument(uploadId).pipe(first()).subscribe(instance => {
-      if (!instance) {
-        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
-        return;
-      }
-      const url = URL.createObjectURL(instance);
-      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
-        data: {title: `Upload: ${uploadId}`,
-          imageSrc: url,
-          downloadable: true,
-          dl_name: `upload_${uploadId}`
-        }
-      });
-      dialogRef.afterClosed().subscribe(() => {
-        URL.revokeObjectURL(url);
-        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: assSolId}});
-      });
-    });
   }
 }

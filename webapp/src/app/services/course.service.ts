@@ -1,19 +1,17 @@
 import { Injectable } from '@angular/core';
 
-import { BehaviorSubject, from, Observable, of, forkJoin } from 'rxjs';
+import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { catchError, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { Assignment } from '../models/assignment.model';
 import { Student } from '../models/student.model';
-import { VM } from '../models/vm.model';
 import { Professor } from '../models/professor.model';
 import { environment } from 'src/environments/environment';
 import { handleError } from '../helpers/handle.error';
 import {StudentAssignmentDetails} from '../models/student-assignment-details.model';
 import {VmProfessorDetails} from '../models/vm-professor-details.model';
-import {Team} from "../models/team.model";
 
 /**
  * CourseService service
@@ -34,6 +32,10 @@ export class CourseService {
     this.course = new BehaviorSubject<Course>(null);
   }
 
+  /**
+   * Set the current course
+   * @param acronym The course id
+   */
   setNext(acronym: string) {
     this.currentCourseSubject.next(acronym);
     if (!acronym) {
@@ -48,7 +50,7 @@ export class CourseService {
   /**
    * Function to retrieve a Course resource given a path
    *
-   * @param(path) the requested path
+   * @param(acronym) the course acronym
    */
   getCourse(acronym: string): Observable<Course> {
     return this.http
@@ -66,7 +68,7 @@ export class CourseService {
   /**
    * Function to retrieve all students enroll to a Course
    *
-   * @param(course) the objective course
+   * @param(courseId) the course acronym
    */
   getEnrolledStudents(
     courseId: string = this.currentCourseSubject.value
@@ -99,6 +101,10 @@ export class CourseService {
     );
   }
 
+  /**
+   * Get all the vms of the course
+   * @param courseId The course acronym
+   */
   getCourseVMs(courseId: string): Observable<VmProfessorDetails[]> {
     return this.http
       .get<VmProfessorDetails[]>(`${environment.base_courses_url}/${courseId}/vms`)
@@ -112,6 +118,10 @@ export class CourseService {
       );
   }
 
+  /**
+   * Get all the students available to join a team
+   * @param courseId The course acronym
+   */
   getAvailableStudents(
     courseId: string = this.currentCourseSubject.value
   ): Observable<Student[]> {
@@ -134,6 +144,10 @@ export class CourseService {
       );
   }
 
+  /**
+   * Get all the assignment of the course
+   * @param courseId The course acronym
+   */
   getCourseAssignments(courseId: string): Observable<Assignment[]> {
     return this.http
       .get<Assignment[]>(
@@ -154,6 +168,10 @@ export class CourseService {
       );
   }
 
+  /**
+   * Get the professors of the course
+   * @param course The course
+   */
   getCourseProfessors(course: Course): Observable<Professor[]> {
     return this.http
       .get<Professor[]>(
@@ -174,6 +192,11 @@ export class CourseService {
       );
   }
 
+  /**
+   * Add the professor as manager of the course
+   * @param professor The professor
+   * @param course The course
+   */
   addProfessorToCourse(
     professor: Professor,
     course: Course
@@ -211,7 +234,7 @@ export class CourseService {
    * Return value is ignored, since the we reload the entire list
    *
    * @param(students) the list of students to be enrolled
-   * @param(course) the objective course
+   * @param(courseId) the objective course
    */
   enrollStudents(
     students: Student[],
@@ -255,6 +278,11 @@ export class CourseService {
     );
   }
 
+  /**
+   * Enroll students inside a CSV file
+   * @param formData The data with all the students
+   * @param courseId The course acronym
+   */
   enrollWithCsv(
     formData: FormData,
     courseId: string = this.currentCourseSubject.value
@@ -286,6 +314,11 @@ export class CourseService {
       );
   }
 
+  /**
+   * Remove the student from the curse
+   * @param student The student
+   * @param courseId The course acronym
+   */
   unenrollStudent(student: Student, courseId: string) {
     return this.http
       .put<Student>(
@@ -313,47 +346,11 @@ export class CourseService {
   }
 
   /**
-   * Function to unenroll students from a specific course.
-   * Return value is ignored, since the we reload the entire list
-   *
-   * @param(students) the list of students to be unenrolled
-   * @param(course) the objective course
+   * Remove more than one student from the course
+   * @param students The students
+   * @param courseId The course acronym
    */
-  unenrollStudents(
-    students: Student[],
-    courseId: string = this.currentCourseSubject.value
-  ): Observable<Student[]> {
-    return from(students).pipe(
-      mergeMap((student) => {
-        return this.http
-          .put<Student>(
-            `${environment.base_courses_url}/${courseId}/removeStudent`,
-            { studentId: student.id },
-            environment.base_http_headers
-          )
-          .pipe(
-            tap((s) => {
-              this.toastrService.success(
-                `Unenrolled ${Student.displayFn(s)} from ${courseId}`,
-                'Congratulations 😃'
-              );
-              console.log(
-                `unenrolled ${Student.displayFn(s)} - unenrollStudents()`
-              );
-            }),
-            catchError(
-              handleError<Student>(
-                this.toastrService,
-                `unenrollStudents(${Student.displayFn(student)}, ${courseId})`
-              )
-            )
-          );
-      }),
-      toArray()
-    );
-  }
-
-  unenrollStudents2(
+  unenrollMultipleStudents(
     students: Student[],
     courseId: string = this.currentCourseSubject.value
   ) {
@@ -366,7 +363,7 @@ export class CourseService {
         environment.base_http_headers
       )
       .pipe(
-        tap((s) => {
+        tap(() => {
           this.toastrService.success(
             `Successfully unenrolled one ore more students from ${courseId}`,
             'Congratulations 😃'
@@ -378,6 +375,11 @@ export class CourseService {
       );
   }
 
+  /**
+   * Remove the professor as manager of the course
+   * @param professor The professor
+   * @param course The course
+   */
   removeProfessorFromCourse(
     professor: Professor,
     course: Course
@@ -406,6 +408,10 @@ export class CourseService {
       );
   }
 
+  /**
+   *
+   * @param formData The course information
+   */
   createCourse(formData: FormData): Observable<Course> {
     return this.http.post<Course>(environment.base_courses_url, formData).pipe(
       tap(() =>
@@ -423,6 +429,10 @@ export class CourseService {
     );
   }
 
+  /**
+   *
+   * @param formData The course update information
+   */
   updateCourse(formData: FormData): Observable<Course> {
     return this.http
       .put<Course>(
@@ -446,27 +456,10 @@ export class CourseService {
       );
   }
 
-  changeCourseStatus(statusRequested: boolean): Observable<boolean> {
-    const enabled = statusRequested ? 'true' : 'false';
-    return this.http
-      .put<any>(
-        `${environment.base_courses_url}/${this.currentCourseSubject.value}/toggle`,
-        { enabled },
-        environment.base_http_headers
-      )
-      .pipe(
-        tap(() =>
-          console.log(`set course to ${statusRequested} - changeCourseStatus()`)
-        ),
-        catchError(
-          handleError<Course>(
-            this.toastrService,
-            `changeCourseStatus(${statusRequested})`
-          )
-        )
-      );
-  }
-
+  /**
+   *
+   * @param courseAcronym The course acronym
+   */
   deleteCourse(courseAcronym: string = this.course.value.acronym) {
     return this.http
       .delete<Course>(`${environment.base_courses_url}/${courseAcronym}`)
@@ -476,6 +469,10 @@ export class CourseService {
       );
   }
 
+  /**
+   *
+   * @param formData The assignment details
+   */
   createAssignment(formData: FormData): Observable<Assignment> {
     return this.http
       .post<Assignment>(
@@ -499,6 +496,10 @@ export class CourseService {
       );
   }
 
+  /**
+   *
+   * @param courseAcronym The course acronym
+   */
   getStudentCourseAssignments(courseAcronym: string): Observable<StudentAssignmentDetails[]> {
     return this.http
         .get<StudentAssignmentDetails[]>(

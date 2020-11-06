@@ -2,7 +2,6 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {Subject} from 'rxjs';
 import {first} from 'rxjs/operators';
 import {VmService} from '../../services/vm.service';
 
@@ -13,7 +12,6 @@ import {VmService} from '../../services/vm.service';
 })
 export class VmOptionsDialogComponent implements OnInit {
   form: FormGroup;
-  private destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor(
       private fb: FormBuilder,
@@ -51,7 +49,6 @@ export class VmOptionsDialogComponent implements OnInit {
     const maxField     = 'max' + this.capitalizeFirstLetter(field);
     if (value + this.data[currentField] - this.data[field] > this.data[maxField]) {
       this.form.get(field).setValue(this.data[maxField] - this.data[currentField] + this.data[field]);
-      value = this.data[maxField] - this.data[currentField] + this.data[field];
       this.toastrService.info(
           `It violates team configuration`,
           'Ops! Invalid value 😅'

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Student } from '../../models/student.model';
 import { StudentService } from '../../services/student.service';
-import { filter, finalize, first, switchMap, takeUntil } from 'rxjs/operators';
+import {filter, finalize, first, map, switchMap, takeUntil} from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import { CourseService } from '../../services/course.service';
 import { NavigationEnd, Router } from '@angular/router';
@@ -47,7 +47,8 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
     this.filteredStudents = this.searchTerms.pipe(
       takeUntil(this.destroy$),
       // switch to new search observable each time the term changes
-      switchMap((name: string) => this.studentService.searchStudents(name))
+      switchMap((name: string) => this.studentService.searchStudents(name)),
+      map(elems => elems.filter(s => !this.enrolledStudents.map(e => e.id).includes(s.id)))
     );
   }
 
@@ -76,7 +77,7 @@ export class TabStudentsContComponent implements OnInit, OnDestroy {
    */
   unenrollStudents(students: Student[]) {
     this.courseService
-      .unenrollStudents2(students)
+      .unenrollMultipleStudents(students)
       .pipe(
         first(),
         finalize(() => this.refreshEnrolled())

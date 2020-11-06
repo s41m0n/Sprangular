@@ -1,5 +1,3 @@
-import { Course } from './course.model';
-
 /**
  * Model for Assignment resource
  *

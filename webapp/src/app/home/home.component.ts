@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 
 /** HomeComponent
  *
@@ -12,7 +11,4 @@ import {ActivatedRoute} from '@angular/router';
 })
 export class HomeComponent {
   path: string;
-
-  constructor(private route: ActivatedRoute) {
-  }
 }

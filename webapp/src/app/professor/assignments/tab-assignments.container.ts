@@ -18,8 +18,8 @@ import {AssignmentSolutionDetails} from '../../models/assignment-solution-detail
   templateUrl: './tab-assignments.container.html'
 })
 export class TabProfessorAssignmentsContComponent {
-
   assignments: Assignment[] = [];                             // The current assignments
+  assignmentSolutions: AssignmentSolutionDetails[] = [];
 
   constructor(private courseService: CourseService,
               private assignmentService: AssignmentAndUploadService,
@@ -54,5 +54,31 @@ export class TabProfessorAssignmentsContComponent {
         this.router.navigate([this.router.url.split('?')[0]]);
       });
     });
+  }
+
+  viewDocument(object: any) {
+    this.assignmentService.getUploadDocument(object.upId).pipe(first()).subscribe(instance => {
+      if (!instance) {
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: object.solId}});
+        return;
+      }
+      const url = URL.createObjectURL(instance);
+      const dialogRef = this.dialog.open(ImageViewerDialogComponent, {
+        data: {title: `Upload: ${object.upId}`,
+          imageSrc: url,
+          downloadable: true,
+          dl_name: `upload_${object.upId}`
+        }
+      });
+      dialogRef.afterClosed().subscribe(() => {
+        URL.revokeObjectURL(url);
+        this.router.navigate([this.router.url.split('?')[0]], {queryParams: {solution: object.solId}});
+      });
+    });
+  }
+
+  getAssignmentSolutions(assignmentId: number) {
+    this.assignmentService.getSolutionsForAssignment(assignmentId).pipe(first()).subscribe(
+        solutions => this.assignmentSolutions = solutions.sort(AssignmentSolutionDetails.compare));
   }
 }

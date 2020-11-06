@@ -5,7 +5,6 @@ import it.polito.ai.lab2.utility.ProposalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 @Repository

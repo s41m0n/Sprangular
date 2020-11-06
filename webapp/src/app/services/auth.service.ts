@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../models/user.model';
 import { ToastrService } from 'ngx-toastr';
 import * as moment from 'moment';
@@ -55,7 +55,7 @@ export class AuthService {
   /**
    * Function to authenticate a user via the IdentityProvider
    *
-   * @param(email)    the login email
+   * @param(id)    The login id
    * @param(password) the login password
    */
   login(id: string, password: string) {
@@ -86,6 +86,10 @@ export class AuthService {
       );
   }
 
+  /**
+   * Register the user to the system
+   * @param formData The registration data
+   */
   register(formData: FormData) {
     return this.http.post(environment.register_url, formData).pipe(
       tap(() =>
@@ -112,6 +116,11 @@ export class AuthService {
     console.log(`logged out`);
   }
 
+  /**
+   * Confirm the registration
+   * @param id The user id
+   * @param token The toke id
+   */
   confirmEmail(id: string, token: string) {
     return this.http
       .get(`${environment.confirm_url}/${id}/confirmEmail/${token}`)
@@ -127,6 +136,10 @@ export class AuthService {
       );
   }
 
+  /**
+   *
+   * @param token The authentication token
+   */
   parseJwt(token: string) {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');

@@ -1,6 +1,5 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {Team} from '../../models/team.model';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {TeamService} from '../../services/team.service';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Subject} from 'rxjs';

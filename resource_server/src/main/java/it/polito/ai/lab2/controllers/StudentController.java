@@ -4,19 +4,15 @@ import it.polito.ai.lab2.dtos.*;
 import it.polito.ai.lab2.exceptions.*;
 import it.polito.ai.lab2.pojos.TeamDetails;
 import it.polito.ai.lab2.pojos.TeamProposalDetails;
-import it.polito.ai.lab2.pojos.UploadDetails;
 import it.polito.ai.lab2.services.*;
 import it.polito.ai.lab2.utility.ModelHelper;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.FileNotFoundException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController

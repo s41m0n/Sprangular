@@ -1,5 +1,5 @@
 import { ToastrService } from 'ngx-toastr';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 /**
  * Handle Http operation that failed.
