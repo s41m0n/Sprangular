@@ -239,6 +239,7 @@ public class CourseServiceImpl implements CourseService {
   public CourseDTO removeCourse(String courseId) {
     Course c = courseRepository.findById(courseId).orElseThrow(
         () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
+    // Delete all the associated resources too, gathering all the images paths in this list to delete them once
     List<Path> imagesToDelete = new ArrayList<>();
     imagesToDelete.add(Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString()));
     vmModelRepository.delete(c.getVmModel());

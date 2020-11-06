@@ -86,6 +86,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     );
   }
 
+  // Handles the opening of the assignment solutions section
   showSolutions(row: Assignment) {
     this.expandedElement = this.expandedElement === row ? null : row;
     if (this.expandedElement === null) {
@@ -94,6 +95,7 @@ export class TabProfessorAssignmentsComponent implements AfterViewInit {
     this.assignmentSolutionEvent.emit(row.id);
   }
 
+  /** Function to express the date in a user friendly way */
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
     return (

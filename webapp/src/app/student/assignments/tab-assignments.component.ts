@@ -56,6 +56,7 @@ export class TabStudentAssignmentsComponent {
     );
   }
 
+  // Handles the opening of the uploads section
   showUploads(element: StudentAssignmentDetails) {
     this.expandedElement = this.expandedElement === element ? null : element;
     if (this.expandedElement === null) {
@@ -84,6 +85,7 @@ export class TabStudentAssignmentsComponent {
         });
   }
 
+  /** Function to express the date in a user friendly way */
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
     return (

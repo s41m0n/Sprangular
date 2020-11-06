@@ -58,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
       proposal.setStatus(ProposalStatus.ACCEPTED);
       proposalRepository.save(proposal);
 
-      // Reject all pending proposals since this one is accepted 100%
+      // Reject all pending valid proposals since this one is accepted
       proposalRepository.findAllByInvitedUserIdAndCourseId(proposal.getInvitedUserId(), proposal.getCourseId()).stream()
           .filter(p -> p.getStatus().equals(ProposalStatus.PENDING) && p.isValid())
           .forEach(p -> reject(p.getId()));

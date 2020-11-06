@@ -158,6 +158,7 @@ public class TeamServiceImpl implements TeamService {
     team.setMaxDiskStorage(20);
     TeamDTO t = modelMapper.map(teamRepository.save(team), TeamDTO.class);
     if (!isAlone) {
+      // Create the proposal for each member
       members.forEach(
           member -> {
             Proposal proposal = new Proposal();
@@ -176,6 +177,7 @@ public class TeamServiceImpl implements TeamService {
             proposalRepository.save(proposal);
           }
       );
+      // Schedule the automatic delivery at the deadline to reject all pending proposals
       Runnable proposalDeadline = () -> {
         log.info("Deadline for proposal ");
         List<Proposal> proposals = proposalRepository.findAllByTeamId(t.getId());
@@ -190,7 +192,7 @@ public class TeamServiceImpl implements TeamService {
       scheduler.schedule(proposalDeadline, new Date(deadline));
       notificationService.notifyTeam(t, memberIds, courseId);
     } else {
-      // Delete all pending proposals since this one is accepted 100%
+      // Reject all pending valid proposals and delete all creator's proposals since this one is accepted and completed
       proposalRepository.findAllByInvitedUserIdAndCourseId(creator.getId(), courseId)
           .forEach(p -> {
             if (p.getStatus().equals(ProposalStatus.PENDING)) {

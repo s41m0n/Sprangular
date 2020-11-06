@@ -40,6 +40,7 @@ export class TabStudentVmsComponent {
               public dialog: MatDialog) {
   }
 
+  /** Turn on/off the vm */
   triggerTurn(vmId: number, enable: boolean) {
     if (enable && this.dataSource.filter(vm => vm.vm.active).length + 1 > this.teamService.currentTeamSubject.value.maxActiveInstances) {
       this.toastrService.info(
