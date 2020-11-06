@@ -1,5 +1,3 @@
-import { Professor } from './professor.model';
-
 /**
  * Model for Course resource
  *

@@ -3,13 +3,12 @@ import { Injectable } from '@angular/core';
 import { Student } from '../models/student.model';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { Course } from '../models/course.model';
 import { environment } from 'src/environments/environment';
 import { CourseService } from './course.service';
 import { handleError } from '../helpers/handle.error';
-import { AssignmentSolution } from '../models/assignment-solution.model';
 import { Upload } from '../models/upload.model';
 import { AuthService } from './auth.service';
 import { Proposal } from '../models/proposal.model';
@@ -100,29 +99,6 @@ export class StudentService {
       );
   }
 
-  public getAssignmentSolution(
-    assignmentId: number,
-    studentId: string = this.authService.currentUserValue.id
-  ): Observable<AssignmentSolution> {
-    return this.http
-      .get<AssignmentSolution>(
-        `${environment.base_students_url}/${studentId}/assignments/${assignmentId}`
-      )
-      .pipe(
-        tap(() =>
-          console.log(
-            `fetched assignment solution ${assignmentId} - getAssignmentSolution()`
-          )
-        ),
-        catchError(
-          handleError<AssignmentSolution>(
-            this.toastrService,
-            `getAssignmentSolution(${studentId}, ${assignmentId})`
-          )
-        )
-      );
-  }
-
   public getStudentCourses(id: string): Observable<Course[]> {
     return this.http
       .get<Course[]>(`${environment.base_students_url}/${id}/courses`)
@@ -132,27 +108,6 @@ export class StudentService {
         ),
         catchError(
           handleError<Course[]>(this.toastrService, `getUserCourses(${id})`)
-        )
-      );
-  }
-
-  public getStudentByEmail(email: string): Observable<Student> {
-    return this.http
-      .get<Student[]>(
-        `${environment.base_students_url}?email_like=${email}&_expand=team`
-      )
-      .pipe(
-        map((x) => x.shift()),
-        tap(() =>
-          console.log(
-            `fetched student with email ${email} - getStudentByEmail()`
-          )
-        ),
-        catchError(
-          handleError<Student>(
-            this.toastrService,
-            `getStudentByEmail(${email})`
-          )
         )
       );
   }
@@ -167,7 +122,7 @@ export class StudentService {
         uploadDetails
       )
       .pipe(
-        tap((x) =>
+        tap(() =>
           this.toastrService.success(
             `Uploaded a new assignment solution`,
             'Congratulations 😃'

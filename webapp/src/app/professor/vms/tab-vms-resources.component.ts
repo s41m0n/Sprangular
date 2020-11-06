@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Resource} from '../../models/resource.model';
 
 @Component({

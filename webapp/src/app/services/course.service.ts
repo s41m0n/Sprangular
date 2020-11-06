@@ -46,7 +46,7 @@ export class CourseService {
   /**
    * Function to retrieve a Course resource given a path
    *
-   * @param(path) the requested path
+   * @param(acronym) the course acronym
    */
   getCourse(acronym: string): Observable<Course> {
     return this.http
@@ -64,7 +64,7 @@ export class CourseService {
   /**
    * Function to retrieve all students enroll to a Course
    *
-   * @param(course) the objective course
+   * @param(courseId) the course acronym
    */
   getEnrolledStudents(
     courseId: string = this.currentCourseSubject.value
@@ -209,7 +209,7 @@ export class CourseService {
    * Return value is ignored, since the we reload the entire list
    *
    * @param(students) the list of students to be enrolled
-   * @param(course) the objective course
+   * @param(courseId) the objective course
    */
   enrollStudents(
     students: Student[],
@@ -310,47 +310,6 @@ export class CourseService {
       );
   }
 
-  /**
-   * Function to unenroll students from a specific course.
-   * Return value is ignored, since the we reload the entire list
-   *
-   * @param(students) the list of students to be unenrolled
-   * @param(course) the objective course
-   */
-  unenrollStudents(
-    students: Student[],
-    courseId: string = this.currentCourseSubject.value
-  ): Observable<Student[]> {
-    return from(students).pipe(
-      mergeMap((student) => {
-        return this.http
-          .put<Student>(
-            `${environment.base_courses_url}/${courseId}/removeStudent`,
-            { studentId: student.id },
-            environment.base_http_headers
-          )
-          .pipe(
-            tap((s) => {
-              this.toastrService.success(
-                `Unenrolled ${Student.displayFn(s)} from ${courseId}`,
-                'Congratulations 😃'
-              );
-              console.log(
-                `unenrolled ${Student.displayFn(s)} - unenrollStudents()`
-              );
-            }),
-            catchError(
-              handleError<Student>(
-                this.toastrService,
-                `unenrollStudents(${Student.displayFn(student)}, ${courseId})`
-              )
-            )
-          );
-      }),
-      toArray()
-    );
-  }
-
   unenrollStudents2(
     students: Student[],
     courseId: string = this.currentCourseSubject.value
@@ -364,7 +323,7 @@ export class CourseService {
         environment.base_http_headers
       )
       .pipe(
-        tap((s) => {
+        tap(() => {
           this.toastrService.success(
             `Successfully unenrolled one ore more students from ${courseId}`,
             'Congratulations 😃'
@@ -439,27 +398,6 @@ export class CourseService {
           handleError<Course>(
             this.toastrService,
             `updateCourse(${this.course.value.name})`
-          )
-        )
-      );
-  }
-
-  changeCourseStatus(statusRequested: boolean): Observable<boolean> {
-    const enabled = statusRequested ? 'true' : 'false';
-    return this.http
-      .put<any>(
-        `${environment.base_courses_url}/${this.currentCourseSubject.value}/toggle`,
-        { enabled },
-        environment.base_http_headers
-      )
-      .pipe(
-        tap(() =>
-          console.log(`set course to ${statusRequested} - changeCourseStatus()`)
-        ),
-        catchError(
-          handleError<Course>(
-            this.toastrService,
-            `changeCourseStatus(${statusRequested})`
           )
         )
       );

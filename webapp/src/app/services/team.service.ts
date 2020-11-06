@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { Team } from '../models/team.model';
@@ -9,7 +9,6 @@ import { environment } from 'src/environments/environment';
 import { TeamProposal } from '../models/team-proposal.model';
 import { CourseService } from './course.service';
 import { AuthService } from './auth.service';
-import { Student } from '../models/student.model';
 import { handleError } from '../helpers/handle.error';
 
 /** Team service
@@ -96,24 +95,6 @@ export class TeamService {
                     `getStudentTeam(${courseId}, ${studentId})`,
                     null,
                     false
-                )
-            )
-        );
-  }
-
-  public getStudentsInTeam(teamId: number = this.currentTeamSubject.value.id) {
-    return this.http
-        .get<Student[]>(`${environment.base_teams_url}/${teamId}/members`)
-        .pipe(
-            tap(() =>
-                console.log(
-                    `retrieved members of team ${teamId} - getStudentsInTeam()`
-                )
-            ),
-            catchError(
-                handleError<Student[]>(
-                    this.toastrService,
-                    `getStudentsInTeam(${teamId})`
                 )
             )
         );

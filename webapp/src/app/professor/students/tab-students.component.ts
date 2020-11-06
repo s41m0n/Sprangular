@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef,
   EventEmitter,
   Input,
   OnDestroy,
@@ -74,11 +73,6 @@ export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy {
     /** Setting paginator and sort after ng containers are initialized */
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-  }
-
-  /** Function to check whether the number of selected elements matches the total number of rows. */
-  isAllSelected(): boolean {
-    return this.selection.selected.length === this.dataSource.data.length;
   }
 
   /** Function to select all rows if they are not all selected; otherwise clear selection. */

@@ -3,7 +3,6 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { CourseService } from 'src/app/services/course.service';
-import { Course } from 'src/app/models/course.model';
 import { FileInput } from 'ngx-material-file-input';
 
 @Component({

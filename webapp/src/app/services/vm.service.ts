@@ -2,10 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { VmModel } from '../models/vm-model.model';
-import { Course } from '../models/course.model';
 import { VM } from '../models/vm.model';
 import { TeamService } from './team.service';
 import { handleError } from '../helpers/handle.error';
@@ -24,53 +22,6 @@ export class VmService {
         private toastrService: ToastrService,
         private teamService: TeamService
     ) {}
-
-    public getModelForCourse(course: Course): Observable<VmModel> {
-        return this.http.get<VmModel[]>(`${environment.production}/vmModel`).pipe(
-            map((x) => x.shift()),
-            tap((x) =>
-                console.log(
-                    `found models for course - getModelsForCourse(${course.acronym})`
-                )
-            ),
-            catchError(
-                handleError<VmModel>(
-                    this.toastrService,
-                    `getModelsForCourse(${course.acronym})`,
-                    null,
-                    false
-                )
-            )
-        );
-    }
-
-    public assignVmModelToCourse(
-        model: VmModel,
-        course: Course
-    ): Observable<VmModel> {
-        model.courseId = course.acronym;
-        return this.http
-            .put<VmModel>(
-                `${environment.base_courses_url}`,
-                model,
-                environment.base_http_headers
-            )
-            .pipe(
-                tap((x) =>
-                    console.log(
-                        `updated course model - assignVmModelToCourse(${course.acronym})`
-                    )
-                ),
-                catchError(
-                    handleError<VmModel>(
-                        this.toastrService,
-                        `assignVmModelToCourse(${course.acronym})`,
-                        null,
-                        false
-                    )
-                )
-            );
-    }
 
     public createVmForTeam(
         vmDTO: VM,

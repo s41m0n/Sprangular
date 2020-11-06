@@ -109,7 +109,7 @@ export class ProfessorService {
             uploadDetails
         )
         .pipe(
-            tap((x) =>
+            tap(() =>
                 this.toastrService.success(
                     `Uploaded a new assignment solution`,
                     'Congratulations 😃'

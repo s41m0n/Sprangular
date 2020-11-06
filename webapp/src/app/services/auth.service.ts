@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap } from 'rxjs/operators';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../models/user.model';
 import { ToastrService } from 'ngx-toastr';
 import * as moment from 'moment';
@@ -55,7 +55,7 @@ export class AuthService {
   /**
    * Function to authenticate a user via the IdentityProvider
    *
-   * @param(email)    the login email
+   * @param(id)    the login id
    * @param(password) the login password
    */
   login(id: string, password: string) {
