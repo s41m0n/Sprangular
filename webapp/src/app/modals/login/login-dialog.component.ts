@@ -22,13 +22,6 @@ export class LoginDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<LoginDialogComponent>
   ) {}
 
-  /** Create a Form with email-password input and validators.
-   *  The password must:
-   *    - contain at least 1 lowercase
-   *    - contain at least 1 uppercase
-   *    - contain at least 1 digit
-   *    - be within 8-15 characters
-   */
   ngOnInit(): void {
     this.form = this.fb.group({
       id: [''],

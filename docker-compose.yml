@@ -1,0 +1,38 @@
+version: "3"
+services:
+  spring-jdbc:
+    image: sprangular_server
+    container_name: spring_server
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-maria-angular
+    depends_on:
+      - mariadb
+    restart: on-failure
+ 
+  mariadb:
+    image: mariadb
+    container_name: mariadb_compose
+    volumes:
+      - "/home/$USER/db:/var/lib/mysql"
+    ports:
+      - "3306:3306"
+    networks:
+      - spring-maria-angular
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sprangular
+
+  angular:
+    image: sprangular_client
+    container_name: angular_client
+    ports:
+      - "4200:4200"
+    networks:
+      - spring-maria-angular
+    depends_on:
+      - spring-jdbc
+
+networks:
+  spring-maria-angular:

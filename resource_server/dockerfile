@@ -1,5 +1,19 @@
 FROM openjdk:11
+
 EXPOSE 8080
+
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app.jar
+
+RUN mkdir uploads
+RUN mkdir uploads/assignments
+RUN mkdir uploads/photos
+RUN mkdir uploads/uploads
+RUN mkdir uploads/vm-models
+RUN mkdir uploads/vms
+
+RUN useradd app
+RUN chown -R app uploads/
+USER app
+
 ENTRYPOINT ["java", "-jar", "/app.jar"]

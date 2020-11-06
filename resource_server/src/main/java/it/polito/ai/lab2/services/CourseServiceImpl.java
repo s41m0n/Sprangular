@@ -222,18 +222,18 @@ public class CourseServiceImpl implements CourseService {
     Course c = courseRepository.findById(courseId).orElseThrow(
         () -> new CourseNotFoundException("Course `" + courseId + "` does not exist"));
     List<Path> imagesToDelete = new ArrayList<>();
-    imagesToDelete.add(Utility.VM_MODELS_DIR.resolve(c.getVmModel().getImagePath()));
+    imagesToDelete.add(Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString()));
     vmModelRepository.delete(c.getVmModel());
     proposalRepository.deleteAllByCourseId(courseId);
     c.getTeams().forEach(t -> {
-      t.getVms().forEach(v -> imagesToDelete.add(Utility.VMS_DIR.resolve(v.getImagePath())));
+      t.getVms().forEach(v -> imagesToDelete.add(Utility.VMS_DIR.resolve(v.getId().toString())));
       vmRepository.deleteAll(t.getVms());
     });
     c.getAssignments().forEach(a -> {
-      imagesToDelete.add(Utility.ASSIGNMENTS_DIR.resolve(a.getImagePath()));
+      imagesToDelete.add(Utility.ASSIGNMENTS_DIR.resolve(a.getId().toString()));
       a.getSolutions().forEach(s -> {
         s.getUploads().forEach(u -> {
-          imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getImagePath()));
+          imagesToDelete.add(Utility.UPLOADS_DIR.resolve(u.getId().toString()));
         });
         uploadRepository.deleteAll(s.getUploads());
       });
@@ -270,7 +270,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     if(c.getVmModel() != null && course.getVmModel() != null) {
-      Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getImagePath());
+      Path oldVmModelPath = Utility.VM_MODELS_DIR.resolve(c.getVmModel().getId().toString());
       try {
         Files.delete(oldVmModelPath);
       } catch (IOException e) {
