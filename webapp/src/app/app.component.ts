@@ -50,7 +50,9 @@ export class AppComponent {
       this.course = x;
     });
 
-    // Subscribing to the route queryParam to check doLogin parameter
+    /*
+     Subscribing to the all the route handling the dialogs
+     */
     this.route.queryParams.subscribe((queryParam) =>
       queryParam && queryParam.doLogin ? this.openLogin() : null
     );

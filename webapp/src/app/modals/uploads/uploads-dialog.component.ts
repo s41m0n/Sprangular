@@ -30,6 +30,7 @@ export class UploadsDialogComponent {
         uploads => this.dataSource.data = uploads.sort(Upload.compare));
   }
 
+  /** Function to express the date in a user friendly way */
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
     return (

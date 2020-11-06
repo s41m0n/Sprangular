@@ -119,7 +119,7 @@ export class AuthService {
   /**
    * Confirm the registration
    * @param id The user id
-   * @param token The toke id
+   * @param token The token id
    */
   confirmEmail(id: string, token: string) {
     return this.http

@@ -160,6 +160,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
     return student ? Student.displayFn(student) : '';
   }
 
+  /** Function to express the date in a user friendly way */
   dateString(statusTs: string): string {
     const date = new Date(statusTs);
     return (
