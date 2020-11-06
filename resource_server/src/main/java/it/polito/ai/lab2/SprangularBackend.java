@@ -63,7 +63,6 @@ public class SprangularBackend {
         log.info("Uploads directory already exists");
       }
 
-      // TODO: test!
       // Team proposals management
       List<Proposal> proposals = proposalRepository.findAllByStatus(ProposalStatus.PENDING);
       Set<Long> scheduled = new HashSet<>();
@@ -93,7 +92,6 @@ public class SprangularBackend {
         }
       });
 
-      // TODO: test!
       // Assignment delivery management
       List<AssignmentSolution> assignmentSolutions = assignmentSolutionRepository.findAllByStatusIn(
           Arrays.asList(AssignmentStatus.NULL, AssignmentStatus.READ, AssignmentStatus.REVIEWED_UPLOADABLE));
