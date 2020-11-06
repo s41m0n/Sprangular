@@ -121,7 +121,7 @@ export class TabStudentsComponent implements AfterViewInit, OnInit, OnDestroy {
     const fileInput: FileInput = this.csvControl.value;
     formData.append('file', fileInput.files[0]);
     this.addStudentsWithCsv.emit(formData);
-    this.csvControl.reset(undefined);
+    this.csvControl.reset();
   }
 
   getPageData() {

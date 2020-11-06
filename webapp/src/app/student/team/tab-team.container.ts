@@ -80,7 +80,7 @@ export class TabTeamContComponent implements OnInit, OnDestroy {
       .createTeam(proposal)
       .pipe(first())
       .subscribe(t => {
-        if (proposal.studentIds.length === 1) {
+        if (t && proposal.studentIds.length === 1) {
           t.members = [];
           t.members.push(this.availableStudents.find(s => s.id === JSON.parse(localStorage.getItem('currentUser')).id));
           this.teamService.currentTeamSubject.next(t);

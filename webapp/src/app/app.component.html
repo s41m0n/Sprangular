@@ -74,7 +74,6 @@
         <mat-divider></mat-divider>
         <mat-list-item
           *ngFor="let course of courseList | async"
-          [ngClass]="course.enabled ? 'enabled' : 'disabled'"
           [routerLink]="[
             currentUser.roles[0].toLowerCase().replace('role_', '') +
               '/courses/' +

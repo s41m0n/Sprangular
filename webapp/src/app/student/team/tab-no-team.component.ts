@@ -151,6 +151,7 @@ export class TabNoTeamComponent implements AfterViewInit, OnInit, OnDestroy {
           )
       );
       this.chosenMembers = [];
+      this.teamNameControl.setValue('');
     }
   }
 
