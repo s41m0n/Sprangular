@@ -22,8 +22,8 @@ export class RegisterDialogComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group(
       {
-        name: ['', Validators.pattern('^[A-Za-z]{1,32}$')],
-        surname: ['', Validators.pattern('^[A-Za-z,.\'-]{1,32}$')],
+        name: ['', Validators.pattern('^[A-Za-z]{2,32}$')],
+        surname: ['', Validators.pattern('^[A-Za-z,.\'-]{2,32}$')],
         email: ['', Validators.email],
         id: ['', Validators.pattern('^(s|d)[0-9]+$')],
         pic: [''],

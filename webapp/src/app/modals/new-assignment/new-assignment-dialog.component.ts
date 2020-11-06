@@ -23,7 +23,7 @@ export class NewAssignmentDialogComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
-      title: ['', Validators.pattern('^[A-Za-z,.\'-]{1,64}$')],
+      title: ['', [Validators.pattern('^[A-Za-z0-9 -]{2,32}$')]],
       doc: [''],
       date: ['']
     });

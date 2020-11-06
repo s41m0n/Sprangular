@@ -29,7 +29,7 @@ export class NewAssignmentUploadDialogComponent implements OnInit {
 
     ngOnInit(): void {
         this.form = this.fb.group({
-            comment: ['', Validators.pattern('^[A-Za-z .,;:!?]{1,128}$')],
+            comment: ['', [Validators.pattern('^[A-Za-z0-9 .,;:!?]{2,128}$')]],
             document: [''],
             reuploadable: false
         });

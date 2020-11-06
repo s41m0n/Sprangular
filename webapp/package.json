@@ -25,7 +25,6 @@
     "@angular/router": "~9.1.6",
     "file-saver": "^2.0.2",
     "font-awesome": "^4.7.0",
-    "json-server-auth": "^2.0.2",
     "moment": "^2.29.1",
     "ng-circle-progress": "^1.6.0",
     "ngx-material-file-input": "^2.1.1",

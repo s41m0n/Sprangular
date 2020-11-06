@@ -22,7 +22,7 @@ export class NewCourseDialogComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       acronym: ['', [Validators.pattern('^[A-Z0-9]{2,10}$')]],
-      name: ['', [Validators.pattern('^[A-Za-z0-9 -]{1,32}$')]],
+      name: ['', [Validators.pattern('^[A-Za-z0-9 -]{2,32}$')]],
       teamMinSize: [1, [Validators.min(1), Validators.max(10)]],
       teamMaxSize: [1, [Validators.min(1), Validators.max(10)]],
       vmModel: [''],
