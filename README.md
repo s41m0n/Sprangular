@@ -4,8 +4,11 @@ Progetto finale di Applicazioni Internet - sito web creato con Spring Boot e Ang
 
 ## Istruzioni per compilazione e deploy con docker
 
-Verificare che nel file *applications.properties* sia settata la seguente datasource:
+Verificare che nel file *applications.properties* del server Spring sia settata la seguente datasource:
 ```spring.datasource.url=jdbc:mysql://mariadb_compose/sprangular```
+
+Verificare che nel file *proxy.conf.json* del client Angular sia settato il seguente target:
+```"target": "http://spring-jdbc:8080"```
 
 Dalla cartella del server ./resource_server generare il .jar dell'applicazione Spring Boot con il seguente comando: 
 ```$ mvn clean package -DskipTests``` 
