@@ -142,7 +142,8 @@ public class SecurityServiceImpl implements SecurityService {
 
   @Override
   public boolean isAssignmentSolutionOfProfessorCourse(Long assignmentSolutionId) {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElse(null);
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId)
+        .orElse(null);
     if (assignmentSolution == null)
       return false;
     return assignmentSolution.getAssignment().getCourse().getProfessors().stream()
@@ -151,7 +152,8 @@ public class SecurityServiceImpl implements SecurityService {
 
   @Override
   public boolean isAssignmentSolutionOfStudent(Long assignmentSolutionId) {
-    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId).orElse(null);
+    AssignmentSolution assignmentSolution = assignmentSolutionRepository.findById(assignmentSolutionId)
+        .orElse(null);
     if (assignmentSolution == null)
       return false;
     return assignmentSolution.getStudent().getId().equals(

@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     student.setSurname(sDetails.getSurname());
     student.setPassword(passwordEncoder.encode(sDetails.getPassword()));
     Role role = roleRepository.findByName(Utility.STUDENT_ROLE)
-        .orElseThrow(() -> new UserRoleNotFounException(Utility.STUDENT_ROLE + " not found"));
+        .orElseThrow(() -> new UserRoleNotFoundException(Utility.STUDENT_ROLE + " not found"));
     student.addRole(role);
     student.setVerified(false);
     student.setPhotoPath(photoPath.toString());
@@ -75,7 +75,8 @@ public class UserServiceImpl implements UserService {
     ConfirmEmailToken confirmEmailToken = new ConfirmEmailToken(UUID.randomUUID().toString(), sDetails.getId());
     confirmEmailTokenRepository.save(confirmEmailToken);
 
-    notificationService.sendMessage(sDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(sDetails.getId(), confirmEmailToken));
+    notificationService.sendMessage(
+        sDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(sDetails.getId(), confirmEmailToken));
     return true;
   }
 
@@ -96,7 +97,7 @@ public class UserServiceImpl implements UserService {
     professor.setSurname(pDetails.getSurname());
     professor.setPassword(passwordEncoder.encode(pDetails.getPassword()));
     Role role = roleRepository.findByName(Utility.PROFESSOR_ROLE)
-        .orElseThrow(() -> new UserRoleNotFounException(Utility.PROFESSOR_ROLE + " not found"));
+        .orElseThrow(() -> new UserRoleNotFoundException(Utility.PROFESSOR_ROLE + " not found"));
     professor.addRole(role);
     professor.setVerified(false);
     professor.setPhotoPath(photoPath.toString());
@@ -111,14 +112,17 @@ public class UserServiceImpl implements UserService {
     ConfirmEmailToken confirmEmailToken = new ConfirmEmailToken(UUID.randomUUID().toString(), pDetails.getId());
     confirmEmailTokenRepository.save(confirmEmailToken);
 
-    notificationService.sendMessage(pDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(pDetails.getId(), confirmEmailToken));
+    notificationService.sendMessage(
+        pDetails.getEmail(), "Account Creation", getPredefinedRegisterMessage(pDetails.getId(), confirmEmailToken));
     return true;
   }
 
   @Override
   public boolean confirmEmail(String id, String token) {
-    User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User " + id + " does not exist"));
-    ConfirmEmailToken emailToken = confirmEmailTokenRepository.findById(token).orElseThrow(() -> new ConfirmEmailTokenNotFoundException("Token " + token + " does not exist"));
+    User user = userRepository.findById(id).orElseThrow(
+        () -> new UserNotFoundException("User " + id + " does not exist"));
+    ConfirmEmailToken emailToken = confirmEmailTokenRepository.findById(token).orElseThrow(
+        () -> new ConfirmEmailTokenNotFoundException("Token " + token + " does not exist"));
 
     if (emailToken.getUserId().equals(id)) {
       user.setVerified(true);

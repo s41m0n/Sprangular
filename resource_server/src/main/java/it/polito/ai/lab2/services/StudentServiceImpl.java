@@ -54,7 +54,7 @@ public class StudentServiceImpl implements StudentService {
   PasswordEncoder passwordEncoder;
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') " +
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') " +
       "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
   public Optional<StudentDTO> getStudent(String studentId) {
     return studentRepository.findById(studentId)
@@ -62,7 +62,7 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public List<StudentDTO> getAllStudents() {
     return studentRepository.findAll().stream()
         .map(student -> modelMapper.map(student, StudentDTO.class))
@@ -70,7 +70,7 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') " +
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') " +
       "or hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId)")
   public List<CourseDTO> getStudentCourses(String studentId) {
     return studentRepository.findById(studentId)
@@ -133,7 +133,7 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public List<StudentDTO> getStudentsLike(String pattern) {
     List<StudentDTO> returnedList = new ArrayList<>();
     for (StudentDTO s : this.getAllStudents()) {

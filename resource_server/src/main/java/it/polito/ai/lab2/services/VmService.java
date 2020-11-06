@@ -13,10 +13,6 @@ import java.util.List;
 
 public interface VmService {
 
-  VmModelDTO createVmModel(VmModelDetails vmModelDetails, String courseId);
-
-  VmModelDTO updateVmModel(VmModelDetails vmModelDetails, String courseId);
-
   VmDTO createVm(Long teamId, VmDTO vmDTO);
 
   VmDTO deleteVm(Long vmId);

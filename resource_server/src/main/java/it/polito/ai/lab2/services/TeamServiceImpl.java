@@ -59,7 +59,8 @@ public class TeamServiceImpl implements TeamService {
   TaskScheduler scheduler;
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR') or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
   public List<TeamDTO> getTeamsForStudent(String studentId) {
     return studentRepository.findById(studentId)
         .map(student -> student.getTeams().stream()
@@ -69,13 +70,15 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentSelf(#studentId))")
   public TeamDetails getTeamOfStudentOfCourse(String studentId, String courseId) {
     Team team = studentRepository.findById(studentId)
         .map(student -> student.getTeams().stream()
             .filter(t -> t.getCourse().getAcronym().equals(courseId) && t.isActive())
             .findFirst()
-            .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId))).orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
+            .orElseThrow(() -> new TeamNotFoundException("No team for student" + studentId + " in course " + courseId)))
+        .orElseThrow(() -> new StudentNotFoundException("Student " + studentId + " does not exist"));
 
     if (team.isActive()) {
       return modelMapper.map(team, TeamDetails.class);
@@ -85,7 +88,8 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#teamId))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#teamId))")
   public List<StudentDTO> getTeamMembers(Long teamId) {
     return teamRepository.findById(teamId)
         .map(team -> team.getMembers().stream()
@@ -95,13 +99,14 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
+  @PreAuthorize("hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId) " +
+      "and @securityServiceImpl.isStudentInTeamRequest(#memberIds)")
   public TeamDTO proposeTeam(String courseId, String name, List<String> memberIds, Long deadline) {
     if (new Timestamp(System.currentTimeMillis()).after(new Timestamp(deadline)))
       throw new InvalidTimestampException("Timestamp before current date");
 
     if (memberIds.stream().distinct().count() != memberIds.size())
-      throw new DuplicateStudentInTeam("Some student is already in the group " + name);
+      throw new DuplicateStudentInTeamException("Some student is already in the group " + name);
 
     Course course = courseRepository.findById(courseId).orElseThrow(
         () -> new CourseNotFoundException("Course " + courseId + " does not exist"));
@@ -133,7 +138,7 @@ public class TeamServiceImpl implements TeamService {
             .anyMatch(team -> (team.getCourse().getAcronym().equals(courseId) && team.isActive())
                 || proposalRepository.findAllByInvitedUserIdAndCourseId(student.getId(), courseId).stream()
                   .anyMatch(p -> p.getStatus().equals(ProposalStatus.ACCEPTED) && p.isValid()))))
-      throw new StudentAlreadyInTeam(
+      throw new StudentAlreadyInTeamException(
           "Some student is already in a team or accepted another proposal for the course " + courseId);
 
     Student creator = members.stream()
@@ -198,7 +203,8 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
   public List<TeamDTO> getTeamsForCourse(String courseId) {
     return courseRepository.findById(courseId)
         .map(course -> course.getTeams().stream()
@@ -208,7 +214,8 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
   public List<StudentDTO> getStudentsInTeams(String courseId) {
     return courseRepository.getStudentsInTeams(courseId).stream()
         .map(student -> modelMapper.map(student, StudentDTO.class))
@@ -216,7 +223,8 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isProfessorCourseOwner(#courseId)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isStudentEnrolled(#courseId))")
   public List<StudentDTO> getAvailableStudents(String courseId) {
     return courseRepository.getStudentsNotInTeams(courseId).stream()
         .map(student -> modelMapper.map(student, StudentDTO.class))
@@ -233,7 +241,8 @@ public class TeamServiceImpl implements TeamService {
 
   @Override
   public void activateTeam(Long id) {
-    Team team = teamRepository.findById(id).orElseThrow(() -> new TeamNotFoundException("Team + " + id + " does not exist"));
+    Team team = teamRepository.findById(id).orElseThrow(
+        () -> new TeamNotFoundException("Team + " + id + " does not exist"));
     team.setActive(true);
     teamRepository.save(team);
   }
@@ -244,7 +253,7 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_PROFESSOR')")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR')")
   public List<TeamDTO> getTeams() {
     return teamRepository.findAll().stream()
         .map(t -> modelMapper.map(t, TeamDTO.class))
@@ -252,14 +261,16 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#id)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#id))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#id)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#id))")
   public Optional<TeamDTO> getTeam(Long id) {
     return teamRepository.findById(id)
         .map(t -> modelMapper.map(t, TeamDTO.class));
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or (hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#id)) or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#id))")
+  @PreAuthorize("(hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#id)) " +
+      "or (hasRole('ROLE_STUDENT') and @securityServiceImpl.isTeamOfStudentCourse(#id))")
   public CourseDTO getCourseForTeam(Long id) {
     return teamRepository.findById(id)
         .map(team -> modelMapper.map(team.getCourse(), CourseDTO.class))
@@ -267,9 +278,10 @@ public class TeamServiceImpl implements TeamService {
   }
 
   @Override
-  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)")
+  @PreAuthorize("hasRole('ROLE_PROFESSOR') and @securityServiceImpl.isTeamOfProfessorCourse(#teamId)")
   public TeamDTO setVmsResourceLimits(Long teamId, SetVmsResourceLimits vmResourceLimits) {
-    Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException("Team " + teamId + " does not exist"));
+    Team team = teamRepository.findById(teamId).orElseThrow(
+        () -> new TeamNotFoundException("Team " + teamId + " does not exist"));
 
     int actualVCpu = 0;
     int actualRam = 0;
@@ -285,8 +297,13 @@ public class TeamServiceImpl implements TeamService {
       }
     }
 
-    if (actualVCpu > vmResourceLimits.getVCpu() || actualRam > vmResourceLimits.getRam() || actualDiskStorage > vmResourceLimits.getDiskStorage() || numOfActiveVms > vmResourceLimits.getMaxActiveInstances() || team.getVms().size() > vmResourceLimits.getMaxTotalInstances()) {
-      throw new TooManyActualResourcesException("Cannot set VMs resource limits, actual used resources are higher than the new limits");
+    if (actualVCpu > vmResourceLimits.getVCpu()
+        || actualRam > vmResourceLimits.getRam()
+        || actualDiskStorage > vmResourceLimits.getDiskStorage()
+        || numOfActiveVms > vmResourceLimits.getMaxActiveInstances()
+        || team.getVms().size() > vmResourceLimits.getMaxTotalInstances()) {
+      throw new TooManyActualResourcesException(
+          "Cannot set VMs resource limits, actual used resources are higher than the new limits");
     }
 
     team.setMaxVCpu(vmResourceLimits.getVCpu());

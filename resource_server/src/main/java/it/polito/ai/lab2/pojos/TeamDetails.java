@@ -7,22 +7,13 @@ import java.util.List;
 
 @Data
 public class TeamDetails {
-
   Long id;
-
   String name;
-
   boolean active;
-
   int maxVCpu;
-
   int maxDiskStorage;
-
   int maxRam;
-
   int maxActiveInstances;
-
   int maxTotalInstances;
-
   List<StudentDTO> members;
 }

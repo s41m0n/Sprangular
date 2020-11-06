@@ -22,13 +22,15 @@ public class CustomUserDetailsService implements UserDetailsService {
   @Autowired
   UserRepository userRepository;
 
-  //UserDetails = username, password e authorities
+  // UserDetails = username, password and authorities
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + username));
+    User user = userRepository.findById(username).orElseThrow(
+        () -> new UsernameNotFoundException("User not found with id: " + username));
     if (!user.isVerified())
       throw new UserNotVerifiedException("User " + username + " not verified yet. Check your email.");
-    return new org.springframework.security.core.userdetails.User(user.getId(), user.getPassword(), getAuthorities(user));
+    return new org.springframework.security.core.userdetails.User(
+        user.getId(), user.getPassword(), getAuthorities(user));
   }
 
   private static Collection<? extends GrantedAuthority> getAuthorities(User user) {

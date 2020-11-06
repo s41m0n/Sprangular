@@ -5,14 +5,9 @@ import lombok.Data;
 
 @Data
 public class StudentWithTeamDetails {
-
   String email;
-
   String id;
-
   String name;
-
   String surname;
-
   TeamDTO team;
 }

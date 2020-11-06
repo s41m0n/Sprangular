@@ -6,10 +6,7 @@ import java.util.List;
 
 @Data
 public class TeamProposalRequest {
-
   String teamName;
-
   List<String> studentIds;
-
   Long deadline; //Unix timestamp
 }

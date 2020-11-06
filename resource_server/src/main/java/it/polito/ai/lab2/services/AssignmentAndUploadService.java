@@ -7,7 +7,6 @@ import it.polito.ai.lab2.pojos.AssignmentDetails;
 import it.polito.ai.lab2.pojos.AssignmentSolutionDetails;
 import it.polito.ai.lab2.pojos.StudentAssignmentDetails;
 import it.polito.ai.lab2.pojos.UploadDetails;
-import it.polito.ai.lab2.utility.AssignmentStatus;
 import org.springframework.core.io.Resource;
 
 import java.io.FileNotFoundException;
